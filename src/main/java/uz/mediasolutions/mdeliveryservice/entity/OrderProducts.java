@@ -19,8 +19,7 @@ public class OrderProducts {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
-    @Enumerated(EnumType.STRING)
-    private StepName name;
+    @Column(name = "count")
+    private Integer count;
 
 }

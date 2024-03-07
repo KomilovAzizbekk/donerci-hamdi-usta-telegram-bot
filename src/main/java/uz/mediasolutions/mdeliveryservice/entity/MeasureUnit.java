@@ -3,11 +3,11 @@ package uz.mediasolutions.mdeliveryservice.entity;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import uz.mediasolutions.mdeliveryservice.entity.template.AbsDate;
 import uz.mediasolutions.mdeliveryservice.entity.template.AbsLong;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,12 +20,19 @@ import javax.persistence.Table;
 @DynamicUpdate
 @Entity
 @Table(name = "measure_units")
-public class MeasureUnit extends AbsLong {
+public class MeasureUnit extends AbsDate {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "name_uz")
     private String nameUz;
 
     @Column(name = "name_ru")
     private String nameRu;
+
+    @OneToMany(mappedBy = "measure", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Variation> variations;
 
 }

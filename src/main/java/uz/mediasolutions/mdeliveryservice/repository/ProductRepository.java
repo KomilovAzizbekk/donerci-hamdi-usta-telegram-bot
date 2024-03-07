@@ -8,9 +8,15 @@ import uz.mediasolutions.mdeliveryservice.entity.Product;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    Page<Product> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    Page<Product> findAllByOrderByNumberAsc(Pageable pageable);
 
-    boolean existsByNumberAndCategory(Long number, Category category);
+    Page<Product> findAllByNameUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrderByNumberAsc(String nameUz, String nameRu, Pageable pageable);
+
+    boolean existsByNumberAndCategoryId(Long number, Long categoryId);
 
     boolean existsByNumberAndId(Long number, Long id);
+
+    boolean existsByNameUzOrNameRu(String nameUz, String nameRu);
+
+    boolean existsByNameUzOrNameRuAndId(String nameUz, String nameRu, Long id);
 }

@@ -28,7 +28,7 @@ public interface LanguageController {
                                                @RequestParam(defaultValue = "null", required = false) String key);
 
     @GetMapping(ALL_BY_LANG)
-    ResponseEntity<Map<String, String>> getAllByLang(@RequestParam(defaultValue = "Uz") String language);
+    ResponseEntity<Map<String, String>> getAllByLang(@RequestParam(defaultValue = "UZ") String language);
 
     @PostMapping(CREATE_EDIT)
     ApiResult<?> createTranslation(@RequestBody TranslateDto dto);

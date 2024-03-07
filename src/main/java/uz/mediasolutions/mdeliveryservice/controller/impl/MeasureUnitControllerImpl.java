@@ -19,8 +19,8 @@ public class MeasureUnitControllerImpl implements MeasureUnitController {
     private final MeasureUnitService measureUnitService;
 
     @Override
-    public ApiResult<Page<MeasureUnitDTO>> getAll(int page, int size, String name) {
-        return measureUnitService.getAll(page, size, name);
+    public ApiResult<Page<MeasureUnitDTO>> getAll(int page, int size, String search) {
+        return measureUnitService.getAll(page, size, search);
     }
 
     @Override

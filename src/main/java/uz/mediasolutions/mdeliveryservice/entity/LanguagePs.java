@@ -26,7 +26,7 @@ public class LanguagePs implements Serializable {
     @Column(name = "primary_lang")
     private String primaryLang;
 
-    @OneToMany(mappedBy = "languagePs" ,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "languagePs", fetch = FetchType.EAGER)
     private List<LanguageSourcePs> languageSourcePs;
 
 }

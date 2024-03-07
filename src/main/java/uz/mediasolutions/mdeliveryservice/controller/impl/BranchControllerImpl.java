@@ -16,8 +16,8 @@ public class BranchControllerImpl implements BranchController {
     private final BranchService branchService;
 
     @Override
-    public ApiResult<Page<BranchDTO>> getAll(int page, int size, String name) {
-        return branchService.getAll(page, size, name);
+    public ApiResult<Page<BranchDTO>> getAll(int page, int size, String search) {
+        return branchService.getAll(page, size, search);
     }
 
     @Override

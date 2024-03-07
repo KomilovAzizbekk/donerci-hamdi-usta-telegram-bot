@@ -21,8 +21,8 @@ public class LanguageControllerImpl implements LanguageController {
     private final LanguageServicePs languageServicePs;
 
     @Override
-    public ApiResult<Page<LanguagePs>> getAllPageable(int page, int size, String key) {
-        return languageServicePs.getAllPaginated(page, size, key);
+    public ApiResult<Page<LanguagePs>> getAllPageable(int page, int size, String search) {
+        return languageServicePs.getAllPaginated(page, size, search);
     }
 
     @Override

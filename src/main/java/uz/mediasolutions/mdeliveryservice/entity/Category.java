@@ -3,11 +3,11 @@ package uz.mediasolutions.mdeliveryservice.entity;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import uz.mediasolutions.mdeliveryservice.entity.template.AbsDate;
 import uz.mediasolutions.mdeliveryservice.entity.template.AbsLong;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,7 +20,11 @@ import javax.persistence.Table;
 @DynamicUpdate
 @Entity
 @Table(name = "categories")
-public class Category extends AbsLong {
+public class Category extends AbsDate {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "number", columnDefinition = "serial", nullable = false)
     private Long number;
@@ -39,5 +43,8 @@ public class Category extends AbsLong {
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Product> products;
 
 }

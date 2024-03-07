@@ -15,8 +15,8 @@ public class CategoryControllerImpl implements CategoryController {
     private final CategoryService categoryService;
 
     @Override
-    public ApiResult<Page<CategoryDTO>> getAll(int page, int size, String name) {
-        return categoryService.getAll(page, size, name);
+    public ApiResult<Page<CategoryDTO>> getAll(int page, int size, String search) {
+        return categoryService.getAll(page, size, search);
     }
 
     @Override

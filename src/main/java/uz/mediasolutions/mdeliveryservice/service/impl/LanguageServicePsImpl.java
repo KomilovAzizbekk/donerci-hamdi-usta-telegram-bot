@@ -63,12 +63,12 @@ public class LanguageServicePsImpl implements LanguageServicePs {
                 LanguagePs savedLanguagePs = languageRepository.save(languagePs);
                 LanguageSourcePs uz = LanguageSourcePs.builder()
                         .languagePs(savedLanguagePs)
-                        .language("Uz")
+                        .language("UZ")
                         .translation(dto.getTextUz())
                         .build();
                 LanguageSourcePs ru = LanguageSourcePs.builder()
                         .languagePs(savedLanguagePs)
-                        .language("Ru")
+                        .language("RU")
                         .translation(dto.getTextRu())
                         .build();
                 languageSourceRepositoryPs.saveAll(List.of(uz, ru));
@@ -85,28 +85,28 @@ public class LanguageServicePsImpl implements LanguageServicePs {
             List<LanguageSourcePs> allByIdId = languageSourceRepositoryPs.findAllByLanguagePs_Id(languagePs.getId());
             if (!allByIdId.isEmpty()) {
                 for (int i = 0; i < allByIdId.size(); i++) {
-                    if (allByIdId.get(i).getLanguage().equals("Uz")) {
+                    if (allByIdId.get(i).getLanguage().equals("UZ")) {
                         LanguageSourcePs uz = allByIdId.get(i);
                         uz.setTranslation(dto.getTextUz() != null ? dto.getTextUz() : uz.getTranslation());
-                        uz.setLanguage("Uz");
+                        uz.setLanguage("UZ");
                         languageSourceRepositoryPs.save(uz);
                     }
 
-                    if (allByIdId.get(i).getLanguage().equals("Ru")) {
+                    if (allByIdId.get(i).getLanguage().equals("RU")) {
                         LanguageSourcePs ru = allByIdId.get(i);
                         ru.setTranslation(dto.getTextRu() != null ? dto.getTextRu() : ru.getTranslation());
-                        ru.setLanguage("Ru");
+                        ru.setLanguage("RU");
                         languageSourceRepositoryPs.save(ru);
                     }
-                    if (!languageSourceRepositoryPs.existsByLanguageAndLanguagePsId("Uz", languagePs.getId()))
-                        languageSourceRepositoryPs.save(new LanguageSourcePs(languagePs, "Uz", dto.getTextUz()));
+                    if (!languageSourceRepositoryPs.existsByLanguageAndLanguagePsId("UZ", languagePs.getId()))
+                        languageSourceRepositoryPs.save(new LanguageSourcePs(languagePs, "UZ", dto.getTextUz()));
 
-                    if (!languageSourceRepositoryPs.existsByLanguageAndLanguagePsId("Ru", languagePs.getId()))
-                        languageSourceRepositoryPs.save(new LanguageSourcePs(languagePs, "Ru", dto.getTextRu()));
+                    if (!languageSourceRepositoryPs.existsByLanguageAndLanguagePsId("RU", languagePs.getId()))
+                        languageSourceRepositoryPs.save(new LanguageSourcePs(languagePs, "RU", dto.getTextRu()));
                 }
             } else {
-                languageSourceRepositoryPs.save(new LanguageSourcePs(languagePs, "Uz", dto.getTextUz()));
-                languageSourceRepositoryPs.save(new LanguageSourcePs(languagePs, "Ru", dto.getTextRu()));
+                languageSourceRepositoryPs.save(new LanguageSourcePs(languagePs, "UZ", dto.getTextUz()));
+                languageSourceRepositoryPs.save(new LanguageSourcePs(languagePs, "RU", dto.getTextRu()));
             }
             return ApiResult.success("SAVED SUCCESSFULLY");
         } else

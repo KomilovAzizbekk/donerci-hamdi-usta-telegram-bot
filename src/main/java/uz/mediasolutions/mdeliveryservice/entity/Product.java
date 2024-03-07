@@ -32,7 +32,7 @@ public class Product extends AbsLong {
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     private Variation variation;
 
     @Column(name = "count")
