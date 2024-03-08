@@ -44,11 +44,9 @@ public class Branch extends AbsLong {
     private String addressRu;
 
     @Column(name = "opening_time")
-    @DateTimeFormat(pattern = "HH:mm")
     private LocalTime openingTime;
 
     @Column(name = "closing_time")
-    @DateTimeFormat(pattern = "HH:mm")
     private LocalTime closingTime;
 
     @Column(name = "is_closes_after_mn")

@@ -38,7 +38,6 @@ public class Product extends AbsLong {
     @Column(name = "count")
     private Integer count;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    private FileImage image;
+    private String imageUrl;
 
 }

@@ -1,6 +1,8 @@
 package uz.mediasolutions.mdeliveryservice.utills.constants;
 
 import uz.mediasolutions.mdeliveryservice.controller.abs.AuthController;
+import uz.mediasolutions.mdeliveryservice.controller.abs.BranchController;
+import uz.mediasolutions.mdeliveryservice.controller.abs.FileImageController;
 import uz.mediasolutions.mdeliveryservice.controller.abs.LanguageController;
 
 import java.util.HashMap;
@@ -18,7 +20,9 @@ public interface Rest {
             "/swagger-ui.html",
             "/webjars/**",
             AuthController.AUTH + "**",
-            LanguageController.LANGUAGE + "**"
+            LanguageController.LANGUAGE + "**",
+            FileImageController.IMAGE + "**",
+            BranchController.BRANCH + "**"
     };
 
     String AUTHORIZATION_HEADER = "Authorization";
