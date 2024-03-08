@@ -114,9 +114,9 @@ public class MakeService {
                 getUserLanguage(chatId)));
         sendMessage.setReplyMarkup(forStart());
         TgUser tgUser = TgUser.builder().chatId(chatId)
-                .isAdmin(false)
-                .isRegistered(false)
-                .isBanned(false)
+                .admin(false)
+                .registered(false)
+                .banned(false)
                 .username(getUsername(update))
                 .chatId(chatId)
                 .build();

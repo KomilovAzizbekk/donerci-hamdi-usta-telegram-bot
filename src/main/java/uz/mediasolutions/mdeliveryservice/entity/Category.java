@@ -41,8 +41,8 @@ public class Category extends AbsDate {
     @Column(name = "description_ru", columnDefinition = "text")
     private String descriptionRu;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive;
+    @Column(name = "active", nullable = false)
+    private boolean active;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products;

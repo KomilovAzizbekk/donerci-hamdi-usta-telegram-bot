@@ -25,8 +25,8 @@ public class Variation extends AbsDate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "number", columnDefinition = "serial")
-    private Long number;
+//    @Column(name = "number", columnDefinition = "serial")
+//    private Long number;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private MeasureUnit measure;

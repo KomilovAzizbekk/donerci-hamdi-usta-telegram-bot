@@ -7,6 +7,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import uz.mediasolutions.mdeliveryservice.entity.TgUser;
+import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
 import uz.mediasolutions.mdeliveryservice.enums.StepName;
 import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
@@ -44,6 +45,14 @@ public class TgService extends TelegramLongPollingBot {
                 update.getMessage().getText().equals("/start") &&
                 !tgUserRepository.existsByChatId(chatId)) {
             execute(makeService.whenStart(update));
+        } else if (update.hasMessage() && update.getMessage().hasText() &&
+                update.getMessage().getText().equals("/start") &&
+                tgUserRepository.existsByChatId(chatId)) {
+            makeService.setUserStep(chatId, StepName.CHOOSE_FROM_MAIN_MENU);
+            if (tgUser.getLanguage().getName().equals(LanguageName.UZ))
+                execute(makeService.whenUz(update));
+            else
+                execute(makeService.whenRu(update));
         } else {
             if (update.hasMessage() && update.getMessage().hasText()) {
                 String text = update.getMessage().getText();

@@ -2,16 +2,17 @@ package uz.mediasolutions.mdeliveryservice.service.abs;
 
 import org.springframework.data.domain.Page;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
-import uz.mediasolutions.mdeliveryservice.payload.ProductDTO;
+import uz.mediasolutions.mdeliveryservice.payload.ProductVariationDTO;
+import uz.mediasolutions.mdeliveryservice.payload.ProductVariationResDTO;
 
 public interface ProductService {
-    ApiResult<Page<ProductDTO>> getAll(int page, int size, String search);
+    ApiResult<Page<ProductVariationResDTO>> getAll(int page, int size, String search);
 
-    ApiResult<ProductDTO> getById(Long id);
+    ApiResult<ProductVariationResDTO> getById(Long id);
 
-    ApiResult<?> add(ProductDTO dto);
+    ApiResult<?> add(ProductVariationDTO dto);
 
-    ApiResult<?> edit(Long id, ProductDTO dto);
+    ApiResult<?> edit(Long id, ProductVariationDTO dto);
 
     ApiResult<?> delete(Long id);
 

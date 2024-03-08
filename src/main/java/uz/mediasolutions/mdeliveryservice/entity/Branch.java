@@ -49,10 +49,10 @@ public class Branch extends AbsLong {
     @Column(name = "closing_time")
     private LocalTime closingTime;
 
-    @Column(name = "is_closes_after_mn")
-    private boolean isClosesAfterMn;
+    @Column(name = "closes_after_mn")
+    private boolean closesAfterMn;
 
-    @Column(name = "is_active")
-    private boolean isActive;
+    @Column(name = "active")
+    private boolean active;
 
 }

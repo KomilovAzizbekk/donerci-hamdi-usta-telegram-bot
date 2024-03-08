@@ -38,6 +38,7 @@ public class Product extends AbsLong {
     @Column(name = "count")
     private Integer count;
 
+    @Column(name = "image_url")
     private String imageUrl;
 
 }

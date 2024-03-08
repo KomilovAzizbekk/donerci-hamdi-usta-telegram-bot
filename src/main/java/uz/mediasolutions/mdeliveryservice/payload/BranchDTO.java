@@ -45,8 +45,8 @@ public class BranchDTO {
     @Schema(name = "closingTime", format = "HH:mm", example = "22:00")
     private LocalTime closingTime;
 
-    private boolean isClosesAfterMn;
+    private boolean closesAfterMn;
 
-    private boolean isActive;
+    private boolean active;
 
 }

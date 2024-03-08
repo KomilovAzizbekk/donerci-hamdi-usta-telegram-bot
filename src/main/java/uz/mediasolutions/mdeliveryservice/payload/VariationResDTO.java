@@ -9,20 +9,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CategoryDTO {
+public class VariationResDTO {
 
     private Long id;
 
-    private Long number;
+//    private Long number;
 
-    private String nameUz;
+    private MeasureUnitDTO measure;
 
-    private String nameRu;
-
-    private String descriptionUz;
-
-    private String descriptionRu;
-
-    private boolean active;
+    private Double price;
 
 }

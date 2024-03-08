@@ -21,9 +21,8 @@ public class ProductDTO {
 
     private Long categoryId;
 
-    private Long variationId;
-
     private Integer count;
 
+    private String imageUrl;
 
 }

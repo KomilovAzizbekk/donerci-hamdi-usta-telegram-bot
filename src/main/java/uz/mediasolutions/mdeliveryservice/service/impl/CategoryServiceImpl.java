@@ -7,11 +7,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uz.mediasolutions.mdeliveryservice.entity.Category;
+import uz.mediasolutions.mdeliveryservice.entity.Product;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.mapper.CategoryMapper;
 import uz.mediasolutions.mdeliveryservice.payload.CategoryDTO;
 import uz.mediasolutions.mdeliveryservice.repository.CategoryRepository;
+import uz.mediasolutions.mdeliveryservice.repository.VariationRepository;
 import uz.mediasolutions.mdeliveryservice.service.abs.CategoryService;
 
 @Service
@@ -20,6 +22,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final VariationRepository variationRepository;
 
     @Override
     public ApiResult<Page<CategoryDTO>> getAll(int page, int size, String name) {
@@ -81,8 +84,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public ApiResult<?> delete(Long id) {
+        Category category = categoryRepository.findById(id).orElseThrow(
+                () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
         try {
             categoryRepository.deleteById(id);
+            for (Product product : category.getProducts()) {
+                variationRepository.deleteById(product.getVariation().getId());
+            }
             return ApiResult.success("DELETED SUCCESSFULLY");
         } catch (Exception e) {
             throw RestException.restThrow("CANNOT DELETE", HttpStatus.CONFLICT);

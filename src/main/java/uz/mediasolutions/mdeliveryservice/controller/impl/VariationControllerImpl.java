@@ -12,30 +12,30 @@ import uz.mediasolutions.mdeliveryservice.service.abs.VariationService;
 @RequiredArgsConstructor
 public class VariationControllerImpl implements VariationController {
 
-    private final VariationService variationService;
-
-    @Override
-    public ApiResult<Page<VariationDTO>> getAll(int page, int size) {
-        return variationService.getAll(page, size);
-    }
-
-    @Override
-    public ApiResult<VariationDTO> getById(Long id) {
-        return variationService.getById(id);
-    }
-
-    @Override
-    public ApiResult<?> add(VariationDTO dto) {
-        return variationService.add(dto);
-    }
-
-    @Override
-    public ApiResult<?> edit(Long id, VariationDTO dto) {
-        return variationService.edit(id, dto);
-    }
-
-    @Override
-    public ApiResult<?> delete(Long id) {
-        return variationService.delete(id);
-    }
+//    private final VariationService variationService;
+//
+//    @Override
+//    public ApiResult<Page<VariationDTO>> getAll(int page, int size) {
+//        return variationService.getAll(page, size);
+//    }
+//
+//    @Override
+//    public ApiResult<VariationDTO> getById(Long id) {
+//        return variationService.getById(id);
+//    }
+//
+//    @Override
+//    public ApiResult<?> add(VariationDTO dto) {
+//        return variationService.add(dto);
+//    }
+//
+//    @Override
+//    public ApiResult<?> edit(Long id, VariationDTO dto) {
+//        return variationService.edit(id, dto);
+//    }
+//
+//    @Override
+//    public ApiResult<?> delete(Long id) {
+//        return variationService.delete(id);
+//    }
 }

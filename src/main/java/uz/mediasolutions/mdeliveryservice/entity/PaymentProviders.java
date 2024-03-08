@@ -24,7 +24,7 @@ public class PaymentProviders {
     @Enumerated(EnumType.STRING)
     private ProviderName name;
 
-    @Column(name = "is_active")
-    private boolean isActive;
+    @Column(name = "active")
+    private boolean active;
 
 }

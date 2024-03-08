@@ -2,7 +2,12 @@ package uz.mediasolutions.mdeliveryservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,8 +16,10 @@ import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.service.abs.FileImageService;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 import java.util.UUID;
@@ -33,6 +40,8 @@ public class FileImageServiceImpl implements FileImageService {
         // Normalize the file name to prevent directory traversal
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
+        fileName = UUID.randomUUID() + fileName.substring(fileName.lastIndexOf('.'));
+
         // Copy the file to the target location
         Path targetPath = Path.of(uploadDir).resolve(fileName);
         try {
@@ -41,11 +50,28 @@ public class FileImageServiceImpl implements FileImageService {
             throw new RuntimeException(e);
         }
 
-        UUID uuid = UUID.randomUUID();
+        return ApiResult.success(fileName);
+    }
 
-        // Build the URL for the saved image
-        String imageUrl = "/images/" + uuid + fileName; // Adjust this based on your server configuration
+    @Override
+    public ResponseEntity<?> get(String imageName) {
+        try {
+            // Load the image file as a resource
+            Path imagePath = Paths.get(uploadDir).resolve(imageName);
+            Resource resource = new UrlResource(imagePath.toUri());
 
-        return ApiResult.success(imageUrl);
+            // Check if the resource exists
+            if (resource.exists()) {
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + resource.getFilename())
+                        .contentType(MediaType.IMAGE_JPEG) // Adjust the MediaType according to your image type
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
+        }
     }
 }

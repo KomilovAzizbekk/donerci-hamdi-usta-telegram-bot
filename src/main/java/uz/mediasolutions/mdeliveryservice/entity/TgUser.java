@@ -35,14 +35,14 @@ public class TgUser extends AbsLong {
     @ManyToOne(fetch = FetchType.LAZY)
     private Language language;
 
-    @Column(name = "is_registered")
-    private boolean isRegistered;
+    @Column(name = "registered")
+    private boolean registered;
 
-    @Column(name = "is_admin")
-    private boolean isAdmin;
+    @Column(name = "admin")
+    private boolean admin;
 
-    @Column(name = "is_banned")
-    private boolean isBanned;
+    @Column(name = "banned")
+    private boolean banned;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Step step;

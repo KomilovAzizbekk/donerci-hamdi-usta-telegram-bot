@@ -13,7 +13,7 @@ public class VariationDTO {
 
     private Long id;
 
-    private Long number;
+//    private Long number;
 
     private Long measureId;
 

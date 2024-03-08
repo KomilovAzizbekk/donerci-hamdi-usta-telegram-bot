@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CategoryDTO {
+public class ProductVariationResDTO {
 
     private Long id;
 
@@ -19,10 +19,12 @@ public class CategoryDTO {
 
     private String nameRu;
 
-    private String descriptionUz;
+    private CategoryDTO category;
 
-    private String descriptionRu;
+    private Integer count;
 
-    private boolean active;
+    private String imageUrl;
+
+    private VariationResDTO variation;
 
 }
