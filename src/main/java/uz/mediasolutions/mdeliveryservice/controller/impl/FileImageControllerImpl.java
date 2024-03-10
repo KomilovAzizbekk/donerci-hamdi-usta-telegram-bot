@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uz.mediasolutions.mdeliveryservice.controller.abs.FileImageController;
-import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.service.abs.FileImageService;
 
 @RestController
@@ -20,7 +19,7 @@ public class FileImageControllerImpl implements FileImageController {
     }
 
     @Override
-    public ApiResult<?> upload(MultipartFile file) {
+    public ResponseEntity<?> upload(MultipartFile file) {
         return fileImageService.upload(file);
     }
 }

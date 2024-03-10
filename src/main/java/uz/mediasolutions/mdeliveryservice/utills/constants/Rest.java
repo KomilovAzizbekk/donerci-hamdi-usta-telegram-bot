@@ -22,7 +22,9 @@ public interface Rest {
             AuthController.AUTH + "**",
             LanguageController.LANGUAGE + "**",
             FileImageController.IMAGE + "**",
-            BranchController.BRANCH + "**"
+            BranchController.BRANCH + "**",
+            "/images/**",
+            "/favicon.ico"
     };
 
     String AUTHORIZATION_HEADER = "Authorization";

@@ -2,6 +2,7 @@ package uz.mediasolutions.mdeliveryservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -14,9 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.service.abs.FileImageService;
+import uz.mediasolutions.mdeliveryservice.utills.constants.Rest;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,7 +32,9 @@ public class FileImageServiceImpl implements FileImageService {
     @Value("${upload-dir}")
     private String uploadDir;
 
-    public ApiResult<?> upload(MultipartFile file) {
+    private final Environment environment;
+
+    public ResponseEntity<?> upload(MultipartFile file) {
         // Check if the file is empty
         if (file.isEmpty()) {
             throw RestException.restThrow("FILE IS EMPTY", HttpStatus.BAD_REQUEST);
@@ -50,7 +53,7 @@ public class FileImageServiceImpl implements FileImageService {
             throw new RuntimeException(e);
         }
 
-        return ApiResult.success(fileName);
+        return ResponseEntity.ok(constructImageUrl(fileName));
     }
 
     @Override
@@ -73,5 +76,10 @@ public class FileImageServiceImpl implements FileImageService {
             e.printStackTrace();
             return ResponseEntity.status(500).build();
         }
+    }
+
+    private String constructImageUrl(String fileName) {
+        String baseUrl = environment.getProperty("server.base-url", "http://localhost:8091" + Rest.BASE_PATH);
+        return baseUrl + "images/" + fileName;
     }
 }
