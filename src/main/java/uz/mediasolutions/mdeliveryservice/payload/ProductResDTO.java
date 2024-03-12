@@ -26,8 +26,6 @@ public class ProductResDTO {
 
     private CategoryDTO category;
 
-    private Integer count;
-
     private String imageUrl;
 
 }

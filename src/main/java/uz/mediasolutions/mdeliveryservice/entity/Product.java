@@ -47,9 +47,6 @@ public class Product extends AbsDate {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Variation> variations;
 
-    @Column(name = "count")
-    private Integer count;
-
     @Column(name = "image_url")
     private String imageUrl;
 

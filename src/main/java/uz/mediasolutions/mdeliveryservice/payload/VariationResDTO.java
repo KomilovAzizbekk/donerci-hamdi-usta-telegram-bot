@@ -21,6 +21,8 @@ public class VariationResDTO {
 
     private Double price;
 
+    private Integer count;
+
     private ProductDTO product;
 
 }

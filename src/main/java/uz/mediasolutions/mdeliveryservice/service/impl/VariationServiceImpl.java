@@ -73,6 +73,7 @@ public class VariationServiceImpl implements VariationService {
             variation.setMeasureUnit(measureUnit);
             variation.setMeasure(dto.getMeasure());
             variation.setProduct(product);
+            variation.setCount(dto.getCount());
             variationRepository.save(variation);
             return ApiResult.success("EDITED SUCCESSFULLY");
         }

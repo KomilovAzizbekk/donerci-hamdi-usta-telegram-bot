@@ -26,8 +26,6 @@ public class ProductDTO {
 
     private Long categoryId;
 
-    private Integer count;
-
     private String imageUrl;
 
 }
