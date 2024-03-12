@@ -13,10 +13,14 @@ public class VariationDTO {
 
     private Long id;
 
-//    private Long number;
+    private Long number;
 
-    private Long measureId;
+    private Long measureUnitId;
+
+    private Double measure;
 
     private Double price;
+
+    private Long productId;
 
 }

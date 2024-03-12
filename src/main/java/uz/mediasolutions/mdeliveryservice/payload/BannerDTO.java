@@ -9,24 +9,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductVariationDTO {
+public class BannerDTO {
 
     private Long id;
 
     private Long number;
 
-    private String nameUz;
-
-    private String nameRu;
-
-    private Long categoryId;
-
-    private Integer count;
-
     private String imageUrl;
-
-    private Long measureId;
-
-    private Double price;
 
 }

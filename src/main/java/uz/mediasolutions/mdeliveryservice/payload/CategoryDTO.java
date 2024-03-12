@@ -25,4 +25,6 @@ public class CategoryDTO {
 
     private boolean active;
 
+    private String imageUrl;
+
 }

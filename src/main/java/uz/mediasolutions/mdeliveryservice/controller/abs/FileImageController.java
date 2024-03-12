@@ -10,7 +10,7 @@ public interface FileImageController {
 
     String IMAGE = Rest.BASE_PATH + "images/";
 
-    String GET = "{imageName}";
+    String GET = "/get/{imageName}";
 
     String UPLOAD = "upload";
 

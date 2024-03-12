@@ -80,6 +80,6 @@ public class FileImageServiceImpl implements FileImageService {
 
     private String constructImageUrl(String fileName) {
         String baseUrl = environment.getProperty("server.base-url", "http://localhost:8091" + Rest.BASE_PATH);
-        return baseUrl + "images/" + fileName;
+        return baseUrl + "images/get/" + fileName;
     }
 }

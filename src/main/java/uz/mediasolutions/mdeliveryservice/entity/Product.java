@@ -3,9 +3,11 @@ package uz.mediasolutions.mdeliveryservice.entity;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import uz.mediasolutions.mdeliveryservice.entity.template.AbsDate;
 import uz.mediasolutions.mdeliveryservice.entity.template.AbsLong;
 
 import javax.persistence.*;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,22 +20,32 @@ import javax.persistence.*;
 @DynamicUpdate
 @Entity
 @Table(name = "products")
-public class Product extends AbsLong {
+public class Product extends AbsDate {
 
-    @Column(name = "number", columnDefinition = "serial")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, name = "number")
     private Long number;
 
-    @Column(name = "name_uz")
+    @Column(nullable = false, name = "name_uz")
     private String nameUz;
 
-    @Column(name = "name_ru")
+    @Column(nullable = false, name = "name_ru")
     private String nameRu;
+
+    @Column(name = "description_uz", columnDefinition = "text")
+    private String descriptionUz;
+
+    @Column(name = "description_ru", columnDefinition = "text")
+    private String descriptionRu;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    private Variation variation;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Variation> variations;
 
     @Column(name = "count")
     private Integer count;

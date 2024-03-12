@@ -77,6 +77,7 @@ public class CategoryServiceImpl implements CategoryService {
             category.setDescriptionUz(categoryDTO.getDescriptionUz());
             category.setDescriptionRu(categoryDTO.getDescriptionRu());
             category.setActive(categoryDTO.isActive());
+            category.setImageUrl(categoryDTO.getImageUrl());
             categoryRepository.save(category);
             return ApiResult.success("EDITED SUCCESSFULLY");
         }
@@ -84,13 +85,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public ApiResult<?> delete(Long id) {
-        Category category = categoryRepository.findById(id).orElseThrow(
-                () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
         try {
             categoryRepository.deleteById(id);
-            for (Product product : category.getProducts()) {
-                variationRepository.deleteById(product.getVariation().getId());
-            }
             return ApiResult.success("DELETED SUCCESSFULLY");
         } catch (Exception e) {
             throw RestException.restThrow("CANNOT DELETE", HttpStatus.CONFLICT);

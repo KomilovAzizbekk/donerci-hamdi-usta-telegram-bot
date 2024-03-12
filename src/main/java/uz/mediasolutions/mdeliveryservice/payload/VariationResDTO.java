@@ -13,10 +13,14 @@ public class VariationResDTO {
 
     private Long id;
 
-//    private Long number;
+    private Long number;
 
-    private MeasureUnitDTO measure;
+    private MeasureUnitDTO measureUnit;
+
+    private Double measure;
 
     private Double price;
+
+    private ProductDTO product;
 
 }

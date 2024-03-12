@@ -26,7 +26,7 @@ public class Category extends AbsDate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "number", columnDefinition = "serial", nullable = false)
+    @Column(name = "number", nullable = false)
     private Long number;
 
     @Column(name = "name_uz", nullable = false)
@@ -46,5 +46,8 @@ public class Category extends AbsDate {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 
 }

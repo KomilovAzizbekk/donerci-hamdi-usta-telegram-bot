@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,6 +19,10 @@ public class ProductDTO {
     private String nameUz;
 
     private String nameRu;
+
+    private String descriptionUz;
+
+    private String descriptionRu;
 
     private Long categoryId;
 

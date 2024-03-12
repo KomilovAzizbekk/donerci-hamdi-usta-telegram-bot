@@ -25,15 +25,18 @@ public class Variation extends AbsDate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @Column(name = "number", columnDefinition = "serial")
-//    private Long number;
+    @Column(name = "number", columnDefinition = "serial")
+    private Long number;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private MeasureUnit measure;
+    private MeasureUnit measureUnit;
+
+    @Column(name = "measure")
+    private Double measure;
 
     @Column(name = "price")
     private Double price;
 
-    @OneToOne(mappedBy = "variation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 }

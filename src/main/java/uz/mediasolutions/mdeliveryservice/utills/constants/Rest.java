@@ -21,9 +21,7 @@ public interface Rest {
             "/webjars/**",
             AuthController.AUTH + "**",
             LanguageController.LANGUAGE + "**",
-            FileImageController.IMAGE + "**",
-            BranchController.BRANCH + "**",
-            "/images/**",
+            FileImageController.IMAGE + "get/**",
             "/favicon.ico"
     };
 

@@ -5,11 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductVariationResDTO {
+public class ProductResDTO {
 
     private Long id;
 
@@ -19,12 +20,14 @@ public class ProductVariationResDTO {
 
     private String nameRu;
 
+    private String descriptionUz;
+
+    private String descriptionRu;
+
     private CategoryDTO category;
 
     private Integer count;
 
     private String imageUrl;
-
-    private VariationResDTO variation;
 
 }

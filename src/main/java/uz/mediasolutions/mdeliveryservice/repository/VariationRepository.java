@@ -7,10 +7,10 @@ import uz.mediasolutions.mdeliveryservice.entity.Variation;
 
 public interface VariationRepository extends JpaRepository<Variation, Long> {
 
-//    Page<Variation> findAllByOrderByNumberAsc(Pageable pageable);
-//
-//    boolean existsByNumber(Long number);
-//
-//    boolean existsByNumberAndId(Long number, Long id);
+    Page<Variation> findAllByOrderByNumberAsc(Pageable pageable);
+
+    boolean existsByNumber(Long number);
+
+    boolean existsByNumberAndId(Long number, Long id);
 
 }
