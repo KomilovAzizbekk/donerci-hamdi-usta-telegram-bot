@@ -18,7 +18,7 @@ public interface BannerController {
 
     String GET = "/{id}";
 
-    String UPLOAD = "upload/{imageUrl}";
+    String UPLOAD = "upload";
 
     String DELETE = "delete/{id}";
 
