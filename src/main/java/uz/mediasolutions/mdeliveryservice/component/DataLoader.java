@@ -32,6 +32,7 @@ public class DataLoader implements CommandLineRunner {
     private final LanguageRepositoryPs languageRepositoryPs;
     private final StepRepository stepRepository;
     private final LanguageRepository languageRepository;
+    private final ConstantsRepository constantsRepository;
 
     @Value("${spring.sql.init.mode}")
     private String mode;
@@ -53,8 +54,21 @@ public class DataLoader implements CommandLineRunner {
             addLanguage();
             addUzLangValues();
             addRuLangValues();
+            addConstants();
         }
 
+    }
+
+    private void addConstants() {
+        Constants constants = Constants.builder()
+                .minOrderPriceForFreeDelivery(0D)
+                .minOrderPrice(0D)
+                .botWorking(0)
+                .pricePerKilometer(0D)
+                .minDeliveryPrice(0D)
+                .radiusFreeDelivery(0D)
+                .build();
+        constantsRepository.save(constants);
     }
 
     private void addRole() {

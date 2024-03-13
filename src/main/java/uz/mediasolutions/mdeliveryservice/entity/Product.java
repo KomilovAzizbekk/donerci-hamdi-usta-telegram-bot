@@ -50,4 +50,7 @@ public class Product extends AbsDate {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "active")
+    private boolean active;
+
 }

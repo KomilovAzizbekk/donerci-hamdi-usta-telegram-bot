@@ -28,4 +28,6 @@ public class ProductDTO {
 
     private String imageUrl;
 
+    private boolean active;
+
 }

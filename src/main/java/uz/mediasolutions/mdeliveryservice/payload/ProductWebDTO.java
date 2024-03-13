@@ -5,29 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductResDTO {
+public class ProductWebDTO {
 
     private Long id;
 
-    private Long number;
-
-    private String nameUz;
-
-    private String nameRu;
-
-    private String descriptionUz;
-
-    private String descriptionRu;
-
-    private CategoryDTO category;
+    private String name;
 
     private String imageUrl;
 
-    private boolean active;
+    private Double price;
 
 }

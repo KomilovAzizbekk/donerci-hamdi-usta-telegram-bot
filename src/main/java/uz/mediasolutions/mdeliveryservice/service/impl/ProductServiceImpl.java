@@ -83,6 +83,7 @@ public class ProductServiceImpl implements ProductService {
             product.setDescriptionRu(dto.getDescriptionRu());
             product.setDescriptionUz(dto.getDescriptionUz());
             product.setImageUrl(dto.getImageUrl());
+            product.setActive(dto.isActive());
             productRepository.save(product);
             return ApiResult.success("EDITED SUCCESSFULLY");
         }

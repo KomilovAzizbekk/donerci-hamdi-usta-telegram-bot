@@ -19,6 +19,12 @@ public class OrderProducts {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Variation variation;
+
     @Column(name = "count")
     private Integer count;
 

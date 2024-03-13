@@ -4,13 +4,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uz.mediasolutions.mdeliveryservice.entity.Banner;
+import uz.mediasolutions.mdeliveryservice.entity.Basket;
 
 import java.util.List;
 
-public interface BannerRepository extends JpaRepository<Banner, Long> {
+public interface BasketRepository extends JpaRepository<Basket, Long> {
 
-    Page<Banner> findAllByOrderByNumberAsc(Pageable pageable);
-
-    List<Banner> findAllByOrderByNumberAsc();
+    Basket findByTgUserChatId(String chatId);
 
 }
