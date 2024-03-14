@@ -28,7 +28,7 @@ public interface UserController {
     @GetMapping(GET_BY_ID)
     ApiResult<TgUserDTO> getById(@PathVariable Long id);
 
-    @PostMapping(BAN)
+    @PutMapping(BAN)
     ApiResult<?> banUser(@PathVariable Long id);
 
     @PutMapping(UNBAN)
