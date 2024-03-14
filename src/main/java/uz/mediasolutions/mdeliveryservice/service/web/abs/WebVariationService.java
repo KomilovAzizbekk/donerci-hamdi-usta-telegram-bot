@@ -5,7 +5,7 @@ import uz.mediasolutions.mdeliveryservice.payload.VariationWebDTO;
 
 import java.util.List;
 
-public interface VariationWebService {
+public interface WebVariationService {
 
     ApiResult<List<VariationWebDTO>> getAllByProductId(String chatId, Long productId);
 }

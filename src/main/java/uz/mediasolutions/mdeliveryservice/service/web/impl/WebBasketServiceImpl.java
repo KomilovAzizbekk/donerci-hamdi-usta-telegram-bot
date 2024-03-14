@@ -12,7 +12,7 @@ import uz.mediasolutions.mdeliveryservice.repository.BasketRepository;
 import uz.mediasolutions.mdeliveryservice.repository.OrderProductRepository;
 import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
 import uz.mediasolutions.mdeliveryservice.repository.VariationRepository;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.BasketWebService;
+import uz.mediasolutions.mdeliveryservice.service.web.abs.WebBasketService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class BasketWebServiceImpl implements BasketWebService {
+public class WebBasketServiceImpl implements WebBasketService {
 
     private final BasketRepository basketRepository;
     private final TgUserRepository tgUserRepository;

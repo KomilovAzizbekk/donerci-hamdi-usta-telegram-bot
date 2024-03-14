@@ -1,7 +1,6 @@
 package uz.mediasolutions.mdeliveryservice.utills.constants;
 
 import uz.mediasolutions.mdeliveryservice.controller.abs.AuthController;
-import uz.mediasolutions.mdeliveryservice.controller.abs.BranchController;
 import uz.mediasolutions.mdeliveryservice.controller.abs.FileImageController;
 import uz.mediasolutions.mdeliveryservice.controller.abs.LanguageController;
 import uz.mediasolutions.mdeliveryservice.controller.web.abs.*;
@@ -24,11 +23,11 @@ public interface Rest {
             LanguageController.LANGUAGE + "**",
             FileImageController.IMAGE + "get/**",
             "/favicon.ico",
-            BannerWebController.BANNER_WEB + "**",
-            BasketWebController.BASKET_WEB + "**",
-            CategoryWebController.CATEGORY_WEB + "**",
-            ProductWebController.PRODUCT_WEB + "**",
-            VariationWebController.VARIATION_WEB + "**"
+            WebBannerController.BANNER_WEB + "**",
+            WebBasketController.BASKET_WEB + "**",
+            WebCategoryController.CATEGORY_WEB + "**",
+            WebProductController.PRODUCT_WEB + "**",
+            WebVariationController.VARIATION_WEB + "**"
     };
 
     String AUTHORIZATION_HEADER = "Authorization";

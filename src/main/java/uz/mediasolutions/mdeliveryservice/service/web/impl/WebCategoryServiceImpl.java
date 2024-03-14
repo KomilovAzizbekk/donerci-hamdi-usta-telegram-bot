@@ -6,18 +6,17 @@ import uz.mediasolutions.mdeliveryservice.entity.Category;
 import uz.mediasolutions.mdeliveryservice.entity.TgUser;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
-import uz.mediasolutions.mdeliveryservice.mapper.CategoryMapper;
 import uz.mediasolutions.mdeliveryservice.payload.CategoryWebDTO;
 import uz.mediasolutions.mdeliveryservice.repository.CategoryRepository;
 import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.CategoryWebService;
+import uz.mediasolutions.mdeliveryservice.service.web.abs.WebCategoryService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CategoryWebServiceImpl implements CategoryWebService {
+public class WebCategoryServiceImpl implements WebCategoryService {
 
     private final CategoryRepository categoryRepository;
     private final TgUserRepository tgUserRepository;

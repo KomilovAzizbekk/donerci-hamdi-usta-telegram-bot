@@ -4,7 +4,7 @@ import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.BasketWebDTO;
 import uz.mediasolutions.mdeliveryservice.payload.OrderProductDTO;
 
-public interface BasketWebService {
+public interface WebBasketService {
 
     ApiResult<BasketWebDTO> get(String chatId);
 

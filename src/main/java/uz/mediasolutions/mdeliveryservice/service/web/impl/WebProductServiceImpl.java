@@ -10,14 +10,14 @@ import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.ProductWebDTO;
 import uz.mediasolutions.mdeliveryservice.repository.ProductRepository;
 import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.ProductWebService;
+import uz.mediasolutions.mdeliveryservice.service.web.abs.WebProductService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ProductWebServiceImpl implements ProductWebService {
+public class WebProductServiceImpl implements WebProductService {
 
     private final ProductRepository productRepository;
     private final TgUserRepository tgUserRepository;

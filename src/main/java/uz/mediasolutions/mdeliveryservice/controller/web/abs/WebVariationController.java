@@ -10,8 +10,8 @@ import uz.mediasolutions.mdeliveryservice.utills.constants.Rest;
 
 import java.util.List;
 
-@RequestMapping(VariationWebController.VARIATION_WEB)
-public interface VariationWebController {
+@RequestMapping(WebVariationController.VARIATION_WEB)
+public interface WebVariationController {
 
     String VARIATION_WEB = Rest.BASE_PATH + "variation-web/";
 

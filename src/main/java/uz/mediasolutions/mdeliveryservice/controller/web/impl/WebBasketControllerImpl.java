@@ -2,22 +2,17 @@ package uz.mediasolutions.mdeliveryservice.controller.web.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
-import uz.mediasolutions.mdeliveryservice.controller.web.abs.BannerWebController;
-import uz.mediasolutions.mdeliveryservice.controller.web.abs.BasketWebController;
+import uz.mediasolutions.mdeliveryservice.controller.web.abs.WebBasketController;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
-import uz.mediasolutions.mdeliveryservice.payload.BannerDTO;
 import uz.mediasolutions.mdeliveryservice.payload.BasketWebDTO;
 import uz.mediasolutions.mdeliveryservice.payload.OrderProductDTO;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.BannerWebService;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.BasketWebService;
-
-import java.util.List;
+import uz.mediasolutions.mdeliveryservice.service.web.abs.WebBasketService;
 
 @RestController
 @RequiredArgsConstructor
-public class BasketWebControllerImpl implements BasketWebController {
+public class WebBasketControllerImpl implements WebBasketController {
 
-    private final BasketWebService basketWebService;
+    private final WebBasketService basketWebService;
 
     @Override
     public ApiResult<BasketWebDTO> get(String chatId) {

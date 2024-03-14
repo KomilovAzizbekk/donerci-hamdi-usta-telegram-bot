@@ -10,8 +10,8 @@ import uz.mediasolutions.mdeliveryservice.utills.constants.Rest;
 
 import java.util.List;
 
-@RequestMapping(ProductWebController.PRODUCT_WEB)
-public interface ProductWebController {
+@RequestMapping(WebProductController.PRODUCT_WEB)
+public interface WebProductController {
 
     String PRODUCT_WEB = Rest.BASE_PATH + "product-web/";
 

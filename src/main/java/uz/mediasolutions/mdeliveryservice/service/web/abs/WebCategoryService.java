@@ -5,6 +5,6 @@ import uz.mediasolutions.mdeliveryservice.payload.CategoryWebDTO;
 
 import java.util.List;
 
-public interface CategoryWebService {
+public interface WebCategoryService {
     ApiResult<List<CategoryWebDTO>> get(String chatId);
 }
