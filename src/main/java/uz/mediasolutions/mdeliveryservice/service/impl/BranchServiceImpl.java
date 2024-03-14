@@ -29,8 +29,9 @@ public class BranchServiceImpl implements BranchService {
     public ApiResult<Page<BranchDTO>> getAll(int page, int size, String name) {
         Pageable pageable = PageRequest.of(page, size);
         if (!name.equals("null")) {
-            Page<Branch> branches = branchRepository.findAllByNameRuContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrderByCreatedAtDesc(
-                    name, name, pageable);
+            Page<Branch> branches = branchRepository
+                    .findAllByAddressRuContainsIgnoreCaseOrAddressUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrderByCreatedAtDesc(
+                    name, name, name, name, pageable);
             Page<BranchDTO> dtos = branches.map(branchMapper::toDTO);
             return ApiResult.success(dtos);
         }

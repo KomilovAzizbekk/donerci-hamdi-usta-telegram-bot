@@ -16,8 +16,8 @@ public class VariationControllerImpl implements VariationController {
     private final VariationService variationService;
 
     @Override
-    public ApiResult<Page<VariationResDTO>> getAll(int page, int size) {
-        return variationService.getAll(page, size);
+    public ApiResult<Page<VariationResDTO>> getAll(int page, int size, String search) {
+        return variationService.getAll(page, size, search);
     }
 
     @Override

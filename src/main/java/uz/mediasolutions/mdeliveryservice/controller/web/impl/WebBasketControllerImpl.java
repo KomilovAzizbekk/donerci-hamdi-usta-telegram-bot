@@ -23,9 +23,4 @@ public class WebBasketControllerImpl implements WebBasketController {
     public ApiResult<?> add(String chatId, OrderProductDTO dto) {
         return basketWebService.add(chatId, dto);
     }
-
-    @Override
-    public ApiResult<?> edit(String chatId, Long id, OrderProductDTO dto) {
-        return basketWebService.edit(chatId, id, dto);
-    }
 }

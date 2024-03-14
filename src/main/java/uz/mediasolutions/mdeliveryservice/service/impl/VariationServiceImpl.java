@@ -29,11 +29,19 @@ public class VariationServiceImpl implements VariationService {
     private final ProductRepository productRepository;
 
     @Override
-    public ApiResult<Page<VariationResDTO>> getAll(int page, int size) {
+    public ApiResult<Page<VariationResDTO>> getAll(int page, int size, String search) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Variation> variations = variationRepository.findAllByOrderByNumberAsc(pageable);
-        Page<VariationResDTO> dtos = variations.map(variationMapper::toDTO);
-        return ApiResult.success(dtos);
+        if (!search.equals("null")) {
+            Page<Variation> variations = variationRepository
+                    .findAllByProductNameRuContainsIgnoreCaseOrProductNameUzContainsIgnoreCaseOrMeasureUnitNameRuContainsIgnoreCaseOrMeasureUnitNameUzContainsIgnoreCaseOrderByNumberAsc(
+                            search, search, search, search, pageable);
+            Page<VariationResDTO> map = variations.map(variationMapper::toDTO);
+            return ApiResult.success(map);
+        } else {
+            Page<Variation> variations = variationRepository.findAllByOrderByNumberAsc(pageable);
+            Page<VariationResDTO> dtos = variations.map(variationMapper::toDTO);
+            return ApiResult.success(dtos);
+        }
     }
 
     @Override

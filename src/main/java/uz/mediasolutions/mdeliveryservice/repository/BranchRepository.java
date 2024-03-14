@@ -13,5 +13,5 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
 
     boolean existsByNameUzOrNameRuAndId(String nameUz, String nameRu, Long id);
 
-    Page<Branch> findAllByNameRuContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrderByCreatedAtDesc(String nameUz, String nameRu, Pageable pageable);
+    Page<Branch> findAllByAddressRuContainsIgnoreCaseOrAddressUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrderByCreatedAtDesc(String aRu, String aUz, String nameUz, String nameRu, Pageable pageable);
 }

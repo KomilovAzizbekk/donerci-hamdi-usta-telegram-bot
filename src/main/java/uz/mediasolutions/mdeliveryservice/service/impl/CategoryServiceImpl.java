@@ -7,13 +7,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uz.mediasolutions.mdeliveryservice.entity.Category;
-import uz.mediasolutions.mdeliveryservice.entity.Product;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.mapper.CategoryMapper;
 import uz.mediasolutions.mdeliveryservice.payload.CategoryDTO;
 import uz.mediasolutions.mdeliveryservice.repository.CategoryRepository;
-import uz.mediasolutions.mdeliveryservice.repository.VariationRepository;
 import uz.mediasolutions.mdeliveryservice.service.abs.CategoryService;
 
 import java.io.IOException;
@@ -28,14 +26,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
-    private final VariationRepository variationRepository;
 
     @Override
     public ApiResult<Page<CategoryDTO>> getAll(int page, int size, String name) {
         Pageable pageable = PageRequest.of(page, size);
         if (!name.equals("null")) {
-            Page<Category> categories = categoryRepository.findAllByNameRuContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrderByNumberAsc(
-                    name, name, pageable);
+            Page<Category> categories = categoryRepository
+                    .findAllByDescriptionRuContainsIgnoreCaseOrDescriptionUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrderByNumberAsc(
+                    name, name, name, name, pageable);
             Page<CategoryDTO> dtos = categories.map(categoryMapper::toDTO);
             return ApiResult.success(dtos);
         }

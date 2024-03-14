@@ -93,9 +93,9 @@ public class MakeService {
 
     public String getUsername(Update update) {
         if (update.hasMessage()) {
-            return update.getMessage().getFrom().getFirstName();
+            return update.getMessage().getFrom().getUserName();
         } else if (update.hasCallbackQuery()) {
-            return update.getCallbackQuery().getFrom().getFirstName();
+            return update.getCallbackQuery().getFrom().getUserName();
         }
         return "";
     }

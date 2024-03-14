@@ -17,8 +17,6 @@ public interface WebBasketController {
 
     String ADD = "add";
 
-    String EDIT = "edit/{id}";
-
     @GetMapping(GET)
     ApiResult<BasketWebDTO> get(@RequestParam("user_id") String chatId);
 
@@ -26,9 +24,5 @@ public interface WebBasketController {
     ApiResult<?> add(@RequestParam("user_id") String chatId,
                      @RequestBody @Valid OrderProductDTO dto);
 
-    @PutMapping(EDIT)
-    ApiResult<?> edit(@RequestParam("user_id") String chatId,
-                      @PathVariable Long id,
-                      @RequestBody @Valid OrderProductDTO dto);
 
 }

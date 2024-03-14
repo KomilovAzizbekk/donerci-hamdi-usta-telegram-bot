@@ -6,7 +6,7 @@ import uz.mediasolutions.mdeliveryservice.payload.VariationDTO;
 import uz.mediasolutions.mdeliveryservice.payload.VariationResDTO;
 
 public interface VariationService {
-    ApiResult<Page<VariationResDTO>> getAll(int page, int size);
+    ApiResult<Page<VariationResDTO>> getAll(int page, int size, String search);
 
     ApiResult<VariationResDTO> getById(Long id);
 

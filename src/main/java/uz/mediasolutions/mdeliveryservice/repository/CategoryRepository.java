@@ -12,7 +12,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     Page<Category> findAllByOrderByNumberAsc(Pageable pageable);
     List<Category> findAllByActiveIsTrueOrderByNumberAsc();
 
-    Page<Category> findAllByNameRuContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrderByNumberAsc(String nameUz, String nameRu, Pageable pageable);
+    Page<Category> findAllByDescriptionRuContainsIgnoreCaseOrDescriptionUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrderByNumberAsc(String dUz, String dRu, String nameUz, String nameRu, Pageable pageable);
 
     boolean existsByNumber(Long number);
 

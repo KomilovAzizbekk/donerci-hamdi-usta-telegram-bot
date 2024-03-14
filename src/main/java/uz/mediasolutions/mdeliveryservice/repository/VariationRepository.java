@@ -11,6 +11,8 @@ public interface VariationRepository extends JpaRepository<Variation, Long> {
 
     Page<Variation> findAllByOrderByNumberAsc(Pageable pageable);
 
+    Page<Variation> findAllByProductNameRuContainsIgnoreCaseOrProductNameUzContainsIgnoreCaseOrMeasureUnitNameRuContainsIgnoreCaseOrMeasureUnitNameUzContainsIgnoreCaseOrderByNumberAsc(String pNameUz, String pNameRu, String mNameUz, String mNameRu, Pageable pageable);
+
     boolean existsByNumber(Long number);
 
     boolean existsByNumberAndId(Long number, Long id);

@@ -11,12 +11,10 @@ import uz.mediasolutions.mdeliveryservice.entity.Product;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.mapper.ProductMapper;
-import uz.mediasolutions.mdeliveryservice.mapper.VariationMapper;
 import uz.mediasolutions.mdeliveryservice.payload.ProductDTO;
 import uz.mediasolutions.mdeliveryservice.payload.ProductResDTO;
 import uz.mediasolutions.mdeliveryservice.repository.CategoryRepository;
 import uz.mediasolutions.mdeliveryservice.repository.ProductRepository;
-import uz.mediasolutions.mdeliveryservice.repository.VariationRepository;
 import uz.mediasolutions.mdeliveryservice.service.abs.ProductService;
 
 import java.io.IOException;
@@ -37,7 +35,9 @@ public class ProductServiceImpl implements ProductService {
     public ApiResult<Page<ProductResDTO>> getAll(int page, int size, String search) {
         Pageable pageable = PageRequest.of(page, size);
         if (!search.equals("null")) {
-            Page<Product> products = productRepository.findAllByNameUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrderByNumberAsc(search, search, pageable);
+            Page<Product> products = productRepository
+                    .findAllByDescriptionRuContainsIgnoreCaseOrDescriptionUzContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrCategoryNameRuContainsIgnoreCaseOrCategoryNameUzContainsIgnoreCaseOrderByNumberAsc(
+                            search, search, search, search, search, search, pageable);
             Page<ProductResDTO> dtos = products.map(productMapper::toDTO);
             return ApiResult.success(dtos);
         } else {

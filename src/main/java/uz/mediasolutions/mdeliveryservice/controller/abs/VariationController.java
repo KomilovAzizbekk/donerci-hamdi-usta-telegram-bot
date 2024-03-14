@@ -28,7 +28,8 @@ public interface VariationController {
 
     @GetMapping(GET_ALL)
     ApiResult<Page<VariationResDTO>> getAll(@RequestParam(defaultValue = Rest.DEFAULT_PAGE_NUMBER) int page,
-                                            @RequestParam(defaultValue = Rest.DEFAULT_PAGE_SIZE) int size);
+                                            @RequestParam(defaultValue = Rest.DEFAULT_PAGE_SIZE) int size,
+                                            @RequestParam(defaultValue = "null", required = false) String search);
 
 
     @GetMapping(GET_BY_ID)

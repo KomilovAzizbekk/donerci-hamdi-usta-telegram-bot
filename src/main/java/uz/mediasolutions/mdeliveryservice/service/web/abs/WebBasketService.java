@@ -10,6 +10,4 @@ public interface WebBasketService {
 
     ApiResult<?> add(String chatId, OrderProductDTO dto);
 
-    ApiResult<?> edit(String chatId, Long id, OrderProductDTO dto);
-
 }

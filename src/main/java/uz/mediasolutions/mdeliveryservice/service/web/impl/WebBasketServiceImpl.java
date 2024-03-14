@@ -63,30 +63,6 @@ public class WebBasketServiceImpl implements WebBasketService {
         return ApiResult.success("SAVED SUCCESSFULLY");
     }
 
-    @Override
-    public ApiResult<?> edit(String chatId, Long id, OrderProductDTO dto) {
-        Basket basket = basketRepository.findById(id).orElseThrow(
-                () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
-        List<OrderProducts> products = basket.getOrderProducts();
-        for (OrderProducts product : products) {
-            if (product.getId().equals(dto.getId())) {
-                if (dto.getCount() < 1) {
-                    products.remove(product);
-                    basket.setOrderProducts(products);
-                    basketRepository.save(basket);
-                    orderProductRepository.delete(product);
-                } else {
-                    product.setCount(dto.getCount());
-                    OrderProducts orderProducts = orderProductRepository.save(product);
-                    products.add(orderProducts);
-                    basket.setOrderProducts(products);
-                    basketRepository.save(basket);
-                }
-            }
-        }
-        return ApiResult.success("EDITED SUCCESSFULLY");
-    }
-
 
 
 
