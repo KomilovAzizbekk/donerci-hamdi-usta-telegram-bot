@@ -9,20 +9,20 @@ import uz.mediasolutions.mdeliveryservice.utills.constants.Rest;
 import javax.validation.Valid;
 import java.util.List;
 
-@RequestMapping(WebBasketController.BASKET_WEB)
-public interface WebBasketController {
+@RequestMapping(WebOrderController.ORDER_WEB)
+public interface WebOrderController {
 
-    String BASKET_WEB = Rest.BASE_PATH + "basket-web/";
+    String ORDER_WEB = Rest.BASE_PATH + "order-web/";
 
-    String GET = "get";
+    String GET_ALL = "get-all";
 
-    String ADD = "add";
+    String GET_BY_ID = "get/{id}";
 
-    @GetMapping(GET)
-    ApiResult<BasketWebDTO> get(@RequestParam("user_id") String chatId);
+    @GetMapping(GET_ALL)
+    ApiResult<List<BasketWebDTO>> getAll(@RequestParam("user_id") String chatId);
 
-    @PostMapping(ADD)
-    ApiResult<?> add(@RequestParam("user_id") String chatId,
+    @GetMapping(GET_BY_ID)
+    ApiResult<?> getById(@RequestParam("user_id") String chatId,
                      @RequestBody @Valid List<OrderProductDTO> dtoList);
 
 

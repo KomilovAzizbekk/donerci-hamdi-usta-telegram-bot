@@ -27,4 +27,7 @@ public class Basket extends AbsLong {
     @OneToOne(fetch = FetchType.LAZY)
     private TgUser tgUser;
 
+    @Column(name = "total_price")
+    private Double totalPrice;
+
 }

@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BasketWebDTO {
+public class OrderWebDTO {
 
     private Long id;
 

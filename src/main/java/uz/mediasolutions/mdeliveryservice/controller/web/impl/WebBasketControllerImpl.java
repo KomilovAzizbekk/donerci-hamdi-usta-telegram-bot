@@ -8,6 +8,8 @@ import uz.mediasolutions.mdeliveryservice.payload.BasketWebDTO;
 import uz.mediasolutions.mdeliveryservice.payload.OrderProductDTO;
 import uz.mediasolutions.mdeliveryservice.service.web.abs.WebBasketService;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class WebBasketControllerImpl implements WebBasketController {
@@ -20,7 +22,7 @@ public class WebBasketControllerImpl implements WebBasketController {
     }
 
     @Override
-    public ApiResult<?> add(String chatId, OrderProductDTO dto) {
-        return basketWebService.add(chatId, dto);
+    public ApiResult<?> add(String chatId, List<OrderProductDTO> dtoList) {
+        return basketWebService.add(chatId, dtoList);
     }
 }

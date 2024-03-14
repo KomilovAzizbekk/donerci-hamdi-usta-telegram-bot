@@ -37,6 +37,7 @@ public class WebBasketServiceImpl implements WebBasketService {
         } else {
             Basket basket = Basket.builder()
                     .tgUser(tgUser)
+                    .totalPrice(0D)
                     .build();
             Basket save = basketRepository.save(basket);
             BasketWebDTO dto = toBasketWebDTO(save, chatId);
@@ -45,18 +46,20 @@ public class WebBasketServiceImpl implements WebBasketService {
     }
 
     @Override
-    public ApiResult<?> add(String chatId, OrderProductDTO dto) {
-        OrderProducts orderProductsEntity = toOrderProductsEntity(dto);
-        OrderProducts orderProducts = orderProductRepository.save(orderProductsEntity);
+    public ApiResult<?> add(String chatId, List<OrderProductDTO> dtoList) {
+        List<OrderProducts> orderProductsEntity = toOrderProductsEntityList(dtoList);
+        List<OrderProducts> orderProducts = orderProductRepository.saveAll(orderProductsEntity);
         TgUser tgUser = tgUserRepository.findByChatId(chatId);
         if (basketRepository.existsByTgUserChatId(chatId)) {
             Basket basket = basketRepository.findByTgUserChatId(chatId);
-            basket.setOrderProducts(Collections.singletonList(orderProducts));
+            basket.setOrderProducts(orderProducts);
+            basket.setTotalPrice(totalPrice(orderProducts));
             basketRepository.save(basket);
         } else {
             Basket basket = Basket.builder()
-                    .orderProducts(Collections.singletonList(orderProducts))
+                    .orderProducts(orderProducts)
                     .tgUser(tgUser)
+                    .totalPrice(totalPrice(orderProducts))
                     .build();
             basketRepository.save(basket);
         }
@@ -80,6 +83,29 @@ public class WebBasketServiceImpl implements WebBasketService {
         return builder.build();
     }
 
+    private List<OrderProducts> toOrderProductsEntityList(List<OrderProductDTO> dtoList) {
+        if (dtoList == null) {
+            return null;
+        }
+        List<OrderProducts> orderProducts = new ArrayList<>();
+        for (OrderProductDTO orderProductDTO : dtoList) {
+            orderProducts.add(toOrderProductsEntity(orderProductDTO));
+        }
+        return orderProducts;
+    }
+
+    private double totalPrice(List<OrderProducts> orderProducts) {
+        if (orderProducts == null) {
+            return 0;
+        }
+        double totalPrice = 0;
+
+        for (OrderProducts orderProduct : orderProducts) {
+            totalPrice += orderProduct.getCount() * orderProduct.getVariation().getPrice();
+        }
+        return totalPrice;
+    }
+
     private BasketWebDTO toBasketWebDTO(Basket basket, String chatId) {
         if (basket == null) {
             return null;
@@ -88,6 +114,7 @@ public class WebBasketServiceImpl implements WebBasketService {
         BasketWebDTO.BasketWebDTOBuilder basketWebDTO = BasketWebDTO.builder();
 
         basketWebDTO.id(basket.getId());
+        basketWebDTO.totalPrice(totalPrice(basket.getOrderProducts()));
         basketWebDTO.orderProducts(toOrderProductResDTOlist(basket.getOrderProducts(), chatId));
 
         return basketWebDTO.build();
