@@ -19,6 +19,12 @@ import uz.mediasolutions.mdeliveryservice.repository.ProductRepository;
 import uz.mediasolutions.mdeliveryservice.repository.VariationRepository;
 import uz.mediasolutions.mdeliveryservice.service.abs.ProductService;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
@@ -63,7 +69,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResult<?> edit(Long id, ProductDTO dto) {
+    public ApiResult<?> edit(Long id, ProductDTO dto) throws IOException {
         if (productRepository.existsByNumberAndCategoryId(dto.getNumber(), dto.getCategoryId()) &&
                 !productRepository.existsByNumberAndId(dto.getNumber(), id)) {
             throw RestException.restThrow("NUMBER MUST ME UNIQUE", HttpStatus.BAD_REQUEST);
@@ -75,6 +81,13 @@ public class ProductServiceImpl implements ProductService {
                     () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
             Category category = categoryRepository.findById(dto.getCategoryId()).orElseThrow(
                     () -> RestException.restThrow("CATEGORY ID NOT FOUND", HttpStatus.BAD_REQUEST));
+
+            if (!Objects.equals(product.getImageUrl(), dto.getImageUrl())) {
+                String imageUrl = product.getImageUrl();
+                String imagePath = "delivery-files/" + imageUrl.substring(imageUrl.lastIndexOf('/'));
+                Path path = Paths.get(imagePath);
+                Files.deleteIfExists(path);
+            }
 
             product.setNumber(dto.getNumber());
             product.setCategory(category);

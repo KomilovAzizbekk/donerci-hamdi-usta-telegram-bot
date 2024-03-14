@@ -8,6 +8,7 @@ import uz.mediasolutions.mdeliveryservice.utills.constants.Rest;
 
 import javax.validation.Valid;
 import javax.ws.rs.Path;
+import java.io.IOException;
 
 @RequestMapping(CategoryController.CATEGORY)
 public interface CategoryController {
@@ -36,7 +37,7 @@ public interface CategoryController {
     ApiResult<?> add(@RequestBody @Valid CategoryDTO categoryDTO);
 
     @PutMapping(EDIT)
-    ApiResult<?> edit(@PathVariable Long id, @RequestBody @Valid CategoryDTO categoryDTO);
+    ApiResult<?> edit(@PathVariable Long id, @RequestBody @Valid CategoryDTO categoryDTO) throws IOException;
 
     @DeleteMapping(DELETE)
     ApiResult<?> delete(@PathVariable Long id);

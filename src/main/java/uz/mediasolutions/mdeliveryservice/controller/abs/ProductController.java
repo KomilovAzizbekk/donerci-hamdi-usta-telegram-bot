@@ -8,6 +8,7 @@ import uz.mediasolutions.mdeliveryservice.payload.ProductResDTO;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Rest;
 
 import javax.validation.Valid;
+import java.io.IOException;
 
 @RequestMapping(ProductController.PRODUCT)
 public interface ProductController {
@@ -36,7 +37,7 @@ public interface ProductController {
     ApiResult<?> add(@RequestBody @Valid ProductDTO dto);
 
     @PutMapping(EDIT)
-    ApiResult<?> edit(@PathVariable Long id, @RequestBody @Valid ProductDTO dto);
+    ApiResult<?> edit(@PathVariable Long id, @RequestBody @Valid ProductDTO dto) throws IOException;
 
     @DeleteMapping(DELETE)
     ApiResult<?> delete(@PathVariable Long id);

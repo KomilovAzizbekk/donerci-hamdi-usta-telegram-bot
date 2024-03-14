@@ -19,4 +19,6 @@ public class ProductWebDTO {
 
     private Double price;
 
+    private boolean oneVariation;
+
 }

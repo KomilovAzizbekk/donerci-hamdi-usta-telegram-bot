@@ -1,6 +1,7 @@
 package uz.mediasolutions.mdeliveryservice.controller.web.abs;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
@@ -14,9 +15,11 @@ public interface ProductWebController {
 
     String PRODUCT_WEB = Rest.BASE_PATH + "product-web/";
 
-    String GET = "get";
+    String GET_BY_CATEGORY = "get/{categoryId}";
 
-    @GetMapping(GET)
-    ApiResult<List<ProductWebDTO>> getAll(@RequestParam("user_id") String chatId);
+
+    @GetMapping(GET_BY_CATEGORY)
+    ApiResult<List<ProductWebDTO>> getAllByCategoryId(@RequestParam("user_id") String chatId,
+                                                      @PathVariable Long categoryId);
 
 }

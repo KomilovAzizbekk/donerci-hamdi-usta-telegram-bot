@@ -9,12 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrderProductDTO {
+public class MeasureUnitWebDTO {
 
     private Long id;
 
-    private Long variationId;
-
-    private Integer count;
+    private String name;
 
 }

@@ -9,6 +9,8 @@ import uz.mediasolutions.mdeliveryservice.payload.ProductDTO;
 import uz.mediasolutions.mdeliveryservice.payload.ProductResDTO;
 import uz.mediasolutions.mdeliveryservice.service.abs.ProductService;
 
+import java.io.IOException;
+
 @RestController
 @RequiredArgsConstructor
 public class ProductControllerImpl implements ProductController {
@@ -31,7 +33,7 @@ public class ProductControllerImpl implements ProductController {
     }
 
     @Override
-    public ApiResult<?> edit(Long id, ProductDTO dto) {
+    public ApiResult<?> edit(Long id, ProductDTO dto) throws IOException {
         return productService.edit(id, dto);
     }
 

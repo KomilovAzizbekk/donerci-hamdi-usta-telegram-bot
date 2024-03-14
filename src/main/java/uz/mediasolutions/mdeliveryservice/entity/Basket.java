@@ -22,7 +22,7 @@ import java.util.List;
 public class Basket extends AbsLong {
 
     @OneToMany(fetch = FetchType.LAZY)
-    private List<OrderProducts> products;
+    private List<OrderProducts> orderProducts;
 
     @OneToOne(fetch = FetchType.LAZY)
     private TgUser tgUser;

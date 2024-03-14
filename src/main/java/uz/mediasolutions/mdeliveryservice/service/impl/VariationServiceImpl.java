@@ -63,7 +63,7 @@ public class VariationServiceImpl implements VariationService {
         } else {
             Variation variation = variationRepository.findById(id).orElseThrow(
                     () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
-            MeasureUnit measureUnit = measureUnitRepository.findById(id).orElseThrow(
+            MeasureUnit measureUnit = measureUnitRepository.findById(dto.getMeasureUnitId()).orElseThrow(
                     () -> RestException.restThrow("MEASURE UNIT ID NOT FOUND", HttpStatus.BAD_REQUEST));
             Product product = productRepository.findById(dto.getProductId()).orElseThrow(
                     () -> RestException.restThrow("PRODUCT ID NOT FOUND", HttpStatus.BAD_REQUEST));

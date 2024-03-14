@@ -4,10 +4,7 @@ import uz.mediasolutions.mdeliveryservice.controller.abs.AuthController;
 import uz.mediasolutions.mdeliveryservice.controller.abs.BranchController;
 import uz.mediasolutions.mdeliveryservice.controller.abs.FileImageController;
 import uz.mediasolutions.mdeliveryservice.controller.abs.LanguageController;
-import uz.mediasolutions.mdeliveryservice.controller.web.abs.BannerWebController;
-import uz.mediasolutions.mdeliveryservice.controller.web.abs.BasketWebController;
-import uz.mediasolutions.mdeliveryservice.controller.web.abs.CategoryWebController;
-import uz.mediasolutions.mdeliveryservice.controller.web.abs.ProductWebController;
+import uz.mediasolutions.mdeliveryservice.controller.web.abs.*;
 
 import java.util.HashMap;
 
@@ -30,7 +27,8 @@ public interface Rest {
             BannerWebController.BANNER_WEB + "**",
             BasketWebController.BASKET_WEB + "**",
             CategoryWebController.CATEGORY_WEB + "**",
-            ProductWebController.PRODUCT_WEB + "**"
+            ProductWebController.PRODUCT_WEB + "**",
+            VariationWebController.VARIATION_WEB + "**"
     };
 
     String AUTHORIZATION_HEADER = "Authorization";

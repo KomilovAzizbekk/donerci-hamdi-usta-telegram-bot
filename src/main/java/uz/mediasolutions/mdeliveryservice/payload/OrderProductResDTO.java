@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrderProductDTO {
+public class OrderProductResDTO {
 
     private Long id;
 
-    private Long variationId;
+    private VariationWebDTO variation;
 
     private Integer count;
 

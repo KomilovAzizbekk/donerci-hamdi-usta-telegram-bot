@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrderProductDTO {
+public class Product2WebDTO {
 
     private Long id;
 
-    private Long variationId;
+    private String name;
 
-    private Integer count;
+    private String imageUrl;
 
 }

@@ -15,8 +15,6 @@ public class BasketWebDTO {
 
     private Long id;
 
-    private List<OrderProductDTO> products;
-
-    private String chatId;
+    private List<OrderProductResDTO> orderProducts;
 
 }

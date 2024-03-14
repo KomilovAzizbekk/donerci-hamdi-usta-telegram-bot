@@ -8,6 +8,8 @@ import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.CategoryDTO;
 import uz.mediasolutions.mdeliveryservice.service.abs.CategoryService;
 
+import java.io.IOException;
+
 @RestController
 @RequiredArgsConstructor
 public class CategoryControllerImpl implements CategoryController {
@@ -30,7 +32,7 @@ public class CategoryControllerImpl implements CategoryController {
     }
 
     @Override
-    public ApiResult<?> edit(Long id, CategoryDTO categoryDTO) {
+    public ApiResult<?> edit(Long id, CategoryDTO categoryDTO) throws IOException {
         return categoryService.edit(id, categoryDTO);
     }
 

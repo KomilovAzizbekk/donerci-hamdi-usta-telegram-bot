@@ -16,6 +16,12 @@ import uz.mediasolutions.mdeliveryservice.repository.CategoryRepository;
 import uz.mediasolutions.mdeliveryservice.repository.VariationRepository;
 import uz.mediasolutions.mdeliveryservice.service.abs.CategoryService;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
@@ -61,7 +67,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public ApiResult<?> edit(Long id, CategoryDTO categoryDTO) {
+    public ApiResult<?> edit(Long id, CategoryDTO categoryDTO) throws IOException {
         if (categoryRepository.existsByNumber(categoryDTO.getNumber()) &&
         !categoryRepository.existsByNumberAndId(categoryDTO.getNumber(), id)) {
             throw RestException.restThrow("NUMBER MUST ME UNIQUE", HttpStatus.BAD_REQUEST);
@@ -71,6 +77,14 @@ public class CategoryServiceImpl implements CategoryService {
         } else {
             Category category = categoryRepository.findById(id).orElseThrow(
                     () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
+
+            if (!Objects.equals(category.getImageUrl(), categoryDTO.getImageUrl())) {
+                String imageUrl = category.getImageUrl();
+                String imagePath = "delivery-files/" + imageUrl.substring(imageUrl.lastIndexOf('/'));
+                Path path = Paths.get(imagePath);
+                Files.deleteIfExists(path);
+            }
+
             category.setNumber(categoryDTO.getNumber());
             category.setNameUz(categoryDTO.getNameUz());
             category.setNameRu(categoryDTO.getNameRu());

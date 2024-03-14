@@ -5,6 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uz.mediasolutions.mdeliveryservice.entity.Variation;
 
+import java.util.List;
+
 public interface VariationRepository extends JpaRepository<Variation, Long> {
 
     Page<Variation> findAllByOrderByNumberAsc(Pageable pageable);
@@ -12,5 +14,7 @@ public interface VariationRepository extends JpaRepository<Variation, Long> {
     boolean existsByNumber(Long number);
 
     boolean existsByNumberAndId(Long number, Long id);
+
+    List<Variation> findAllByProductIdOrderByNumberAsc(Long productId);
 
 }
