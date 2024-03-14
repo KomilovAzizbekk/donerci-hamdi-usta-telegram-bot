@@ -13,14 +13,14 @@ import uz.mediasolutions.mdeliveryservice.payload.Product2WebDTO;
 import uz.mediasolutions.mdeliveryservice.payload.VariationWebDTO;
 import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
 import uz.mediasolutions.mdeliveryservice.repository.VariationRepository;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.VariationWebService;
+import uz.mediasolutions.mdeliveryservice.service.web.abs.WebVariationService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class VariationWebServiceImpl implements VariationWebService {
+public class WebVariationServiceImpl implements WebVariationService {
 
     private final VariationRepository variationRepository;
     private final TgUserRepository tgUserRepository;
