@@ -6,6 +6,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import uz.mediasolutions.mdeliveryservice.entity.template.AbsLong;
 
 import javax.persistence.*;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -39,8 +40,8 @@ public class Order extends AbsLong {
     @Column(name = "lat")
     private Double lat;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private OrderProducts orderProducts;
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<OrderProducts> orderProducts;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private PaymentProviders paymentProviders;

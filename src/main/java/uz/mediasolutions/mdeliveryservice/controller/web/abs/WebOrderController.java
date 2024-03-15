@@ -2,8 +2,8 @@ package uz.mediasolutions.mdeliveryservice.controller.web.abs;
 
 import org.springframework.web.bind.annotation.*;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
-import uz.mediasolutions.mdeliveryservice.payload.BasketWebDTO;
 import uz.mediasolutions.mdeliveryservice.payload.OrderProductDTO;
+import uz.mediasolutions.mdeliveryservice.payload.OrderWebDTO;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Rest;
 
 import javax.validation.Valid;
@@ -18,11 +18,17 @@ public interface WebOrderController {
 
     String GET_BY_ID = "get/{id}";
 
+    String ADD = "add";
+
     @GetMapping(GET_ALL)
-    ApiResult<List<BasketWebDTO>> getAll(@RequestParam("user_id") String chatId);
+    ApiResult<List<OrderWebDTO>> getAll(@RequestParam("user_id") String chatId);
 
     @GetMapping(GET_BY_ID)
-    ApiResult<?> getById(@RequestParam("user_id") String chatId,
+    ApiResult<OrderWebDTO> getById(@RequestParam("user_id") String chatId,
+                                   @PathVariable Long id);
+
+    @PostMapping(ADD)
+    ApiResult<?> add(@RequestParam("user_id") String chatId,
                      @RequestBody @Valid List<OrderProductDTO> dtoList);
 
 

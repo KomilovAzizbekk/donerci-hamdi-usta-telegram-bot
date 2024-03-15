@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import uz.mediasolutions.mdeliveryservice.entity.*;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
+import uz.mediasolutions.mdeliveryservice.enums.OrderStatusName;
 import uz.mediasolutions.mdeliveryservice.enums.RoleName;
 import uz.mediasolutions.mdeliveryservice.enums.StepName;
 import uz.mediasolutions.mdeliveryservice.repository.*;
@@ -33,6 +34,7 @@ public class DataLoader implements CommandLineRunner {
     private final StepRepository stepRepository;
     private final LanguageRepository languageRepository;
     private final ConstantsRepository constantsRepository;
+    private final OrderStatusRepository orderStatusRepository;
 
     @Value("${spring.sql.init.mode}")
     private String mode;
@@ -55,8 +57,16 @@ public class DataLoader implements CommandLineRunner {
             addUzLangValues();
             addRuLangValues();
             addConstants();
+            addOrderStatus();
         }
 
+    }
+
+    private void addOrderStatus() {
+        for (OrderStatusName value : OrderStatusName.values()) {
+            OrderStatus orderStatus = OrderStatus.builder().name(value).build();
+            orderStatusRepository.save(orderStatus);
+        }
     }
 
     private void addConstants() {

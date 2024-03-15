@@ -43,7 +43,7 @@ public class MakeService {
     private final LanguageRepository languageRepository;
 
     public static final String SUGGEST_COMPLAINT_CHANNEL_ID = "-1001903287909";
-    public static final String LINK = "https://chat.openai.com/";
+    public static final String LINK = "https://restoran-telegram-web-app.netlify.app/";
 
     public String getMessage(String key, String language) {
         List<LanguagePs> allByLanguage = languageRepositoryPs.findAll();

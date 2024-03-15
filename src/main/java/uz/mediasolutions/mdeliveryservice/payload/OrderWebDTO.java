@@ -15,7 +15,25 @@ public class OrderWebDTO {
 
     private Long id;
 
+    private BranchWebDTO branchWebDTO;
+
+    private String status;
+
+    private Long userId;
+
+    private Double lon;
+
+    private Double lat;
+
     private List<OrderProductResDTO> orderProducts;
+
+    private String paymentProviderName;
+
+    private String comment;
+
+    private Double price;
+
+    private Double deliveryPrice;
 
     private Double totalPrice;
 
