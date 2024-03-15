@@ -1,6 +1,7 @@
 package uz.mediasolutions.mdeliveryservice.controller.web.abs;
 
 import org.springframework.web.bind.annotation.*;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.OrderProductDTO;
 import uz.mediasolutions.mdeliveryservice.payload.OrderWebDTO;
@@ -29,7 +30,7 @@ public interface WebOrderController {
 
     @PostMapping(ADD)
     ApiResult<?> add(@RequestParam("user_id") String chatId,
-                     @RequestBody @Valid List<OrderProductDTO> dtoList);
+                     @RequestBody @Valid List<OrderProductDTO> dtoList) throws TelegramApiException;
 
 
 }

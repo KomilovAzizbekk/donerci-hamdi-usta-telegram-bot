@@ -21,14 +21,14 @@ public class TgService extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "uygogo_bot";
-//        return "sakaka_bot";
+//        return "uygogo_bot";
+        return "sakaka_bot";
     }
 
     @Override
     public String getBotToken() {
-        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
-//        return "6052104473:AAEscLILevwPMcG_00PYqAf-Kpb7eIUCIGg";
+//        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
+        return "6052104473:AAEscLILevwPMcG_00PYqAf-Kpb7eIUCIGg";
     }
 
     @SneakyThrows
@@ -80,12 +80,22 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenChangePhoneNumber2(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.CHANGE_LANGUAGE)) {
                     execute(makeService.whenChangeLanguage2(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.ORDER_REGISTER_PHONE)) {
+                    execute(makeService.whenOrderRegPhone1(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.ORDER_LOCATION)) {
+                    execute(makeService.whenOrderLocation1(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.CHOOSE_PAYMENT)) {
+                    execute(makeService.whenChoosePayment(update));
                 }
             } else if (update.hasMessage() && update.getMessage().hasContact()) {
                 if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT)) {
                     execute(makeService.whenIncorrectPhoneFormat(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT_1)) {
+                    execute(makeService.whenIncorrectPhoneFormat1(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.CHANGE_PHONE_NUMBER)) {
                     execute(makeService.whenChangePhoneNumber2(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.ORDER_LOCATION)) {
+                    execute(makeService.whenOrderLocation1(update));
                 }
             } else if (update.hasCallbackQuery()) {
                 String data = update.getCallbackQuery().getData();

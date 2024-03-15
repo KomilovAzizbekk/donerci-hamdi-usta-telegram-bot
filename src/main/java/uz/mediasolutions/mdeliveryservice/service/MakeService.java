@@ -327,7 +327,7 @@ public class MakeService {
     public SendMessage whenChangePhoneNumber1(Update update) {
         String chatId = getChatId(update);
         SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.ENTER_PHONE_NUMBER, getUserLanguage(chatId)));
-        sendMessage.setReplyMarkup(forPhoneNumber(update));
+        sendMessage.setReplyMarkup(forPhoneNumber(chatId));
         setUserStep(chatId, StepName.CHANGE_PHONE_NUMBER);
         return sendMessage;
     }
@@ -345,7 +345,7 @@ public class MakeService {
             } else {
                 SendMessage sendMessage = new SendMessage(getChatId(update),
                         getMessage(Message.INCORRECT_PHONE_FORMAT, getUserLanguage(chatId)));
-                sendMessage.setReplyMarkup(forPhoneNumber(update));
+                sendMessage.setReplyMarkup(forPhoneNumber(chatId));
                 setUserStep(chatId, StepName.INCORRECT_PHONE_FORMAT);
                 return sendMessage;
             }
@@ -361,15 +361,20 @@ public class MakeService {
     public SendMessage whenIncorrectPhoneFormat(Update update) {
         return whenChangePhoneNumber2(update);
     }
+    
 
-    private ReplyKeyboardMarkup forPhoneNumber(Update update) {
+    public SendMessage whenIncorrectPhoneFormat1(Update update) {
+        return whenOrderLocation1(update);
+    }
+
+    private ReplyKeyboardMarkup forPhoneNumber(String chatId) {
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
         List<KeyboardRow> rowList = new ArrayList<>();
         KeyboardRow row1 = new KeyboardRow();
 
         KeyboardButton button1 = new KeyboardButton();
 
-        button1.setText(getMessage(Message.SHARE_PHONE_NUMBER, getUserLanguage(getChatId(update))));
+        button1.setText(getMessage(Message.SHARE_PHONE_NUMBER, getUserLanguage(chatId)));
         button1.setRequestContact(true);
 
         row1.add(button1);
@@ -422,6 +427,96 @@ public class MakeService {
                 getMessage(Message.LANGUAGE_CHANGED, getUserLanguage(chatId)));
         sendMessage.setReplyMarkup(forMainMenu(chatId));
         setUserStep(chatId, StepName.CHOOSE_FROM_MAIN_MENU);
+        return sendMessage;
+    }
+
+    public SendMessage whenOrderLocation(String chatId) {
+        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.SEND_LOCATION, getUserLanguage(chatId)));
+        sendMessage.setReplyMarkup(forSendLocation(chatId));
+        setUserStep(chatId, StepName.CHOOSE_PAYMENT);
+        return sendMessage;
+    }
+
+    public SendMessage whenOrderLocation1(Update update) {
+        String chatId = getChatId(update);
+        TgUser tgUser = tgUserRepository.findByChatId(chatId);
+
+        if (update.getMessage().hasText()) {
+            if (isValidPhoneNumber(update.getMessage().getText())) {
+                String phoneNumber = update.getMessage().getText();
+                tgUser.setPhoneNumber(phoneNumber);
+                tgUserRepository.save(tgUser);
+                return executeSendLocation(chatId);
+            } else {
+                SendMessage sendMessage = new SendMessage(getChatId(update),
+                        getMessage(Message.INCORRECT_PHONE_FORMAT, getUserLanguage(chatId)));
+                sendMessage.setReplyMarkup(forPhoneNumber(chatId));
+                setUserStep(chatId, StepName.INCORRECT_PHONE_FORMAT_1);
+                return sendMessage;
+            }
+        } else {
+            String phoneNumber = update.getMessage().getContact().getPhoneNumber();
+            phoneNumber = phoneNumber.startsWith("+") ? phoneNumber : "+" + phoneNumber;
+            tgUser.setPhoneNumber(phoneNumber);
+            tgUserRepository.save(tgUser);
+            return executeSendLocation(chatId);
+        }
+    }
+
+    private SendMessage executeSendLocation(String chatId) {
+        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.SEND_LOCATION, getUserLanguage(chatId)));
+        sendMessage.setReplyMarkup(forSendLocation(chatId));
+        setUserStep(chatId, StepName.CHOOSE_PAYMENT);
+        return sendMessage;
+    }
+
+    private ReplyKeyboardMarkup forSendLocation(String chatId) {
+        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> rowList = new ArrayList<>();
+        KeyboardRow row1 = new KeyboardRow();
+
+        KeyboardButton button1 = new KeyboardButton();
+
+        button1.setText(getMessage(Message.FOR_LOCATION, getUserLanguage(chatId)));
+        button1.setRequestLocation(true);
+
+        row1.add(button1);
+
+        rowList.add(row1);
+        markup.setKeyboard(rowList);
+        markup.setSelective(true);
+        markup.setResizeKeyboard(true);
+        return markup;
+    }
+
+    public SendMessage whenChoosePayment(Update update) {
+        return null;
+    }
+
+    public SendMessage whenOrderRegName(String chatId) {
+        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.ENTER_NAME, getUserLanguage(chatId)));
+        sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
+        setUserStep(chatId, StepName.ORDER_REGISTER_PHONE);
+        return sendMessage;
+    }
+
+    public SendMessage whenOrderRegPhone(String chatId) {
+        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.ENTER_PHONE_NUMBER, getUserLanguage(chatId)));
+        sendMessage.setReplyMarkup(forPhoneNumber(chatId));
+        setUserStep(chatId, StepName.ORDER_LOCATION);
+        return sendMessage;
+    }
+
+    public SendMessage whenOrderRegPhone1(Update update) {
+        String chatId = getChatId(update);
+        String name = update.getMessage().getText();
+        TgUser tgUser = tgUserRepository.findByChatId(chatId);
+        tgUser.setName(name);
+        tgUserRepository.save(tgUser);
+
+        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.ENTER_PHONE_NUMBER, getUserLanguage(chatId)));
+        sendMessage.setReplyMarkup(forPhoneNumber(chatId));
+        setUserStep(chatId, StepName.ORDER_LOCATION);
         return sendMessage;
     }
 }

@@ -2,6 +2,7 @@ package uz.mediasolutions.mdeliveryservice.controller.web.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.mediasolutions.mdeliveryservice.controller.web.abs.WebOrderController;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.OrderProductDTO;
@@ -27,7 +28,7 @@ public class WebOrderControllerImpl implements WebOrderController {
     }
 
     @Override
-    public ApiResult<?> add(String chatId, List<OrderProductDTO> dtoList) {
+    public ApiResult<?> add(String chatId, List<OrderProductDTO> dtoList) throws TelegramApiException {
         return webOrderService.add(chatId, dtoList);
     }
 }

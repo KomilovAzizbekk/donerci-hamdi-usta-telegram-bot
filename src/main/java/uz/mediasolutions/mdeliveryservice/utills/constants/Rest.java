@@ -27,7 +27,8 @@ public interface Rest {
             WebBasketController.BASKET_WEB + "**",
             WebCategoryController.CATEGORY_WEB + "**",
             WebProductController.PRODUCT_WEB + "**",
-            WebVariationController.VARIATION_WEB + "**"
+            WebVariationController.VARIATION_WEB + "**",
+            WebOrderController.ORDER_WEB + "**"
     };
 
     String AUTHORIZATION_HEADER = "Authorization";
