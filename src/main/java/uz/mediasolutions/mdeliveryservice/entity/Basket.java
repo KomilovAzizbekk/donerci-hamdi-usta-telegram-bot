@@ -21,7 +21,7 @@ import java.util.List;
 @Table(name = "baskets")
 public class Basket extends AbsLong {
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true)
     private List<OrderProducts> orderProducts;
 
     @OneToOne(fetch = FetchType.LAZY)

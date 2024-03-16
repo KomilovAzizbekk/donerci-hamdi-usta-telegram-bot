@@ -2,11 +2,11 @@ package uz.mediasolutions.mdeliveryservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -15,16 +15,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
-import uz.mediasolutions.mdeliveryservice.entity.Language;
-import uz.mediasolutions.mdeliveryservice.entity.LanguagePs;
-import uz.mediasolutions.mdeliveryservice.entity.LanguageSourcePs;
-import uz.mediasolutions.mdeliveryservice.entity.TgUser;
+import uz.mediasolutions.mdeliveryservice.entity.*;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
 import uz.mediasolutions.mdeliveryservice.enums.StepName;
-import uz.mediasolutions.mdeliveryservice.repository.LanguageRepository;
-import uz.mediasolutions.mdeliveryservice.repository.LanguageRepositoryPs;
-import uz.mediasolutions.mdeliveryservice.repository.StepRepository;
-import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
+import uz.mediasolutions.mdeliveryservice.repository.*;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
 import java.io.Serializable;
@@ -41,6 +35,7 @@ public class MakeService {
     private final TgUserRepository tgUserRepository;
     private final StepRepository stepRepository;
     private final LanguageRepository languageRepository;
+    private final OrderRepository orderRepository;
 
     public static final String SUGGEST_COMPLAINT_CHANNEL_ID = "-1001903287909";
     public static final String LINK = "https://restoran-telegram-web-app.netlify.app/";
@@ -499,7 +494,43 @@ public class MakeService {
     }
 
     public SendMessage whenChoosePayment(Update update) {
+        String chatId = getChatId(update);
+        Location location = update.getMessage().getLocation();
+        List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
+        Order order = orderList.get(0);
+        order.setLon(location.getLongitude());
+        order.setLat(location.getLatitude());
+        orderRepository.save(order);
+        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.CHOOSE_PAYMENT, getUserLanguage(chatId)));
+        sendMessage.setReplyMarkup(forChoosePayment(chatId));
+        setUserStep(chatId, StepName.LEAVE_COMMENT);
         return null;
+    }
+
+    private ReplyKeyboardMarkup forChoosePayment(String chatId) {
+
+        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> rowList = new ArrayList<>();
+        KeyboardRow row1 = new KeyboardRow();
+        KeyboardRow row2 = new KeyboardRow();
+
+        KeyboardButton button1 = new KeyboardButton();
+        KeyboardButton button2 = new KeyboardButton();
+        KeyboardButton button3 = new KeyboardButton();
+
+        button1.setText(getMessage(Message.CLICK, getUserLanguage(chatId)));
+        button2.setText(getMessage(Message.PAYME, getUserLanguage(chatId)));
+        button3.setText(getMessage(Message.CASH, getUserLanguage(chatId)));
+        row1.add(button1);
+        row1.add(button2);
+        row2.add(button3);
+
+        rowList.add(row1);
+        rowList.add(row2);
+        markup.setKeyboard(rowList);
+        markup.setSelective(true);
+        markup.setResizeKeyboard(true);
+        return markup;
     }
 
     public SendMessage whenOrderRegName(String chatId) {
@@ -527,5 +558,10 @@ public class MakeService {
         sendMessage.setReplyMarkup(forPhoneNumber(chatId));
         setUserStep(chatId, StepName.ORDER_LOCATION);
         return sendMessage;
+    }
+
+    public SendMessage whenLeaveComment(Update update) {
+        String text = update.getMessage().getText();
+        return null;
     }
 }

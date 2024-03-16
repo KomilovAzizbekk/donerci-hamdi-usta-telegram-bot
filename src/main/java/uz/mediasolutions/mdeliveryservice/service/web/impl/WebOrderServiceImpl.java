@@ -37,46 +37,56 @@ public class WebOrderServiceImpl implements WebOrderService {
 
     @Override
     public ApiResult<List<OrderWebDTO>> getAll(String chatId) {
-        List<Order> orders = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
-        List<OrderWebDTO> dtoList = universalMapper.toOrderWebDTOList(orders, chatId);
-        return ApiResult.success(dtoList);
+        if (tgUserRepository.existsByChatId(chatId)) {
+            List<Order> orders = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
+            List<OrderWebDTO> dtoList = universalMapper.toOrderWebDTOList(orders, chatId);
+            return ApiResult.success(dtoList);
+        } else {
+            throw RestException.restThrow("USER ID NOT FOUND", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Override
     public ApiResult<OrderWebDTO> getById(String chatId, Long id) {
-        Order order = orderRepository.findById(id).orElseThrow(
-                () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
-        OrderWebDTO orderWebDTO = universalMapper.toOrderWebDTO(order, chatId);
-        return ApiResult.success(orderWebDTO);
+        if (tgUserRepository.existsByChatId(chatId)) {
+            Order order = orderRepository.findById(id).orElseThrow(
+                    () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
+            OrderWebDTO orderWebDTO = universalMapper.toOrderWebDTO(order, chatId);
+            return ApiResult.success(orderWebDTO);
+        } else {
+            throw RestException.restThrow("USER ID NOT FOUND", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Override
     public ApiResult<?> add(String chatId, List<OrderProductDTO> dtoList) throws TelegramApiException {
-        TgUser tgUser = tgUserRepository.findByChatId(chatId);
-        List<OrderProducts> orderProducts = universalMapper.toOrderProductsEntityList(dtoList);
-        List<OrderProducts> saveAll = orderProductRepository.saveAll(orderProducts);
-        Basket basket = basketRepository.findByTgUserChatId(chatId);
-        basket.setOrderProducts(null);
-        basket.setTotalPrice(0D);
-        basketRepository.save(basket);
+        if (tgUserRepository.existsByChatId(chatId)) {
+            TgUser tgUser = tgUserRepository.findByChatId(chatId);
+            List<OrderProducts> orderProducts = universalMapper.toOrderProductsEntityList(dtoList);
+            List<OrderProducts> saveAll = orderProductRepository.saveAll(orderProducts);
+            Basket basket = basketRepository.findByTgUserChatId(chatId);
+            basketRepository.delete(basket);
 
-        Order.OrderBuilder builder = Order.builder();
-        builder.orderStatus(orderStatusRepository.findByName(OrderStatusName.PENDING));
-        builder.user(tgUser);
-        builder.orderProducts(saveAll);
-        builder.price(universalMapper.totalPrice(saveAll));
-        Order order = builder.build();
-        orderRepository.save(order);
-        if (tgUser.getName() != null && tgUser.getPhoneNumber() != null) {
-            makeService.setUserStep(chatId, StepName.ORDER_LOCATION);
-            tgService.execute(makeService.whenOrderLocation(chatId));
-        } else if (tgUser.getName() == null) {
-            makeService.setUserStep(chatId, StepName.ORDER_REGISTER_NAME);
-            tgService.execute(makeService.whenOrderRegName(chatId));
+            Order.OrderBuilder builder = Order.builder();
+            builder.orderStatus(orderStatusRepository.findByName(OrderStatusName.PENDING));
+            builder.user(tgUser);
+            builder.orderProducts(saveAll);
+            builder.price(universalMapper.totalPrice(saveAll));
+            Order order = builder.build();
+            orderRepository.save(order);
+            if (tgUser.getName() != null && tgUser.getPhoneNumber() != null) {
+                makeService.setUserStep(chatId, StepName.ORDER_LOCATION);
+                tgService.execute(makeService.whenOrderLocation(chatId));
+            } else if (tgUser.getName() == null) {
+                makeService.setUserStep(chatId, StepName.ORDER_REGISTER_NAME);
+                tgService.execute(makeService.whenOrderRegName(chatId));
+            } else {
+                makeService.setUserStep(chatId, StepName.ORDER_REGISTER_PHONE);
+                tgService.execute(makeService.whenOrderRegPhone(chatId));
+            }
+            return ApiResult.success("SAVED SUCCESSFULLY");
         } else {
-            makeService.setUserStep(chatId, StepName.ORDER_REGISTER_PHONE);
-            tgService.execute(makeService.whenOrderRegPhone(chatId));
+            throw RestException.restThrow("USER ID NOT FOUND", HttpStatus.BAD_REQUEST);
         }
-        return ApiResult.success("SAVED SUCCESSFULLY");
     }
 }

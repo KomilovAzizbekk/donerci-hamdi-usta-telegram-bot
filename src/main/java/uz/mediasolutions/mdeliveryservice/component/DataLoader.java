@@ -10,10 +10,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import uz.mediasolutions.mdeliveryservice.entity.*;
-import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
-import uz.mediasolutions.mdeliveryservice.enums.OrderStatusName;
-import uz.mediasolutions.mdeliveryservice.enums.RoleName;
-import uz.mediasolutions.mdeliveryservice.enums.StepName;
+import uz.mediasolutions.mdeliveryservice.enums.*;
 import uz.mediasolutions.mdeliveryservice.repository.*;
 import uz.mediasolutions.mdeliveryservice.service.TgService;
 
@@ -35,6 +32,7 @@ public class DataLoader implements CommandLineRunner {
     private final LanguageRepository languageRepository;
     private final ConstantsRepository constantsRepository;
     private final OrderStatusRepository orderStatusRepository;
+    private final PaymentProvidersRepository paymentProvidersRepository;
 
     @Value("${spring.sql.init.mode}")
     private String mode;
@@ -58,8 +56,16 @@ public class DataLoader implements CommandLineRunner {
             addRuLangValues();
             addConstants();
             addOrderStatus();
+            addPaymentProviders();
         }
 
+    }
+
+    private void addPaymentProviders() {
+        for (ProviderName value : ProviderName.values()) {
+            PaymentProviders providers = PaymentProviders.builder().name(value).active(true).build();
+            paymentProvidersRepository.save(providers);
+        }
     }
 
     private void addOrderStatus() {

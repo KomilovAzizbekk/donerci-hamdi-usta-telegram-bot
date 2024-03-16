@@ -28,7 +28,8 @@ public interface ProductController {
     @GetMapping(GET_ALL)
     ApiResult<Page<ProductResDTO>> getAll(@RequestParam(defaultValue = Rest.DEFAULT_PAGE_NUMBER) int page,
                                           @RequestParam(defaultValue = Rest.DEFAULT_PAGE_SIZE) int size,
-                                          @RequestParam(defaultValue = "null", required = false) String search);
+                                          @RequestParam(defaultValue = "null", required = false) String search,
+                                          @RequestParam(defaultValue = "false") boolean active);
 
     @GetMapping(GET_BY_ID)
     ApiResult<ProductResDTO> getById(@PathVariable Long id);
@@ -40,6 +41,6 @@ public interface ProductController {
     ApiResult<?> edit(@PathVariable Long id, @RequestBody @Valid ProductDTO dto) throws IOException;
 
     @DeleteMapping(DELETE)
-    ApiResult<?> delete(@PathVariable Long id);
+    ApiResult<?> delete(@PathVariable Long id) throws IOException;
 
 }

@@ -1,8 +1,10 @@
 package uz.mediasolutions.mdeliveryservice.service.web.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uz.mediasolutions.mdeliveryservice.entity.*;
+import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.mapper.UniversalMapper;
 import uz.mediasolutions.mdeliveryservice.payload.*;
@@ -24,41 +26,49 @@ public class WebBasketServiceImpl implements WebBasketService {
 
     @Override
     public ApiResult<BasketWebDTO> get(String chatId) {
-        TgUser tgUser = tgUserRepository.findByChatId(chatId);
-        if (basketRepository.existsByTgUserChatId(chatId)) {
-            Basket basket = basketRepository.findByTgUserChatId(chatId);
-            BasketWebDTO dto = universalMapper.toBasketWebDTO(basket, chatId);
-            return ApiResult.success(dto);
+        if (tgUserRepository.existsByChatId(chatId)) {
+            TgUser tgUser = tgUserRepository.findByChatId(chatId);
+            if (basketRepository.existsByTgUserChatId(chatId)) {
+                Basket basket = basketRepository.findByTgUserChatId(chatId);
+                BasketWebDTO dto = universalMapper.toBasketWebDTO(basket, chatId);
+                return ApiResult.success(dto);
+            } else {
+                Basket basket = Basket.builder()
+                        .tgUser(tgUser)
+                        .totalPrice(0D)
+                        .build();
+                Basket save = basketRepository.save(basket);
+                BasketWebDTO dto = universalMapper.toBasketWebDTO(save, chatId);
+                return ApiResult.success(dto);
+            }
         } else {
-            Basket basket = Basket.builder()
-                    .tgUser(tgUser)
-                    .totalPrice(0D)
-                    .build();
-            Basket save = basketRepository.save(basket);
-            BasketWebDTO dto = universalMapper.toBasketWebDTO(save, chatId);
-            return ApiResult.success(dto);
+            throw RestException.restThrow("USER ID NOT FOUND", HttpStatus.BAD_REQUEST);
         }
     }
 
     @Override
     public ApiResult<?> add(String chatId, List<OrderProductDTO> dtoList) {
-        List<OrderProducts> orderProductsEntity = universalMapper.toOrderProductsEntityList(dtoList);
-        List<OrderProducts> orderProducts = orderProductRepository.saveAll(orderProductsEntity);
-        TgUser tgUser = tgUserRepository.findByChatId(chatId);
-        if (basketRepository.existsByTgUserChatId(chatId)) {
-            Basket basket = basketRepository.findByTgUserChatId(chatId);
-            basket.setOrderProducts(orderProducts);
-            basket.setTotalPrice(universalMapper.totalPrice(orderProducts));
-            basketRepository.save(basket);
+        if (tgUserRepository.existsByChatId(chatId)) {
+            List<OrderProducts> orderProductsEntity = universalMapper.toOrderProductsEntityList(dtoList);
+            List<OrderProducts> orderProducts = orderProductRepository.saveAll(orderProductsEntity);
+            TgUser tgUser = tgUserRepository.findByChatId(chatId);
+            if (basketRepository.existsByTgUserChatId(chatId)) {
+                Basket basket = basketRepository.findByTgUserChatId(chatId);
+                basket.setOrderProducts(orderProducts);
+                basket.setTotalPrice(universalMapper.totalPrice(orderProducts));
+                basketRepository.save(basket);
+            } else {
+                Basket basket = Basket.builder()
+                        .orderProducts(orderProducts)
+                        .tgUser(tgUser)
+                        .totalPrice(universalMapper.totalPrice(orderProducts))
+                        .build();
+                basketRepository.save(basket);
+            }
+            return ApiResult.success("SAVED SUCCESSFULLY");
         } else {
-            Basket basket = Basket.builder()
-                    .orderProducts(orderProducts)
-                    .tgUser(tgUser)
-                    .totalPrice(universalMapper.totalPrice(orderProducts))
-                    .build();
-            basketRepository.save(basket);
+            throw RestException.restThrow("USER ID NOT FOUND", HttpStatus.BAD_REQUEST);
         }
-        return ApiResult.success("SAVED SUCCESSFULLY");
     }
 
 

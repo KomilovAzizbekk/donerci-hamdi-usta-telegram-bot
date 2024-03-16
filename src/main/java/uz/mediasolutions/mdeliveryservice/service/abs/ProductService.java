@@ -8,7 +8,7 @@ import uz.mediasolutions.mdeliveryservice.payload.ProductResDTO;
 import java.io.IOException;
 
 public interface ProductService {
-    ApiResult<Page<ProductResDTO>> getAll(int page, int size, String search);
+    ApiResult<Page<ProductResDTO>> getAll(int page, int size, String search, boolean active);
 
     ApiResult<ProductResDTO> getById(Long id);
 
@@ -16,6 +16,6 @@ public interface ProductService {
 
     ApiResult<?> edit(Long id, ProductDTO dto) throws IOException;
 
-    ApiResult<?> delete(Long id);
+    ApiResult<?> delete(Long id) throws IOException;
 
 }

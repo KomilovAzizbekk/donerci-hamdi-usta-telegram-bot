@@ -18,8 +18,8 @@ public class ProductControllerImpl implements ProductController {
     private final ProductService productService;
 
     @Override
-    public ApiResult<Page<ProductResDTO>> getAll(int page, int size, String search) {
-        return productService.getAll(page, size, search);
+    public ApiResult<Page<ProductResDTO>> getAll(int page, int size, String search, boolean active) {
+        return productService.getAll(page, size, search, active);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class ProductControllerImpl implements ProductController {
     }
 
     @Override
-    public ApiResult<?> delete(Long id) {
+    public ApiResult<?> delete(Long id) throws IOException {
         return productService.delete(id);
     }
 }

@@ -90,4 +90,8 @@ public interface Message {
     String COUNT = "count";
     String NOT_ZERO = "not.zero";
     String NOT_EXISTS = "not.exists";
+    String CHOOSE_PAYMENT = "choose.payment";
+    String CLICK = "click";
+    String PAYME = "payme";
+    String CASH = "cash";
 }

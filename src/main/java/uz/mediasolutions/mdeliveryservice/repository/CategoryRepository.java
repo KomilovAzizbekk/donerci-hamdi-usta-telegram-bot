@@ -10,7 +10,12 @@ import java.util.List;
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     Page<Category> findAllByOrderByNumberAsc(Pageable pageable);
+
+    Page<Category> findAllByActiveIsTrueOrderByNumberAsc(Pageable pageable);
+
     List<Category> findAllByActiveIsTrueOrderByNumberAsc();
+
+    Page<Category> findAllByActiveIsTrueAndDescriptionRuContainsIgnoreCaseOrDescriptionUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrderByNumberAsc(String dUz, String dRu, String nameUz, String nameRu, Pageable pageable);
 
     Page<Category> findAllByDescriptionRuContainsIgnoreCaseOrDescriptionUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrderByNumberAsc(String dUz, String dRu, String nameUz, String nameRu, Pageable pageable);
 

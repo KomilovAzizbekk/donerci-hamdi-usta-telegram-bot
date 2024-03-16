@@ -84,8 +84,8 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenOrderRegPhone1(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.ORDER_LOCATION)) {
                     execute(makeService.whenOrderLocation1(update));
-                } else if (makeService.getUserStep(chatId).equals(StepName.CHOOSE_PAYMENT)) {
-                    execute(makeService.whenChoosePayment(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.LEAVE_COMMENT)) {
+                    execute(makeService.whenLeaveComment(update));
                 }
             } else if (update.hasMessage() && update.getMessage().hasContact()) {
                 if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT)) {
@@ -96,6 +96,10 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenChangePhoneNumber2(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.ORDER_LOCATION)) {
                     execute(makeService.whenOrderLocation1(update));
+                }
+            } else if (update.hasMessage() && update.getMessage().hasLocation()) {
+                if (makeService.getUserStep(chatId).equals(StepName.CHOOSE_PAYMENT)) {
+                    execute(makeService.whenChoosePayment(update));
                 }
             } else if (update.hasCallbackQuery()) {
                 String data = update.getCallbackQuery().getData();

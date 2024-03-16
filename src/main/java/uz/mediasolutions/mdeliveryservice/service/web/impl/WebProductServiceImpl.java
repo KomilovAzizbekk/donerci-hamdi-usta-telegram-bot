@@ -1,11 +1,13 @@
 package uz.mediasolutions.mdeliveryservice.service.web.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uz.mediasolutions.mdeliveryservice.entity.Product;
 import uz.mediasolutions.mdeliveryservice.entity.TgUser;
 import uz.mediasolutions.mdeliveryservice.entity.Variation;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
+import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.ProductWebDTO;
 import uz.mediasolutions.mdeliveryservice.repository.ProductRepository;
@@ -24,10 +26,14 @@ public class WebProductServiceImpl implements WebProductService {
 
     @Override
     public ApiResult<List<ProductWebDTO>> getAllByCategoryId(String chatId, Long categoryId) {
-        List<Product> products = productRepository
-                .findAllByCategoryIdAndVariationsIsNotEmptyAndActiveIsTrueAndCategoryActiveIsTrueOrderByNumberAsc(categoryId);
-        List<ProductWebDTO> productWebDTOList = toProductWebDTOList(products, chatId);
-        return ApiResult.success(productWebDTOList);
+        if (tgUserRepository.existsByChatId(chatId)) {
+            List<Product> products = productRepository
+                    .findAllByCategoryIdAndVariationsIsNotEmptyAndActiveIsTrueAndCategoryActiveIsTrueOrderByNumberAsc(categoryId);
+            List<ProductWebDTO> productWebDTOList = toProductWebDTOList(products, chatId);
+            return ApiResult.success(productWebDTOList);
+        } else {
+            throw RestException.restThrow("USER ID NOT FOUND", HttpStatus.BAD_REQUEST);
+        }
     }
 
     private Double getLowestPrice(Product product) {

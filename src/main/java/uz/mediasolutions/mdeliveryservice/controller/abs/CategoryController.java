@@ -28,7 +28,8 @@ public interface CategoryController {
     @GetMapping(GET_ALL)
     ApiResult<Page<CategoryDTO>> getAll(@RequestParam(defaultValue = Rest.DEFAULT_PAGE_NUMBER) int page,
                                         @RequestParam(defaultValue = Rest.DEFAULT_PAGE_SIZE) int size,
-                                        @RequestParam(defaultValue = "null", required = false) String search);
+                                        @RequestParam(defaultValue = "null", required = false) String search,
+                                        @RequestParam(defaultValue = "false") boolean active);
 
     @GetMapping(GET_BY_ID)
     ApiResult<CategoryDTO> getById(@PathVariable Long id);
@@ -40,6 +41,6 @@ public interface CategoryController {
     ApiResult<?> edit(@PathVariable Long id, @RequestBody @Valid CategoryDTO categoryDTO) throws IOException;
 
     @DeleteMapping(DELETE)
-    ApiResult<?> delete(@PathVariable Long id);
+    ApiResult<?> delete(@PathVariable Long id) throws IOException;
 
 }

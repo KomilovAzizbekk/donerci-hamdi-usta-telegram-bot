@@ -17,8 +17,8 @@ public class CategoryControllerImpl implements CategoryController {
     private final CategoryService categoryService;
 
     @Override
-    public ApiResult<Page<CategoryDTO>> getAll(int page, int size, String search) {
-        return categoryService.getAll(page, size, search);
+    public ApiResult<Page<CategoryDTO>> getAll(int page, int size, String search, boolean active) {
+        return categoryService.getAll(page, size, search, active);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class CategoryControllerImpl implements CategoryController {
     }
 
     @Override
-    public ApiResult<?> delete(Long id) {
+    public ApiResult<?> delete(Long id) throws IOException {
         return categoryService.delete(id);
     }
 }

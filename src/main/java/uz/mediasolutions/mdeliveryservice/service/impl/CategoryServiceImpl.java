@@ -28,8 +28,20 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryMapper categoryMapper;
 
     @Override
-    public ApiResult<Page<CategoryDTO>> getAll(int page, int size, String name) {
+    public ApiResult<Page<CategoryDTO>> getAll(int page, int size, String name, boolean active) {
         Pageable pageable = PageRequest.of(page, size);
+        if (active) {
+            if (!name.equals("null")) {
+                Page<Category> categories = categoryRepository
+                        .findAllByActiveIsTrueAndDescriptionRuContainsIgnoreCaseOrDescriptionUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrderByNumberAsc(
+                                name, name, name, name, pageable);
+                Page<CategoryDTO> dtos = categories.map(categoryMapper::toDTO);
+                return ApiResult.success(dtos);
+            }
+            Page<Category> categories = categoryRepository.findAllByActiveIsTrueOrderByNumberAsc(pageable);
+            Page<CategoryDTO> dtos = categories.map(categoryMapper::toDTO);
+            return ApiResult.success(dtos);
+        }
         if (!name.equals("null")) {
             Page<Category> categories = categoryRepository
                     .findAllByDescriptionRuContainsIgnoreCaseOrDescriptionUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrderByNumberAsc(
@@ -76,11 +88,13 @@ public class CategoryServiceImpl implements CategoryService {
             Category category = categoryRepository.findById(id).orElseThrow(
                     () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
 
-            if (!Objects.equals(category.getImageUrl(), categoryDTO.getImageUrl())) {
-                String imageUrl = category.getImageUrl();
-                String imagePath = "delivery-files/" + imageUrl.substring(imageUrl.lastIndexOf('/'));
-                Path path = Paths.get(imagePath);
-                Files.deleteIfExists(path);
+            String imageUrl = category.getImageUrl();
+            if (imageUrl != null) {
+                if (!Objects.equals(imageUrl, categoryDTO.getImageUrl())) {
+                    String imagePath = "delivery-files/" + imageUrl.substring(imageUrl.lastIndexOf('/'));
+                    Path path = Paths.get(imagePath);
+                    Files.deleteIfExists(path);
+                }
             }
 
             category.setNumber(categoryDTO.getNumber());
@@ -96,12 +110,20 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public ApiResult<?> delete(Long id) {
+    public ApiResult<?> delete(Long id) throws IOException {
+        Category category = categoryRepository.findById(id).orElseThrow(
+                () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
+        String imageUrl = category.getImageUrl();
+        if (imageUrl != null) {
+            String imagePath = "delivery-files/" + imageUrl.substring(imageUrl.lastIndexOf('/'));
+            Path path = Paths.get(imagePath);
+            Files.deleteIfExists(path);
+        }
         try {
             categoryRepository.deleteById(id);
             return ApiResult.success("DELETED SUCCESSFULLY");
         } catch (Exception e) {
             throw RestException.restThrow("CANNOT DELETE", HttpStatus.CONFLICT);
         }
-    }
+        }
 }

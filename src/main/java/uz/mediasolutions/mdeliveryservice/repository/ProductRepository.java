@@ -12,9 +12,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Page<Product> findAllByOrderByNumberAsc(Pageable pageable);
 
-    List<Product> findAllByOrderByNumberAsc();
+    Page<Product> findAllByActiveIsTrueOrderByNumberAsc(Pageable pageable);
 
     Page<Product> findAllByDescriptionRuContainsIgnoreCaseOrDescriptionUzContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrCategoryNameRuContainsIgnoreCaseOrCategoryNameUzContainsIgnoreCaseOrderByNumberAsc(String dRu, String dUz, String nameUz, String nameRu, String catNameRu, String catNameUz, Pageable pageable);
+
+    Page<Product> findAllByActiveIsTrueAndDescriptionRuContainsIgnoreCaseOrDescriptionUzContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrCategoryNameRuContainsIgnoreCaseOrCategoryNameUzContainsIgnoreCaseOrderByNumberAsc(String dRu, String dUz, String nameUz, String nameRu, String catNameRu, String catNameUz, Pageable pageable);
 
     boolean existsByNumberAndCategoryId(Long number, Long categoryId);
 

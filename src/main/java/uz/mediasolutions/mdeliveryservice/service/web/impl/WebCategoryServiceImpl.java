@@ -1,10 +1,12 @@
 package uz.mediasolutions.mdeliveryservice.service.web.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uz.mediasolutions.mdeliveryservice.entity.Category;
 import uz.mediasolutions.mdeliveryservice.entity.TgUser;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
+import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.CategoryWebDTO;
 import uz.mediasolutions.mdeliveryservice.repository.CategoryRepository;
@@ -23,9 +25,13 @@ public class WebCategoryServiceImpl implements WebCategoryService {
 
     @Override
     public ApiResult<List<CategoryWebDTO>> get(String chatId) {
-        List<Category> categories = categoryRepository.findAllByActiveIsTrueOrderByNumberAsc();
-        List<CategoryWebDTO> dtoList = toDTOList(categories, chatId);
-        return ApiResult.success(dtoList);
+        if (tgUserRepository.existsByChatId(chatId)) {
+            List<Category> categories = categoryRepository.findAllByActiveIsTrueOrderByNumberAsc();
+            List<CategoryWebDTO> dtoList = toDTOList(categories, chatId);
+            return ApiResult.success(dtoList);
+        } else {
+            throw RestException.restThrow("USER ID NOT FOUND", HttpStatus.BAD_REQUEST);
+        }
     }
 
     private CategoryWebDTO toWebDTO(Category category, String chatId) {

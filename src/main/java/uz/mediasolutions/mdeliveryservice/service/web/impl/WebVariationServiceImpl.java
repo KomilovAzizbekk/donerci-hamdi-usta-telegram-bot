@@ -1,12 +1,14 @@
 package uz.mediasolutions.mdeliveryservice.service.web.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uz.mediasolutions.mdeliveryservice.entity.MeasureUnit;
 import uz.mediasolutions.mdeliveryservice.entity.Product;
 import uz.mediasolutions.mdeliveryservice.entity.TgUser;
 import uz.mediasolutions.mdeliveryservice.entity.Variation;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
+import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.MeasureUnitWebDTO;
 import uz.mediasolutions.mdeliveryservice.payload.Product2WebDTO;
@@ -27,9 +29,13 @@ public class WebVariationServiceImpl implements WebVariationService {
 
     @Override
     public ApiResult<List<VariationWebDTO>> getAllByProductId(String chatId, Long productId) {
-        List<Variation> variations = variationRepository.findAllByProductIdOrderByNumberAsc(productId);
-        List<VariationWebDTO> variationWebDTOList = toVariationWebDTOList(variations, chatId);
-        return ApiResult.success(variationWebDTOList);
+        if (tgUserRepository.existsByChatId(chatId)) {
+            List<Variation> variations = variationRepository.findAllByProductIdOrderByNumberAsc(productId);
+            List<VariationWebDTO> variationWebDTOList = toVariationWebDTOList(variations, chatId);
+            return ApiResult.success(variationWebDTOList);
+        } else {
+            throw RestException.restThrow("USER ID NOT FOUND", HttpStatus.BAD_REQUEST);
+        }
     }
 
     private List<VariationWebDTO> toVariationWebDTOList(List<Variation> variations, String chatId) {

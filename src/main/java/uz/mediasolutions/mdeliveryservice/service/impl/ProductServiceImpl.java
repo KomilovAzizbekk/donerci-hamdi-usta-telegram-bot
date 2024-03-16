@@ -32,8 +32,21 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
 
     @Override
-    public ApiResult<Page<ProductResDTO>> getAll(int page, int size, String search) {
+    public ApiResult<Page<ProductResDTO>> getAll(int page, int size, String search, boolean active) {
         Pageable pageable = PageRequest.of(page, size);
+        if (active) {
+            if (!search.equals("null")) {
+                Page<Product> products = productRepository
+                        .findAllByActiveIsTrueAndDescriptionRuContainsIgnoreCaseOrDescriptionUzContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrCategoryNameRuContainsIgnoreCaseOrCategoryNameUzContainsIgnoreCaseOrderByNumberAsc(
+                                search, search, search, search, search, search, pageable);
+                Page<ProductResDTO> dtos = products.map(productMapper::toDTO);
+                return ApiResult.success(dtos);
+            } else {
+                Page<Product> products = productRepository.findAllByActiveIsTrueOrderByNumberAsc(pageable);
+                Page<ProductResDTO> dtos = products.map(productMapper::toDTO);
+                return ApiResult.success(dtos);
+            }
+        }
         if (!search.equals("null")) {
             Page<Product> products = productRepository
                     .findAllByDescriptionRuContainsIgnoreCaseOrDescriptionUzContainsIgnoreCaseOrNameUzContainsIgnoreCaseOrNameRuContainsIgnoreCaseOrCategoryNameRuContainsIgnoreCaseOrCategoryNameUzContainsIgnoreCaseOrderByNumberAsc(
@@ -82,11 +95,13 @@ public class ProductServiceImpl implements ProductService {
             Category category = categoryRepository.findById(dto.getCategoryId()).orElseThrow(
                     () -> RestException.restThrow("CATEGORY ID NOT FOUND", HttpStatus.BAD_REQUEST));
 
-            if (!Objects.equals(product.getImageUrl(), dto.getImageUrl())) {
-                String imageUrl = product.getImageUrl();
-                String imagePath = "delivery-files/" + imageUrl.substring(imageUrl.lastIndexOf('/'));
-                Path path = Paths.get(imagePath);
-                Files.deleteIfExists(path);
+            String imageUrl = product.getImageUrl();
+            if (imageUrl != null) {
+                if (!Objects.equals(imageUrl, dto.getImageUrl())) {
+                    String imagePath = "delivery-files/" + imageUrl.substring(imageUrl.lastIndexOf('/'));
+                    Path path = Paths.get(imagePath);
+                    Files.deleteIfExists(path);
+                }
             }
 
             product.setNumber(dto.getNumber());
@@ -103,7 +118,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ApiResult<?> delete(Long id) {
+    public ApiResult<?> delete(Long id) throws IOException {
+        Product product = productRepository.findById(id).orElseThrow(
+                () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
+        String imageUrl = product.getImageUrl();
+        if (imageUrl != null) {
+            String imagePath = "delivery-files/" + imageUrl.substring(imageUrl.lastIndexOf('/'));
+            Path path = Paths.get(imagePath);
+            Files.deleteIfExists(path);
+        }
         try {
             productRepository.deleteById(id);
             return ApiResult.success("DELETED SUCCESSFULLY");

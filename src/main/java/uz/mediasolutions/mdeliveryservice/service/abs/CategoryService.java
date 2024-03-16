@@ -7,7 +7,7 @@ import uz.mediasolutions.mdeliveryservice.payload.CategoryDTO;
 import java.io.IOException;
 
 public interface CategoryService {
-    ApiResult<Page<CategoryDTO>> getAll(int page, int size, String name);
+    ApiResult<Page<CategoryDTO>> getAll(int page, int size, String name, boolean active);
 
     ApiResult<CategoryDTO> getById(Long id);
 
@@ -15,6 +15,6 @@ public interface CategoryService {
 
     ApiResult<?> edit(Long id, CategoryDTO categoryDTO) throws IOException;
 
-    ApiResult<?> delete(Long id);
+    ApiResult<?> delete(Long id) throws IOException;
 
 }
