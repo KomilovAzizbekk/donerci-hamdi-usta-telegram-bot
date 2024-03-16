@@ -44,6 +44,8 @@ public class MakeService {
 
     public static final String SUGGEST_COMPLAINT_CHANNEL_ID = "-1001903287909";
     public static final String LINK = "https://restoran-telegram-web-app.netlify.app/";
+    public static final String UZ = "UZ";
+    public static final String RU = "RU";
 
     public String getMessage(String key, String language) {
         List<LanguagePs> allByLanguage = languageRepositoryPs.findAll();
@@ -170,6 +172,8 @@ public class MakeService {
     }
 
     public ReplyKeyboardMarkup forMainMenu(String chatId) {
+        TgUser tgUser = tgUserRepository.findByChatId(chatId);
+
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
         List<KeyboardRow> rowList = new ArrayList<>();
         KeyboardRow row1 = new KeyboardRow();
@@ -186,8 +190,13 @@ public class MakeService {
         button3.setText(getMessage(Message.MENU_MY_ORDERS, getUserLanguage(chatId)));
         button4.setText(getMessage(Message.MENU_SETTINGS, getUserLanguage(chatId)));
 
-        button1.setWebApp(new WebAppInfo(LINK));
-        button3.setWebApp(new WebAppInfo(LINK));
+        if (tgUser.getLanguage().getName().equals(LanguageName.UZ)) {
+            button1.setWebApp(new WebAppInfo(LINK + UZ));
+            button3.setWebApp(new WebAppInfo(LINK + UZ));
+        } else {
+            button1.setWebApp(new WebAppInfo(LINK + RU));
+            button3.setWebApp(new WebAppInfo(LINK + RU));
+        }
 
         row1.add(button1);
         row2.add(button2);
@@ -361,7 +370,7 @@ public class MakeService {
     public SendMessage whenIncorrectPhoneFormat(Update update) {
         return whenChangePhoneNumber2(update);
     }
-    
+
 
     public SendMessage whenIncorrectPhoneFormat1(Update update) {
         return whenOrderLocation1(update);
