@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public enum OrderStatusName {
 
+    NOT_COMPLETE("Tugallanmagan", "Не завершен"),
     PENDING("Tasdiqlanmagan", "Не подтверждено"),
     ACCEPTED("Tasdiqlangan", "Подтвержденный"),
     REJECTED("Rad etilgan", "Отклоненный"),

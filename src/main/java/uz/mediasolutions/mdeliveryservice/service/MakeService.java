@@ -17,7 +17,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
 import uz.mediasolutions.mdeliveryservice.entity.*;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
+import uz.mediasolutions.mdeliveryservice.enums.ProviderName;
 import uz.mediasolutions.mdeliveryservice.enums.StepName;
+import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.repository.*;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
@@ -36,6 +38,7 @@ public class MakeService {
     private final StepRepository stepRepository;
     private final LanguageRepository languageRepository;
     private final OrderRepository orderRepository;
+    private final PaymentProvidersRepository paymentProvidersRepository;
 
     public static final String SUGGEST_COMPLAINT_CHANNEL_ID = "-1001903287909";
     public static final String LINK = "https://restoran-telegram-web-app.netlify.app/";
@@ -186,11 +189,11 @@ public class MakeService {
         button4.setText(getMessage(Message.MENU_SETTINGS, getUserLanguage(chatId)));
 
         if (tgUser.getLanguage().getName().equals(LanguageName.UZ)) {
-            button1.setWebApp(new WebAppInfo(LINK + UZ));
-            button3.setWebApp(new WebAppInfo(LINK + UZ));
+            button1.setWebApp(new WebAppInfo(LINK + chatId + "/" + UZ));
+            button3.setWebApp(new WebAppInfo(LINK + chatId + "/" + UZ));
         } else {
-            button1.setWebApp(new WebAppInfo(LINK + RU));
-            button3.setWebApp(new WebAppInfo(LINK + RU));
+            button1.setWebApp(new WebAppInfo(LINK + chatId + "/" + RU));
+            button3.setWebApp(new WebAppInfo(LINK + chatId + "/" + RU));
         }
 
         row1.add(button1);
@@ -561,7 +564,79 @@ public class MakeService {
     }
 
     public SendMessage whenLeaveComment(Update update) {
+        String chatId = getChatId(update);
         String text = update.getMessage().getText();
-        return null;
+        List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
+        Order order = orderList.get(0);
+        if (text.equals(getMessage(Message.CLICK, getUserLanguage(chatId)))) {
+            order.setPaymentProviders(paymentProvidersRepository.findByName(ProviderName.CLICK));
+        } else if (text.equals(getMessage(Message.PAYME, getUserLanguage(chatId)))) {
+            order.setPaymentProviders(paymentProvidersRepository.findByName(ProviderName.PAYME));
+        } else if (text.equals(getMessage(Message.CASH, getUserLanguage(chatId)))) {
+            order.setPaymentProviders(paymentProvidersRepository.findByName(ProviderName.CASH));
+        }
+        Order saved = orderRepository.save(order);
+        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.SEND_COMMENT, getUserLanguage(chatId)));
+        sendMessage.setReplyMarkup(forSendComment(update));
+        if (saved.getPaymentProviders().getName().equals(ProviderName.CASH)) {
+            setUserStep(chatId, StepName.SEND_ORDER_TO_CHANNEL);
+        } else {
+            setUserStep(chatId, StepName.GO_TO_PAYMENT);
+        }
+        return sendMessage;
     }
+
+    private ReplyKeyboardMarkup forSendComment(Update update) {
+        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> rowList = new ArrayList<>();
+        KeyboardRow row1 = new KeyboardRow();
+
+        KeyboardButton button1 = new KeyboardButton();
+
+        button1.setText(getMessage(Message.SKIP_COMMENT, getUserLanguage(getChatId(update))));
+
+        row1.add(button1);
+
+        rowList.add(row1);
+        markup.setKeyboard(rowList);
+        markup.setSelective(true);
+        markup.setResizeKeyboard(true);
+        return markup;
+    }
+
+    public SendMessage whenGoPayment(Update update) {
+        String chatId = getChatId(update);
+        String text = update.getMessage().getText();
+        List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
+        Order order = orderList.get(0);
+        if (!text.equals(getMessage(Message.SKIP_COMMENT, getUserLanguage(chatId)))) {
+            order.setComment(text);
+            orderRepository.save(order);
+        }
+        SendMessage sendMessage = new SendMessage(chatId,
+                String.format(getMessage(Message.FOR_PAYMENT, getUserLanguage(chatId)), order.getId()));
+        sendMessage.setReplyMarkup(forGoPayment(update));
+        setUserStep(chatId, StepName.SEND_ORDER_TO_CHANNEL);
+        return sendMessage;
+    }
+
+    private ReplyKeyboardMarkup forGoPayment(Update update) {
+        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> rowList = new ArrayList<>();
+        KeyboardRow row1 = new KeyboardRow();
+
+        KeyboardButton button1 = new KeyboardButton();
+
+        button1.setText(getMessage(Message.GO_PAYMENT, getUserLanguage(getChatId(update))));
+
+        row1.add(button1);
+
+        rowList.add(row1);
+        markup.setKeyboard(rowList);
+        markup.setSelective(true);
+        markup.setResizeKeyboard(true);
+        return markup;
+    }
+
+
 }

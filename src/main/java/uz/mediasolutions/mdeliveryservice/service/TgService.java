@@ -21,14 +21,14 @@ public class TgService extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-//        return "uygogo_bot";
-        return "sakaka_bot";
+        return "uygogo_bot";
+//        return "sakaka_bot";
     }
 
     @Override
     public String getBotToken() {
-//        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
-        return "6052104473:AAEscLILevwPMcG_00PYqAf-Kpb7eIUCIGg";
+        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
+//        return "6052104473:AAEscLILevwPMcG_00PYqAf-Kpb7eIUCIGg";
     }
 
     @SneakyThrows
@@ -84,8 +84,13 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenOrderRegPhone1(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.ORDER_LOCATION)) {
                     execute(makeService.whenOrderLocation1(update));
-                } else if (makeService.getUserStep(chatId).equals(StepName.LEAVE_COMMENT)) {
+                } else if (makeService.getUserStep(chatId).equals(StepName.LEAVE_COMMENT) &&
+                        (text.equals(makeService.getMessage(Message.CLICK, makeService.getUserLanguage(chatId))) ||
+                                text.equals(makeService.getMessage(Message.PAYME, makeService.getUserLanguage(chatId))) ||
+                                text.equals(makeService.getMessage(Message.CASH, makeService.getUserLanguage(chatId))))) {
                     execute(makeService.whenLeaveComment(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.GO_TO_PAYMENT)) {
+                    execute(makeService.whenGoPayment(update));
                 }
             } else if (update.hasMessage() && update.getMessage().hasContact()) {
                 if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT)) {
