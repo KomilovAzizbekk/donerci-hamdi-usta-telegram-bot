@@ -19,7 +19,6 @@ import uz.mediasolutions.mdeliveryservice.entity.*;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
 import uz.mediasolutions.mdeliveryservice.enums.ProviderName;
 import uz.mediasolutions.mdeliveryservice.enums.StepName;
-import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.repository.*;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
@@ -639,4 +638,51 @@ public class MakeService {
     }
 
 
+    public SendMessage whenSendOrderToChannel(Update update) {
+        String chatId = getChatId(update);
+        String language = getUserLanguage(chatId);
+        SendMessage sendMessage = new SendMessage(SUGGEST_COMPLAINT_CHANNEL_ID,
+                getMessage(Message.ORDER_MSG, language));
+
+        sendMessage.setReplyMarkup(forSendOrderToChannel(update));
+        return sendMessage;
+    }
+
+
+    private InlineKeyboardMarkup forSendOrderToChannel(Update update) {
+        String chatId = getChatId(update);
+        List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
+        Order order = orderList.get(0);
+
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+
+        InlineKeyboardButton button1 = new InlineKeyboardButton();
+        InlineKeyboardButton button2 = new InlineKeyboardButton();
+
+        button1.setText(getMessage(Message.ACCEPT, getUserLanguage(chatId)));
+        button2.setText(getMessage(Message.REJECT, getUserLanguage(chatId)));
+
+        button1.setCallbackData("accept" + order.getId());
+        button2.setCallbackData("reject" + order.getId());
+
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+
+        row1.add(button1);
+        row1.add(button2);
+
+        rowsInline.add(row1);
+
+        markupInline.setKeyboard(rowsInline);
+
+        return markupInline;
+    }
+
+    public EditMessageText whenAcceptOrder(String orderId) {
+        return null;
+    }
+
+    public EditMessageText whenRejectOrder(String orderId) {
+        return null;
+    }
 }

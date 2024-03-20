@@ -91,6 +91,8 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenLeaveComment(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.GO_TO_PAYMENT)) {
                     execute(makeService.whenGoPayment(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.SEND_ORDER_TO_CHANNEL)) {
+                    execute(makeService.whenSendOrderToChannel(update));
                 }
             } else if (update.hasMessage() && update.getMessage().hasContact()) {
                 if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT)) {
@@ -116,6 +118,10 @@ public class TgService extends TelegramLongPollingBot {
                 } else if (data.equals("changeLanguage")) {
                     execute(makeService.deleteMessageForCallback(update));
                     execute(makeService.whenChangeLanguage1(update));
+                } else if (data.startsWith("accept")) {
+                    execute(makeService.whenAcceptOrder(data.substring(6)));
+                } else if (data.startsWith("reject")) {
+                    execute(makeService.whenRejectOrder(data.substring(6)));
                 }
             }
         }

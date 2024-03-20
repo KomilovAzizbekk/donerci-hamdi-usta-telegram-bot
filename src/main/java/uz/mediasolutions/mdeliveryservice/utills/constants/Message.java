@@ -47,4 +47,5 @@ public interface Message {
     String ACCEPTED = "accepted";
     String REJECT = "reject";
     String ACCEPT = "accept";
+    String ORDER_MSG = "order.msg";
 }
