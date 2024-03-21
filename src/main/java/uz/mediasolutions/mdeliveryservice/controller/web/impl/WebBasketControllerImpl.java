@@ -6,7 +6,7 @@ import uz.mediasolutions.mdeliveryservice.controller.web.abs.WebBasketController
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.BasketWebDTO;
 import uz.mediasolutions.mdeliveryservice.payload.OrderProductDTO;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.WebBasketService;
+import uz.mediasolutions.mdeliveryservice.service.webabs.WebBasketService;
 
 import java.util.List;
 

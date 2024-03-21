@@ -1,8 +1,8 @@
-package uz.mediasolutions.mdeliveryservice.service;
+package uz.mediasolutions.mdeliveryservice.service.webimpl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -17,12 +17,13 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
 import uz.mediasolutions.mdeliveryservice.entity.*;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
+import uz.mediasolutions.mdeliveryservice.enums.OrderStatusName;
 import uz.mediasolutions.mdeliveryservice.enums.ProviderName;
 import uz.mediasolutions.mdeliveryservice.enums.StepName;
+import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.repository.*;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -38,6 +39,7 @@ public class MakeService {
     private final LanguageRepository languageRepository;
     private final OrderRepository orderRepository;
     private final PaymentProvidersRepository paymentProvidersRepository;
+    private final OrderStatusRepository orderStatusRepository;
 
     public static final String SUGGEST_COMPLAINT_CHANNEL_ID = "-1001903287909";
     public static final String LINK = "https://restoran-telegram-web-app.netlify.app/";
@@ -641,6 +643,15 @@ public class MakeService {
     public SendMessage whenSendOrderToChannel(Update update) {
         String chatId = getChatId(update);
         String language = getUserLanguage(chatId);
+        List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
+        Order order = orderList.get(0);
+        if (order.getPaymentProviders().getName().equals(ProviderName.CASH)) {
+            String text = update.getMessage().getText();
+            if (!text.equals(getMessage(Message.SKIP_COMMENT, getUserLanguage(chatId)))) {
+                order.setComment(text);
+                orderRepository.save(order);
+            }
+        }
         SendMessage sendMessage = new SendMessage(SUGGEST_COMPLAINT_CHANNEL_ID,
                 getMessage(Message.ORDER_MSG, language));
 
@@ -678,11 +689,28 @@ public class MakeService {
         return markupInline;
     }
 
-    public EditMessageText whenAcceptOrder(String orderId) {
-        return null;
+    public EditMessageText whenAcceptOrder(String orderId, Update update) {
+        String chatId = getChatId(update);
+        String language = getUserLanguage(chatId);
+        Long id = Long.valueOf(orderId);
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
+        order.setOrderStatus(orderStatusRepository.findByName(OrderStatusName.ACCEPTED));
+        Order savedOrder = orderRepository.save(order);
+
+        EditMessageText editMessageText = new EditMessageText();
+        editMessageText.setChatId(SUGGEST_COMPLAINT_CHANNEL_ID);
+        editMessageText.setText(
+                String.format(getMessage(Message.ORDER_MSG, language),
+                        savedOrder.getId(),
+                        savedOrder.getUser().getName(),
+                        savedOrder.getUser().getChatId(),
+                        savedOrder.getUser().getPhoneNumber()
+                        ));
+        return editMessageText;
     }
 
-    public EditMessageText whenRejectOrder(String orderId) {
+    public EditMessageText whenRejectOrder(String orderId, Update update) {
         return null;
     }
 }

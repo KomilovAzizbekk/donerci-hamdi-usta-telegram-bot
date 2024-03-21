@@ -1,4 +1,4 @@
-package uz.mediasolutions.mdeliveryservice.service.web.impl;
+package uz.mediasolutions.mdeliveryservice.service.webimpl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,9 +16,7 @@ import uz.mediasolutions.mdeliveryservice.mapper.UniversalMapper;
 import uz.mediasolutions.mdeliveryservice.payload.OrderProductDTO;
 import uz.mediasolutions.mdeliveryservice.payload.OrderWebDTO;
 import uz.mediasolutions.mdeliveryservice.repository.*;
-import uz.mediasolutions.mdeliveryservice.service.MakeService;
-import uz.mediasolutions.mdeliveryservice.service.TgService;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.WebOrderService;
+import uz.mediasolutions.mdeliveryservice.service.webabs.WebOrderService;
 
 import java.util.List;
 
@@ -30,10 +28,10 @@ public class WebOrderServiceImpl implements WebOrderService {
     private final TgUserRepository tgUserRepository;
     private final UniversalMapper universalMapper;
     private final OrderStatusRepository orderStatusRepository;
-    private final MakeService makeService;
     private final TgService tgService;
     private final BasketRepository basketRepository;
     private final OrderProductRepository orderProductRepository;
+    private final MakeService makeService;
 
     @Override
     public ApiResult<List<OrderWebDTO>> getAll(String chatId) {

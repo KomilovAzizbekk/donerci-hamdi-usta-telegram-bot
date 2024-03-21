@@ -5,6 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uz.mediasolutions.mdeliveryservice.entity.TgUser;
 
+import java.util.Optional;
+
 public interface TgUserRepository extends JpaRepository<TgUser, Long> {
 
     Page<TgUser> findAllByNameContainsIgnoreCaseOrUsernameContainsIgnoreCaseOrPhoneNumberContainsIgnoreCaseOrderByCreatedAtDesc(String name, String username, String phoneNumber, Pageable pageable);
@@ -14,4 +16,6 @@ public interface TgUserRepository extends JpaRepository<TgUser, Long> {
     TgUser findByChatId(String chatId);
 
     boolean existsByChatId(String chatId);
+
+    Optional<TgUser> findByPhoneNumber(String phoneNumber);
 }

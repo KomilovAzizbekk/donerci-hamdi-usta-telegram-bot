@@ -1,4 +1,4 @@
-package uz.mediasolutions.mdeliveryservice.service.web.impl;
+package uz.mediasolutions.mdeliveryservice.service.webimpl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,7 +12,7 @@ import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.ProductWebDTO;
 import uz.mediasolutions.mdeliveryservice.repository.ProductRepository;
 import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.WebProductService;
+import uz.mediasolutions.mdeliveryservice.service.webabs.WebProductService;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package uz.mediasolutions.mdeliveryservice.service.web.abs;
+package uz.mediasolutions.mdeliveryservice.service.webabs;
 
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.BasketWebDTO;

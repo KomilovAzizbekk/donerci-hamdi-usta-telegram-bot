@@ -1,4 +1,4 @@
-package uz.mediasolutions.mdeliveryservice.service.web.abs;
+package uz.mediasolutions.mdeliveryservice.service.webabs;
 
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;

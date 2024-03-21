@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uz.mediasolutions.mdeliveryservice.controller.web.abs.WebBannerController;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.BannerDTO;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.WebBannerService;
+import uz.mediasolutions.mdeliveryservice.service.webabs.WebBannerService;
 
 import java.util.List;
 

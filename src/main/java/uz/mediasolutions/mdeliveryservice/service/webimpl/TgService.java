@@ -1,4 +1,4 @@
-package uz.mediasolutions.mdeliveryservice.service;
+package uz.mediasolutions.mdeliveryservice.service.webimpl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -119,9 +119,9 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.deleteMessageForCallback(update));
                     execute(makeService.whenChangeLanguage1(update));
                 } else if (data.startsWith("accept")) {
-                    execute(makeService.whenAcceptOrder(data.substring(6)));
+                    execute(makeService.whenAcceptOrder(data.substring(6), update));
                 } else if (data.startsWith("reject")) {
-                    execute(makeService.whenRejectOrder(data.substring(6)));
+                    execute(makeService.whenRejectOrder(data.substring(6), update));
                 }
             }
         }

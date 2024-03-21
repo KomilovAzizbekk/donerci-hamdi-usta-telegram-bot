@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uz.mediasolutions.mdeliveryservice.controller.web.abs.WebVariationController;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.VariationWebDTO;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.WebVariationService;
+import uz.mediasolutions.mdeliveryservice.service.webabs.WebVariationService;
 
 import java.util.List;
 

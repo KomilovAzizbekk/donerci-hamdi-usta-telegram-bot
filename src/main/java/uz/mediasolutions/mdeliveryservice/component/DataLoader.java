@@ -12,7 +12,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import uz.mediasolutions.mdeliveryservice.entity.*;
 import uz.mediasolutions.mdeliveryservice.enums.*;
 import uz.mediasolutions.mdeliveryservice.repository.*;
-import uz.mediasolutions.mdeliveryservice.service.TgService;
+import uz.mediasolutions.mdeliveryservice.service.webimpl.TgService;
 
 import java.io.IOException;
 import java.io.InputStream;

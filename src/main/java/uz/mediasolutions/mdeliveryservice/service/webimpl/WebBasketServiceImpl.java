@@ -1,4 +1,4 @@
-package uz.mediasolutions.mdeliveryservice.service.web.impl;
+package uz.mediasolutions.mdeliveryservice.service.webimpl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,7 +11,7 @@ import uz.mediasolutions.mdeliveryservice.payload.*;
 import uz.mediasolutions.mdeliveryservice.repository.BasketRepository;
 import uz.mediasolutions.mdeliveryservice.repository.OrderProductRepository;
 import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.WebBasketService;
+import uz.mediasolutions.mdeliveryservice.service.webabs.WebBasketService;
 
 import java.util.List;
 

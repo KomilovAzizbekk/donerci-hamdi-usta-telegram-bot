@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uz.mediasolutions.mdeliveryservice.controller.web.abs.WebCategoryController;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.CategoryWebDTO;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.WebCategoryService;
+import uz.mediasolutions.mdeliveryservice.service.webabs.WebCategoryService;
 
 import java.util.List;
 

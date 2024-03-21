@@ -1,4 +1,4 @@
-package uz.mediasolutions.mdeliveryservice.service.web.impl;
+package uz.mediasolutions.mdeliveryservice.service.webimpl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,7 +15,7 @@ import uz.mediasolutions.mdeliveryservice.payload.Product2WebDTO;
 import uz.mediasolutions.mdeliveryservice.payload.VariationWebDTO;
 import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
 import uz.mediasolutions.mdeliveryservice.repository.VariationRepository;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.WebVariationService;
+import uz.mediasolutions.mdeliveryservice.service.webabs.WebVariationService;
 
 import java.util.ArrayList;
 import java.util.List;

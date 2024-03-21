@@ -7,7 +7,7 @@ import uz.mediasolutions.mdeliveryservice.controller.web.abs.WebOrderController;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.OrderProductDTO;
 import uz.mediasolutions.mdeliveryservice.payload.OrderWebDTO;
-import uz.mediasolutions.mdeliveryservice.service.web.abs.WebOrderService;
+import uz.mediasolutions.mdeliveryservice.service.webabs.WebOrderService;
 
 import java.util.List;
 
