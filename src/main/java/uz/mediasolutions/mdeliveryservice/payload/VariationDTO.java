@@ -17,9 +17,9 @@ public class VariationDTO {
 
     private Long measureUnitId;
 
-    private Double measure;
+    private float measure;
 
-    private Double price;
+    private float price;
 
     private Integer count;
 

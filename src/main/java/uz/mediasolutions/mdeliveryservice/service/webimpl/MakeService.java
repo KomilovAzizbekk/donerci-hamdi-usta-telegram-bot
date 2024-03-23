@@ -1,8 +1,10 @@
 package uz.mediasolutions.mdeliveryservice.service.webimpl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -24,6 +26,8 @@ import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.repository.*;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
+import java.io.Serializable;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -40,6 +44,7 @@ public class MakeService {
     private final OrderRepository orderRepository;
     private final PaymentProvidersRepository paymentProvidersRepository;
     private final OrderStatusRepository orderStatusRepository;
+    private final BranchRepository branchRepository;
 
     public static final String SUGGEST_COMPLAINT_CHANNEL_ID = "-1001903287909";
     public static final String LINK = "https://restoran-telegram-web-app.netlify.app/";
@@ -234,9 +239,14 @@ public class MakeService {
     public SendMessage whenSendSuggestComplaintToChannel(Update update) {
         String chatId = getChatId(update);
         TgUser tgUser = tgUserRepository.findByChatId(chatId);
-        String username = String.format("<a href='%s' target='_blank'>",
-                "https://t.me/" + update.getMessage().getFrom().getUserName()) +
-                tgUser.getUsername() + "</a>";
+        String username;
+        if (update.getMessage().getFrom().getUserName() != null) {
+            username = String.format("<a href='%s' target='_blank'>",
+                    "https://t.me/" + update.getMessage().getFrom().getUserName()) +
+                    update.getMessage().getFrom().getFirstName() + "</a>";
+        } else {
+            username = update.getMessage().getFrom().getFirstName();
+        }
         String phoneNumber = tgUser.getPhoneNumber();
         String text = update.getMessage().getText();
 
@@ -372,7 +382,7 @@ public class MakeService {
 
 
     public SendMessage whenIncorrectPhoneFormat1(Update update) {
-        return whenOrderLocation1(update);
+        return whenIsDelivery1(update);
     }
 
     private ReplyKeyboardMarkup forPhoneNumber(String chatId) {
@@ -438,14 +448,39 @@ public class MakeService {
         return sendMessage;
     }
 
-    public SendMessage whenOrderLocation(String chatId) {
-        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.SEND_LOCATION, getUserLanguage(chatId)));
-        sendMessage.setReplyMarkup(forSendLocation(chatId));
-        setUserStep(chatId, StepName.CHOOSE_PAYMENT);
+    public SendMessage whenIsDelivery(String chatId) {
+        SendMessage sendMessage = new SendMessage(chatId,
+                getMessage(Message.IS_DELIVERY, getUserLanguage(chatId)));
+        sendMessage.setReplyMarkup(forIsDelivery(chatId));
+        setUserStep(chatId, StepName.ORDER_CHOOSE);
         return sendMessage;
     }
 
-    public SendMessage whenOrderLocation1(Update update) {
+    private ReplyKeyboardMarkup forIsDelivery(String chatId) {
+        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> rowList = new ArrayList<>();
+        KeyboardRow row1 = new KeyboardRow();
+        KeyboardRow row2 = new KeyboardRow();
+
+        KeyboardButton button1 = new KeyboardButton();
+        KeyboardButton button2 = new KeyboardButton();
+
+        button1.setText(getMessage(Message.PICK_UP, getUserLanguage(chatId)));
+        button2.setText(getMessage(Message.DELIVERY, getUserLanguage(chatId)));
+
+        row1.add(button1);
+        row2.add(button2);
+
+        rowList.add(row1);
+        rowList.add(row2);
+        markup.setKeyboard(rowList);
+        markup.setSelective(true);
+        markup.setResizeKeyboard(true);
+        return markup;
+    }
+
+
+    public SendMessage whenIsDelivery1(Update update) {
         String chatId = getChatId(update);
         TgUser tgUser = tgUserRepository.findByChatId(chatId);
 
@@ -454,7 +489,7 @@ public class MakeService {
                 String phoneNumber = update.getMessage().getText();
                 tgUser.setPhoneNumber(phoneNumber);
                 tgUserRepository.save(tgUser);
-                return executeSendLocation(chatId);
+                return executeIsDelivery(chatId);
             } else {
                 SendMessage sendMessage = new SendMessage(getChatId(update),
                         getMessage(Message.INCORRECT_PHONE_FORMAT, getUserLanguage(chatId)));
@@ -467,15 +502,78 @@ public class MakeService {
             phoneNumber = phoneNumber.startsWith("+") ? phoneNumber : "+" + phoneNumber;
             tgUser.setPhoneNumber(phoneNumber);
             tgUserRepository.save(tgUser);
-            return executeSendLocation(chatId);
+            return executeIsDelivery(chatId);
         }
     }
 
-    private SendMessage executeSendLocation(String chatId) {
-        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.SEND_LOCATION, getUserLanguage(chatId)));
-        sendMessage.setReplyMarkup(forSendLocation(chatId));
+    private SendMessage executeIsDelivery(String chatId) {
+        SendMessage sendMessage = new SendMessage(chatId,
+                getMessage(Message.IS_DELIVERY, getUserLanguage(chatId)));
+        sendMessage.setReplyMarkup(forIsDelivery(chatId));
+        setUserStep(chatId, StepName.ORDER_CHOOSE);
+        return sendMessage;
+    }
+
+    public SendMessage whenChosen(Update update) {
+        String chatId = getChatId(update);
+        String language = getUserLanguage(chatId);
+        String text = update.getMessage().getText();
+
+        List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
+        Order order = orderList.get(0);
+
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        if (text.equals(getMessage(Message.DELIVERY, language))) {
+            order.setDelivery(true);
+            sendMessage.setText(getMessage(Message.SEND_LOCATION, language));
+            sendMessage.setReplyMarkup(forSendLocation(chatId));
+        } else if (text.equals(getMessage(Message.PICK_UP, language))) {
+            order.setDelivery(false);
+            sendMessage.setText(getMessage(Message.CHOOSE_BRANCH, language));
+            sendMessage.setReplyMarkup(forChooseBranch(chatId));
+        }
+        orderRepository.save(order);
         setUserStep(chatId, StepName.CHOOSE_PAYMENT);
         return sendMessage;
+    }
+
+    private ReplyKeyboardMarkup forChooseBranch(String chatId) {
+        String language = getUserLanguage(chatId);
+
+        Sort sort = Sort.by(Sort.Order.asc("createdAt"));
+        List<Branch> branches = branchRepository.findAll(sort);
+
+        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
+        List<KeyboardButton> keyboardButtons = new ArrayList<>();
+
+        if (language.equals("Uz")) {
+            for (Branch market : branches)
+                keyboardButtons.add(new KeyboardButton(market.getNameUz()));
+        } else {
+            for (Branch market : branches)
+                keyboardButtons.add(new KeyboardButton(market.getNameRu()));
+        }
+
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+        KeyboardRow row = new KeyboardRow();
+
+        for (KeyboardButton keyboardButton : keyboardButtons) {
+            row.add(keyboardButton);
+            if (row.size() == 2) {
+                keyboardRows.add(row);
+                row = new KeyboardRow();
+            }
+        }
+
+        if (!row.isEmpty()) {
+            keyboardRows.add(row);
+        }
+
+        markup.setKeyboard(keyboardRows);
+        markup.setSelective(true);
+        markup.setResizeKeyboard(true);
+        return markup;
     }
 
     private ReplyKeyboardMarkup forSendLocation(String chatId) {
@@ -499,16 +597,23 @@ public class MakeService {
 
     public SendMessage whenChoosePayment(Update update) {
         String chatId = getChatId(update);
-        Location location = update.getMessage().getLocation();
         List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
         Order order = orderList.get(0);
-        order.setLon(location.getLongitude());
-        order.setLat(location.getLatitude());
+        if (update.getMessage().hasLocation()) {
+            Location location = update.getMessage().getLocation();
+            order.setLon(location.getLongitude());
+            order.setLat(location.getLatitude());
+        } else if (update.getMessage().hasText() &&
+                branchRepository.existsByNameUzOrNameRu(update.getMessage().getText(), update.getMessage().getText())) {
+            String text = update.getMessage().getText();
+            Branch branch = branchRepository.findByNameUzOrNameRu(text, text);
+            order.setBranch(branch);
+        }
         orderRepository.save(order);
         SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.CHOOSE_PAYMENT, getUserLanguage(chatId)));
         sendMessage.setReplyMarkup(forChoosePayment(chatId));
         setUserStep(chatId, StepName.LEAVE_COMMENT);
-        return null;
+        return sendMessage;
     }
 
     private ReplyKeyboardMarkup forChoosePayment(String chatId) {
@@ -547,7 +652,7 @@ public class MakeService {
     public SendMessage whenOrderRegPhone(String chatId) {
         SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.ENTER_PHONE_NUMBER, getUserLanguage(chatId)));
         sendMessage.setReplyMarkup(forPhoneNumber(chatId));
-        setUserStep(chatId, StepName.ORDER_LOCATION);
+        setUserStep(chatId, StepName.IS_DELIVERY);
         return sendMessage;
     }
 
@@ -560,7 +665,7 @@ public class MakeService {
 
         SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.ENTER_PHONE_NUMBER, getUserLanguage(chatId)));
         sendMessage.setReplyMarkup(forPhoneNumber(chatId));
-        setUserStep(chatId, StepName.ORDER_LOCATION);
+        setUserStep(chatId, StepName.IS_DELIVERY);
         return sendMessage;
     }
 
@@ -645,6 +750,8 @@ public class MakeService {
         String language = getUserLanguage(chatId);
         List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
         Order order = orderList.get(0);
+        order.setOrderStatus(orderStatusRepository.findByName(OrderStatusName.PENDING));
+        orderRepository.save(order);
         if (order.getPaymentProviders().getName().equals(ProviderName.CASH)) {
             String text = update.getMessage().getText();
             if (!text.equals(getMessage(Message.SKIP_COMMENT, getUserLanguage(chatId)))) {
@@ -652,11 +759,91 @@ public class MakeService {
                 orderRepository.save(order);
             }
         }
-        SendMessage sendMessage = new SendMessage(SUGGEST_COMPLAINT_CHANNEL_ID,
-                getMessage(Message.ORDER_MSG, language));
 
+        String address;
+        String branchName = null;
+        String providerName;
+        String orderStatus;
+        Branch branch = order.getBranch();
+        if (language.equals("UZ")) {
+            if (order.getBranch() != null) {
+                branchName = branch.getNameUz();
+            }
+            providerName = order.getPaymentProviders().getName().getNameUz();
+            orderStatus = order.getOrderStatus().getName().getNameUz();
+        } else {
+            if (order.getBranch() != null) {
+                branchName = branch.getNameRu();
+            }
+            providerName = order.getPaymentProviders().getName().getNameRu();
+            orderStatus = order.getOrderStatus().getName().getNameRu();
+        }
+        if (order.isDelivery()) {
+            address = String.format("<a href=\"https://yandex.com/navi/?whatshere%%5Bzoom%%5D=18&whatshere%%5Bpoint%%5D=%f%%2C%f&lang=uz&from=navi\">%s</a>",
+                    order.getLon(),
+                    order.getLat(),
+                    getMessage(Message.IN_MAP, language));
+        } else {
+            assert branch != null;
+            address = String.format("<a href=\"https://yandex.com/navi/?whatshere%%5Bzoom%%5D=18&whatshere%%5Bpoint%%5D=%f%%2C%f&lang=uz&from=navi\">%s</a>",
+                    branch.getLon(),
+                    branch.getLat(),
+                    branchName);
+        }
+        String format = order.getUpdatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss"));
+
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(SUGGEST_COMPLAINT_CHANNEL_ID);
+        sendMessage.setText(
+                String.format(getMessage(Message.ORDER_MSG, language),
+                        order.getId(),
+                        order.getUser().getName(),
+                        order.getUser().getChatId(),
+                        order.getUser().getPhoneNumber(),
+                        address,
+                        format,
+                        allOrderedProducts(chatId, order.getId()),
+                        order.getComment() == null ? getMessage(Message.NO_INFO, language) : order.getComment(),
+                        providerName,
+                        order.getPrice(),
+                        order.getDeliveryPrice(),
+                        order.getTotalPrice(),
+                        order.getPaidSum(),
+                        orderStatus));
         sendMessage.setReplyMarkup(forSendOrderToChannel(update));
+        sendMessage.enableHtml(true);
         return sendMessage;
+    }
+
+    private String allOrderedProducts(String chatId, Long orderId) {
+        String language = getUserLanguage(chatId);
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
+        List<OrderProducts> orderProducts = order.getOrderProducts();
+        StringBuilder productsMessage = new StringBuilder();
+        for (OrderProducts orderProduct : orderProducts) {
+            float p = orderProduct.getCount() * orderProduct.getVariation().getPrice();
+            if (language.equals("UZ")) {
+                productsMessage.append("\n").append(String.format(getMessage(Message.PRODUCTS, language),
+                        orderProduct.getVariation().getProduct().getNameUz(),
+                        orderProduct.getVariation().getMeasure(),
+                        orderProduct.getVariation().getMeasureUnit().getNameUz(),
+                        orderProduct.getVariation().getPrice(),
+                        orderProduct.getCount(),
+                        orderProduct.getVariation().getPrice(),
+                        p));
+            } else {
+                productsMessage.append("\n").append(String.format(getMessage(Message.PRODUCTS, language),
+                        orderProduct.getVariation().getProduct().getNameRu(),
+                        orderProduct.getVariation().getMeasure(),
+                        orderProduct.getVariation().getMeasureUnit().getNameRu(),
+                        orderProduct.getVariation().getPrice(),
+                        orderProduct.getCount(),
+                        orderProduct.getVariation().getPrice(),
+                        p));
+            }
+        }
+        return productsMessage.toString();
     }
 
 
@@ -689,28 +876,106 @@ public class MakeService {
         return markupInline;
     }
 
-    public EditMessageText whenAcceptOrder(String orderId, Update update) {
+    public EditMessageText whenAcceptOrRejectOrder(String data, Update update) {
         String chatId = getChatId(update);
         String language = getUserLanguage(chatId);
-        Long id = Long.valueOf(orderId);
+        Long id = Long.valueOf(data.substring(6));
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
-        order.setOrderStatus(orderStatusRepository.findByName(OrderStatusName.ACCEPTED));
+        if (data.startsWith("accept"))
+            order.setOrderStatus(orderStatusRepository.findByName(OrderStatusName.ACCEPTED));
+        else if (data.startsWith("reject"))
+            order.setOrderStatus(orderStatusRepository.findByName(OrderStatusName.REJECTED));
         Order savedOrder = orderRepository.save(order);
+        String address;
+        String branchName = null;
+        String providerName;
+        String orderStatus;
+        Branch branch = order.getBranch();
+        if (language.equals("UZ")) {
+            if (order.getBranch() != null) {
+                branchName = branch.getNameUz();
+            }
+            providerName = order.getPaymentProviders().getName().getNameUz();
+            orderStatus = order.getOrderStatus().getName().getNameUz();
+        } else {
+            if (order.getBranch() != null) {
+                branchName = branch.getNameRu();
+            }
+            providerName = order.getPaymentProviders().getName().getNameRu();
+            orderStatus = order.getOrderStatus().getName().getNameRu();
+        }
+        if (order.isDelivery()) {
+            address = String.format("<a href=\"https://yandex.com/navi/?whatshere%%5Bzoom%%5D=18&whatshere%%5Bpoint%%5D=%f%%2C%f&lang=uz&from=navi\">%s</a>",
+                    order.getLon(),
+                    order.getLat(),
+                    getMessage(Message.IN_MAP, language));
+        } else {
+            assert branch != null;
+            address = String.format("<a href=\"https://yandex.com/navi/?whatshere%%5Bzoom%%5D=18&whatshere%%5Bpoint%%5D=%f%%2C%f&lang=uz&from=navi\">%s</a>",
+                    branch.getLon(),
+                    branch.getLat(),
+                    branchName);
+        }
+
+        String format = order.getUpdatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss"));
 
         EditMessageText editMessageText = new EditMessageText();
         editMessageText.setChatId(SUGGEST_COMPLAINT_CHANNEL_ID);
+        editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
+        editMessageText.enableHtml(true);
         editMessageText.setText(
                 String.format(getMessage(Message.ORDER_MSG, language),
-                        savedOrder.getId(),
-                        savedOrder.getUser().getName(),
-                        savedOrder.getUser().getChatId(),
-                        savedOrder.getUser().getPhoneNumber()
-                        ));
+                        order.getId(),
+                        order.getUser().getName(),
+                        order.getUser().getChatId(),
+                        order.getUser().getPhoneNumber(),
+                        address,
+                        format,
+                        allOrderedProducts(chatId, order.getId()),
+                        savedOrder.getComment() == null ? getMessage(Message.NO_INFO, language) : order.getComment(),
+                        providerName,
+                        order.getPrice(),
+                        order.getDeliveryPrice(),
+                        order.getTotalPrice(),
+                        order.getPaidSum(),
+                        orderStatus));
         return editMessageText;
     }
 
-    public EditMessageText whenRejectOrder(String orderId, Update update) {
-        return null;
+    public SendMessage whenSendResToUser(String data) {
+        Long id = Long.valueOf(data.substring(6));
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
+
+        String chatId = order.getUser().getChatId();
+        String language = getUserLanguage(chatId);
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+
+        if (order.getOrderStatus().getName().equals(OrderStatusName.ACCEPTED)) {
+            sendMessage.setText(String.format(getMessage(Message.ACCEPTED, language), id));
+        } else if (order.getOrderStatus().getName().equals(OrderStatusName.REJECTED)) {
+            sendMessage.setText(String.format(getMessage(Message.REJECTED, language), id));
+        }
+        sendMessage.enableHtml(true);
+        sendMessage.setReplyMarkup(forMainMenu(chatId));
+        setUserStep(chatId, StepName.CHOOSE_FROM_MAIN_MENU);
+        return sendMessage;
+    }
+
+    public SendMessage whenSendOrderToUser(Update update) {
+        String chatId = getChatId(update);
+        String language = getUserLanguage(chatId);
+
+        List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
+        Order order = orderList.get(0);
+
+        SendMessage sendMessage = new SendMessage(chatId,
+                String.format(getMessage(Message.ORDER_PENDING, language), order.getId()));
+        sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
+        sendMessage.enableHtml(true);
+        setUserStep(chatId, StepName.PENDING_ORDER);
+        return sendMessage;
     }
 }

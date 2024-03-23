@@ -28,6 +28,6 @@ public class Basket extends AbsLong {
     private TgUser tgUser;
 
     @Column(name = "total_price")
-    private Double totalPrice;
+    private float totalPrice;
 
 }

@@ -17,7 +17,7 @@ public class ProductWebDTO {
 
     private String imageUrl;
 
-    private Double price;
+    private float price;
 
     private boolean oneVariation;
 

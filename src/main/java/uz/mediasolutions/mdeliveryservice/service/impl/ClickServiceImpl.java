@@ -1,214 +1,104 @@
 package uz.mediasolutions.mdeliveryservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import uz.mediasolutions.mdeliveryservice.entity.*;
-import uz.mediasolutions.mdeliveryservice.enums.OrderStatusName;
-import uz.mediasolutions.mdeliveryservice.payload.ClickDTO;
-import uz.mediasolutions.mdeliveryservice.repository.*;
+import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
+import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
+import uz.mediasolutions.mdeliveryservice.payload.ClickResDTO;
 import uz.mediasolutions.mdeliveryservice.service.abs.ClickService;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Optional;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
 public class ClickServiceImpl implements ClickService {
 
-    private final OrderRepository orderRepository;
-
-    private final ClickObjectRepository clickObjectRepository;
-
-    private final PaymentRepository paymentRepository;
-
-    private final TgUserRepository tgUserRepository;
-
-    private final OrderStatusRepository orderStatusRepository;
-
-    private final String secureKey = "NQgUZqEDrD";
+    private static final String BASE_URL = "https://api.click.uz/v2/merchant/invoice/create";
+    private static final String MERCHANT_USER_ID = "NQgUZqEDrD";
+    private static final String MERCHANT_ID = "23300";
+    private static final String SECRET_KEY = "NQgUZqEDrD";
+    private static final Integer SERVICE_ID = 32625;
 
     @Override
-    public ClickDTO prepareMethod(ClickDTO clickDTO) {
-        //SECURE KEY BILAN BIRGALIKDA MD5 YASALAYAPTI
-        String signKey = DigestUtils.md5Hex(clickDTO.getClickTransId().toString() +
-                clickDTO.getServiceId().toString() +
-                secureKey +
-                clickDTO.getMerchantTransId() +
-                Math.round(clickDTO.getAmount()) +
-                clickDTO.getAction().toString() +
-                clickDTO.getSignTime());
+    public ApiResult<ClickResDTO> createInvoice(float amount, String phoneNumber, String merchantTransId) throws NoSuchAlgorithmException, IOException {
+        long timestamp = new Date().getTime() / 1000;
+        String authHeader = generateAuthHeader(timestamp);
 
-        //CLICK GA QAYTARISH UCHUN PREPARE OBJECT YASAYAPMIZ
-        ClickObject clickObject = new ClickObject();
-        clickObject.setClickTransId(clickDTO.getClickTransId());
-        clickObject.setAmount(clickDTO.getAmount());
+        String requestBody = String.format("{\"service_id\": %d, \"amount\": %.2f, \"phone_number\": \"%s\", \"merchant_trans_id\": \"%s\"}",
+                SERVICE_ID, amount, phoneNumber, merchantTransId);
 
-        //AGAR SECURE KEY XATO BERGAN BO'LSA
-        if (!clickDTO.getSignString().equals(signKey)) {
-            clickObject.setError(-1);
-            clickObject.setErrorNote("SIGN CHECK FAILED!");
+        URL url = new URL(BASE_URL);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Accept", "application/json");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("Auth", authHeader);
+        connection.setDoOutput(true);
+
+        try (OutputStream os = connection.getOutputStream()) {
+            byte[] input = requestBody.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
         }
-        //SIGN KEY TO'G'RI BO'LSA
-        else {
-            //FOYDALANUVCHILAR RO'YXATIDAN CLICK NI TOPYAPMIZ
-            Optional<TgUser> optionalClickUser = tgUserRepository.findByPhoneNumber("Click");
+        System.out.println(connection.getResponseCode());
+        System.out.println(connection.getResponseMessage());
 
-            //AGAR CUNDAY USER BOR BO'LSA
-            if (optionalClickUser.isPresent()) {
-
-                //TIZIMGA CLICK KIRDI AUTH GA SET QILYAPMIZ
-                Authentication authentication = new UsernamePasswordAuthenticationToken(optionalClickUser.get(), null, new ArrayList<>());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                try {
-
-                    //CLICK DAN KELAYOTGAN ORDER ID KELADI(AGAR SIZDA ABONENTSKIY UCHUN TO'LAYOTGAN BO'LSA TELEFON RAQAM KELADI)
-                    String orderId = clickDTO.getMerchantTransId();
-
-                    //ORDER NI OLAMIZ DB DAN
-                    Optional<Order> optionalOrder = orderRepository.findById(Long.parseLong(orderId));
-
-                    if (optionalOrder.isEmpty()) {
-                        clickObject.setError(-5);
-                        clickObject.setErrorNote("Order does not exist");
-                    } else {
-
-                        //AGAR ORDER UCHUN TO'LOV QILAYOTGAN BO'LSA TO'LANAYOTGAN SUMMA ORDER SUMMASIGA TENG BO'LISHI KERAK
-                        if (optionalOrder.get().getTotalPrice() == clickDTO.getAmount()) {
-                            clickObject.setError(0);
-                            clickObject.setErrorNote("SUCCESS");
-                        } else {
-                            clickObject.setError(-2);
-                            clickObject.setErrorNote("Incorrect parameter amount");
-                        }
-
-                        //AGAR SIZDA ABONENTSIKIY UCHUN TO'LOV QILSA QUYIDAGI 2 QATORNI OCHASIZ, YUQORIDA KODNI COMMENT QILASIZ
-//                        prepareObject.setError(0);
-//                        prepareObject.setErrorNote("SUCCESS");
-                    }
-                } catch (Exception e) {
-                    clickObject.setError(-5);
-                    clickObject.setErrorNote("Order does not exist");
-                }
-            }
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        String inputLine;
+        StringBuilder response = new StringBuilder();
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+            System.out.println(inputLine);
         }
+        in.close();
+        System.out.println(in);
 
-        ClickDTO response = new ClickDTO();
-
-        if (clickObject.getError() == 0) {
-            clickObject = clickObjectRepository.save(clickObject);
-
-            response.setMerchantPrepareId(clickObject.getId());
-        }
-        response.setClickTransId(clickDTO.getClickTransId());
-        response.setMerchantTransId(clickDTO.getMerchantTransId());
-        response.setError(clickObject.getError());
-        response.setErrorNote(clickObject.getErrorNote());
-
-        return clickDTO;
+        System.out.println(response);
+//        ClickResDTO clickResDTO = parseResponse(response.toString());
+        return ApiResult.success(new ClickResDTO());
     }
 
-    @Override
-    public ClickDTO completeMethod(ClickDTO clickDTO) {
+    private static ClickResDTO parseResponse(String jsonResponse) {
 
-        String signKey = DigestUtils.md5Hex(clickDTO.getClickTransId().toString() +
-                clickDTO.getServiceId().toString() +
-                secureKey +
-                clickDTO.getMerchantTransId() +
-                clickDTO.getMerchantPrepareId().toString() +
-                Math.round(clickDTO.getAmount()) +
-                clickDTO.getAction().toString() +
-                clickDTO.getSignTime());
+        try {
+            JSONObject responseJson = new JSONObject(jsonResponse);
+            int errorCode = responseJson.getInt("error_code");
+            String errorNote = responseJson.getString("error_note");
+            long invoiceId = responseJson.getLong("invoice_id");
 
-        ClickDTO response = new ClickDTO();
-        response.setClickTransId(clickDTO.getClickTransId());
-        response.setMerchantTransId(clickDTO.getMerchantTransId());
-
-        //SIGN KEY XATO BO'LGANDA
-        if (!clickDTO.getSignString().equals(signKey)) {
-            response.setError(-1);
-            response.setErrorNote("SIGN CHECK FAILED!");
-        } else {
-            //FOYDALANUVCHILAR RO'YXATIDAN CLICK NI TOPYAPMIZ
-            Optional<TgUser> optionalClickUser = tgUserRepository.findByPhoneNumber("Click");
-
-            //AGAR BUNDAY FOYDALANIVCHI BO'LMASA
-            if (optionalClickUser.isEmpty()) {
-                response.setError(-1);
-                response.setErrorNote("SIGN CHECK FAILED!");
-            } else {
-
-                //TIZIMGA CLICK KIRDI AUTH GA SET QILYAPMIZ
-                Authentication authentication = new UsernamePasswordAuthenticationToken(optionalClickUser.get(), null, new ArrayList<>());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                Optional<ClickObject> optionalClickObject = clickObjectRepository.findById(clickDTO.getMerchantPrepareId());
-
-                //PREPARE METHODGA AVVAL KELMAGAN YOKI PREPARE METHOD DA ERROR BILAN QAYTARILGANDA
-                if (optionalClickObject.isEmpty()) {
-                    response.setError(-6);
-                    response.setErrorNote("Transactions does not exist");
-                } else {
-
-                    //TRANSACTION AVVAL BEKOR QILINGAN HOLATDA
-                    if (optionalClickObject.get().isCancelled()) {
-                        response.setError(-9);
-                        response.setErrorNote("Transaction cancelled");
-                    } else {
-
-                        //ORDER BO'YICHA TEKSHIRIHSNI BOSHLAYMIZ
-                        try {
-                            //CLICK DAN KELAYOTGAN ORDER ID KELADI(AGAR SIZDA ABONENTSKIY UCHUN TO'LAYOTGAN BO'LSA TELEFON RAQAM KELADI)
-                            String orderId = clickDTO.getMerchantTransId();
-
-                            Optional<Order> orderOptional = orderRepository.findById(Long.parseLong(orderId));
-
-                            if (orderOptional.isEmpty()) {
-                                response.setError(-5);
-                                response.setErrorNote("Order not found!");
-                            } else {
-                                Order order = orderOptional.get();
-
-                                if (order.getOrderStatus().getName().equals(OrderStatusName.PAID)) {
-                                    response.setError(-4);
-                                    response.setErrorNote("Already paid");
-                                } else {
-                                    if (order.getTotalPrice() == clickDTO.getAmount() && clickDTO.getError() == 0) {
-
-                                        //ENDI BIZ PAYMENT TABLE GA TO'LOV BO'LDI DEB BELGILAB QO'YAMIZ
-                                        Payment payment = new Payment(
-                                                order.getUser(),
-                                                order.getTotalPrice(),
-                                                new Timestamp(System.currentTimeMillis()),
-                                                clickDTO.getClickTransId().toString());
-
-                                        paymentRepository.save(payment);
-                                        order.setOrderStatus(orderStatusRepository.findByName(OrderStatusName.PAID));
-
-                                        response.setError(0);
-                                        response.setErrorNote("SUCCESS");
-
-                                        response.setMerchantConfirmId(optionalClickObject.get().getId());
-                                    } else {
-                                        response.setError(-2);
-                                        response.setErrorNote("Incorrect parameter amount");
-                                    }
-                                }
-                            }
-                        } catch (Exception e) {
-                            response.setError(-9);
-                            response.setErrorNote("Transactions cancelled");
-                        }
-                    }
-                }
-            }
+            ClickResDTO dto = ClickResDTO.builder()
+                    .errorCode(errorCode)
+                    .errorNote(errorNote)
+                    .invoiceId(invoiceId)
+                    .build();
+            return dto;
+        } catch (JSONException e) {
+            throw RestException.restThrow("JSON EXCEPTION", HttpStatus.CONFLICT);
         }
-        return response;
+    }
+
+    private static String generateAuthHeader(long timestamp) throws NoSuchAlgorithmException {
+        String message = timestamp + SECRET_KEY;
+        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+        byte[] hashedBytes = digest.digest(message.getBytes(StandardCharsets.UTF_8));
+        StringBuilder hexString = new StringBuilder();
+        for (byte hashedByte : hashedBytes) {
+            String hex = Integer.toHexString(0xff & hashedByte);
+            if (hex.length() == 1) hexString.append('0');
+            hexString.append(hex);
+        }
+        return MERCHANT_USER_ID + ":" + hexString + ":" + timestamp;
     }
 
 }

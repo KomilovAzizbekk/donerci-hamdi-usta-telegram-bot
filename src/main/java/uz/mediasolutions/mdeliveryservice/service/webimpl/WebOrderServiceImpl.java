@@ -37,6 +37,9 @@ public class WebOrderServiceImpl implements WebOrderService {
     public ApiResult<List<OrderWebDTO>> getAll(String chatId) {
         if (tgUserRepository.existsByChatId(chatId)) {
             List<Order> orders = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
+
+            orders.removeIf(order -> order.getOrderStatus().getName().equals(OrderStatusName.NOT_COMPLETE));
+
             List<OrderWebDTO> dtoList = universalMapper.toOrderWebDTOList(orders, chatId);
             return ApiResult.success(dtoList);
         } else {
@@ -66,15 +69,16 @@ public class WebOrderServiceImpl implements WebOrderService {
             basketRepository.delete(basket);
 
             Order.OrderBuilder builder = Order.builder();
-            builder.orderStatus(orderStatusRepository.findByName(OrderStatusName.PENDING));
+            builder.orderStatus(orderStatusRepository.findByName(OrderStatusName.NOT_COMPLETE));
             builder.user(tgUser);
             builder.orderProducts(saveAll);
             builder.price(universalMapper.totalPrice(saveAll));
+            builder.totalPrice(universalMapper.totalPrice(saveAll)); //DELIVERY PRICE SHOULD BE ADDED
             Order order = builder.build();
             orderRepository.save(order);
             if (tgUser.getName() != null && tgUser.getPhoneNumber() != null) {
-                makeService.setUserStep(chatId, StepName.ORDER_LOCATION);
-                tgService.execute(makeService.whenOrderLocation(chatId));
+                makeService.setUserStep(chatId, StepName.IS_DELIVERY);
+                tgService.execute(makeService.whenIsDelivery(chatId));
             } else if (tgUser.getName() == null) {
                 makeService.setUserStep(chatId, StepName.ORDER_REGISTER_NAME);
                 tgService.execute(makeService.whenOrderRegName(chatId));

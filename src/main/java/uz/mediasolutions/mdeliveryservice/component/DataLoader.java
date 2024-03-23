@@ -77,12 +77,12 @@ public class DataLoader implements CommandLineRunner {
 
     private void addConstants() {
         Constants constants = Constants.builder()
-                .minOrderPriceForFreeDelivery(0D)
-                .minOrderPrice(0D)
+                .minOrderPriceForFreeDelivery(0)
+                .minOrderPrice(0)
                 .botWorking(0)
-                .pricePerKilometer(0D)
-                .minDeliveryPrice(0D)
-                .radiusFreeDelivery(0D)
+                .pricePerKilometer(0)
+                .minDeliveryPrice(0)
+                .radiusFreeDelivery(0)
                 .build();
         constantsRepository.save(constants);
     }

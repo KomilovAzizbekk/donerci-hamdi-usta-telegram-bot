@@ -17,6 +17,6 @@ public class BasketWebDTO {
 
     private List<OrderProductResDTO> orderProducts;
 
-    private Double totalPrice;
+    private float totalPrice;
 
 }

@@ -31,10 +31,10 @@ public class OrderWebDTO {
 
     private String comment;
 
-    private Double price;
+    private float price;
 
-    private Double deliveryPrice;
+    private float deliveryPrice;
 
-    private Double totalPrice;
+    private float totalPrice;
 
 }

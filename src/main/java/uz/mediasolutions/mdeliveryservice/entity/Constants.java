@@ -24,19 +24,19 @@ public class Constants {
     private Long id;
 
     @Column(name = "min_order_price", nullable = false)
-    private Double minOrderPrice;
+    private float minOrderPrice;
 
     @Column(name = "min_delivery_price")
-    private Double minDeliveryPrice;
+    private float minDeliveryPrice;
 
     @Column(name = "price_per_kilometer")
-    private Double pricePerKilometer;
+    private float pricePerKilometer;
 
     @Column(name = "radius_free_delivery")
-    private Double radiusFreeDelivery;
+    private float radiusFreeDelivery;
 
     @Column(name = "min_order_price_for_free_delivery")
-    private Double minOrderPriceForFreeDelivery;
+    private float minOrderPriceForFreeDelivery;
 
     @Column(name = "bot_working")
     private Integer botWorking;

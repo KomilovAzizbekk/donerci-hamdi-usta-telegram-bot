@@ -32,10 +32,10 @@ public class Variation extends AbsDate {
     private MeasureUnit measureUnit;
 
     @Column(name = "measure")
-    private Double measure;
+    private float measure;
 
     @Column(name = "price")
-    private Double price;
+    private float price;
 
     @Column(name = "count")
     private Integer count;

@@ -113,11 +113,11 @@ public class UniversalMapperImpl implements UniversalMapper {
     }
 
     @Override
-    public double totalPrice(List<OrderProducts> orderProducts) {
+    public float totalPrice(List<OrderProducts> orderProducts) {
         if (orderProducts == null) {
             return 0;
         }
-        double totalPrice = 0;
+        float totalPrice = 0;
 
         for (OrderProducts orderProduct : orderProducts) {
             totalPrice += orderProduct.getCount() * orderProduct.getVariation().getPrice();
@@ -164,12 +164,19 @@ public class UniversalMapperImpl implements UniversalMapper {
         builder.id(order.getId());
         builder.branchWebDTO(toBranchWebDTO(order.getBranch(), chatId));
         builder.userId(tgUser.getId());
+        builder.lon(order.getLon());
+        builder.lat(order.getLat());
         builder.orderProducts(toOrderProductResDTOlist(order.getOrderProducts(), chatId));
-        builder.price(totalPrice(order.getOrderProducts()));
+        builder.price(order.getPrice());
+        builder.comment(order.getComment());
+        builder.deliveryPrice(order.getDeliveryPrice());
+        builder.totalPrice(order.getTotalPrice());
         if (tgUser.getLanguage().getName().equals(LanguageName.UZ)) {
             builder.status(order.getOrderStatus().getName().getNameUz());
+            builder.paymentProviderName(order.getPaymentProviders().getName().getNameUz());
         } else {
             builder.status(order.getOrderStatus().getName().getNameRu());
+            builder.paymentProviderName(order.getPaymentProviders().getName().getNameRu());
         }
         return builder.build();
     }

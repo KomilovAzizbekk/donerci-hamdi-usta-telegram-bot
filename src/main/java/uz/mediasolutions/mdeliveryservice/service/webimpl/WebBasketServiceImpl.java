@@ -35,7 +35,7 @@ public class WebBasketServiceImpl implements WebBasketService {
             } else {
                 Basket basket = Basket.builder()
                         .tgUser(tgUser)
-                        .totalPrice(0D)
+                        .totalPrice(0)
                         .build();
                 Basket save = basketRepository.save(basket);
                 BasketWebDTO dto = universalMapper.toBasketWebDTO(save, chatId);

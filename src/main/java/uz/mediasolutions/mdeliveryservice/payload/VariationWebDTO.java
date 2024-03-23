@@ -17,8 +17,8 @@ public class VariationWebDTO {
 
     private MeasureUnitWebDTO measureUnit;
 
-    private Double measure;
+    private float measure;
 
-    private Double price;
+    private float price;
 
 }

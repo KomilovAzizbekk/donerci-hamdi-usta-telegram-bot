@@ -17,5 +17,5 @@ public interface TgUserRepository extends JpaRepository<TgUser, Long> {
 
     boolean existsByChatId(String chatId);
 
-    Optional<TgUser> findByPhoneNumber(String phoneNumber);
+    Optional<TgUser> findByPhoneNumber(String username);
 }

@@ -50,15 +50,21 @@ public class Order extends AbsLong {
     private String comment;
 
     @Column(name = "price")
-    private Double price;
+    private float price;
 
     @Column(name = "delivery_price")
-    private Double deliveryPrice;
+    private float deliveryPrice;
 
     @Column(name = "total_price")
-    private Double totalPrice;
+    private float totalPrice;
+
+    @Column(name = "paid_sum")
+    private float paidSum = 0;
 
     @OneToOne(fetch = FetchType.LAZY)
     private Transaction transaction;
+
+    @Column(name = "delivery")
+    private boolean delivery;
 
 }

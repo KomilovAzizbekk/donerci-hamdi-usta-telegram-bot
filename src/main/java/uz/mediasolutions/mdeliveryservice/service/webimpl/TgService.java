@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import uz.mediasolutions.mdeliveryservice.entity.TgUser;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
 import uz.mediasolutions.mdeliveryservice.enums.StepName;
+import uz.mediasolutions.mdeliveryservice.repository.BranchRepository;
 import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
@@ -18,6 +19,7 @@ public class TgService extends TelegramLongPollingBot {
 
     private final MakeService makeService;
     private final TgUserRepository tgUserRepository;
+    private final BranchRepository branchRepository;
 
     @Override
     public String getBotUsername() {
@@ -82,8 +84,8 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenChangeLanguage2(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.ORDER_REGISTER_PHONE)) {
                     execute(makeService.whenOrderRegPhone1(update));
-                } else if (makeService.getUserStep(chatId).equals(StepName.ORDER_LOCATION)) {
-                    execute(makeService.whenOrderLocation1(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.IS_DELIVERY)) {
+                    execute(makeService.whenIsDelivery1(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.LEAVE_COMMENT) &&
                         (text.equals(makeService.getMessage(Message.CLICK, makeService.getUserLanguage(chatId))) ||
                                 text.equals(makeService.getMessage(Message.PAYME, makeService.getUserLanguage(chatId))) ||
@@ -93,6 +95,12 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenGoPayment(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.SEND_ORDER_TO_CHANNEL)) {
                     execute(makeService.whenSendOrderToChannel(update));
+                    execute(makeService.whenSendOrderToUser(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.ORDER_CHOOSE)) {
+                    execute(makeService.whenChosen(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.CHOOSE_PAYMENT) &&
+                        branchRepository.existsByNameUzOrNameRu(text, text)) {
+                    execute(makeService.whenChoosePayment(update));
                 }
             } else if (update.hasMessage() && update.getMessage().hasContact()) {
                 if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT)) {
@@ -101,8 +109,8 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenIncorrectPhoneFormat1(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.CHANGE_PHONE_NUMBER)) {
                     execute(makeService.whenChangePhoneNumber2(update));
-                } else if (makeService.getUserStep(chatId).equals(StepName.ORDER_LOCATION)) {
-                    execute(makeService.whenOrderLocation1(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.IS_DELIVERY)) {
+                    execute(makeService.whenIsDelivery1(update));
                 }
             } else if (update.hasMessage() && update.getMessage().hasLocation()) {
                 if (makeService.getUserStep(chatId).equals(StepName.CHOOSE_PAYMENT)) {
@@ -118,10 +126,9 @@ public class TgService extends TelegramLongPollingBot {
                 } else if (data.equals("changeLanguage")) {
                     execute(makeService.deleteMessageForCallback(update));
                     execute(makeService.whenChangeLanguage1(update));
-                } else if (data.startsWith("accept")) {
-                    execute(makeService.whenAcceptOrder(data.substring(6), update));
-                } else if (data.startsWith("reject")) {
-                    execute(makeService.whenRejectOrder(data.substring(6), update));
+                } else if (data.startsWith("accept") || data.startsWith("reject")) {
+                    execute(makeService.whenAcceptOrRejectOrder(data, update));
+                    execute(makeService.whenSendResToUser(data));
                 }
             }
         }

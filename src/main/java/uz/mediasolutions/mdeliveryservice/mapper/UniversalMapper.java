@@ -19,7 +19,7 @@ public interface UniversalMapper {
 
     BasketWebDTO toBasketWebDTO(Basket basket, String chatId);
 
-    double totalPrice(List<OrderProducts> orderProducts);
+    float totalPrice(List<OrderProducts> orderProducts);
 
     List<OrderProducts> toOrderProductsEntityList(List<OrderProductDTO> dtoList);
 

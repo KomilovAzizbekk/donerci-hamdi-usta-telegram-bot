@@ -36,9 +36,9 @@ public class WebProductServiceImpl implements WebProductService {
         }
     }
 
-    private Double getLowestPrice(Product product) {
+    private float getLowestPrice(Product product) {
         List<Variation> variations = product.getVariations();
-        Double lowestPrice = variations.get(0).getPrice();
+        float lowestPrice = variations.get(0).getPrice();
         for (Variation variation : variations) {
             if (lowestPrice > variation.getPrice())
                 lowestPrice = variation.getPrice();

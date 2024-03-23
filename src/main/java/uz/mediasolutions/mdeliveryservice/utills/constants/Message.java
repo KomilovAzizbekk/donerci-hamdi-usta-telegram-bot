@@ -48,4 +48,12 @@ public interface Message {
     String REJECT = "reject";
     String ACCEPT = "accept";
     String ORDER_MSG = "order.msg";
+    String IS_DELIVERY = "is.delivery";
+    String PICK_UP = "pick.up";
+    String DELIVERY = "delivery";
+    String CHOOSE_BRANCH = "choose.branch";
+    String IN_MAP = "in.map";
+    String NO_INFO = "no.info";
+    String ORDER_PENDING = "order.pending";
+    String PRODUCTS = "products";
 }
