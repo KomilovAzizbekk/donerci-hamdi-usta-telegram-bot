@@ -11,7 +11,7 @@ public enum OrderStatusName {
     PENDING("Tasdiqlanmagan", "Не подтверждено"),
     ACCEPTED("Tasdiqlangan", "Подтвержденный"),
     REJECTED("Rad etilgan", "Отклоненный"),
-    PAID("To'langan", "Оплаченный"),
+//    PAID("To'langan", "Оплаченный"),
     DELIVERED("Yetkazib berilgan", "Доставленный");
 
     private final String nameUz;

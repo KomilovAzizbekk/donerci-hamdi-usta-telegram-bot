@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import uz.mediasolutions.mdeliveryservice.entity.Basket;
-import uz.mediasolutions.mdeliveryservice.entity.Order;
-import uz.mediasolutions.mdeliveryservice.entity.OrderProducts;
-import uz.mediasolutions.mdeliveryservice.entity.TgUser;
+import uz.mediasolutions.mdeliveryservice.entity.*;
 import uz.mediasolutions.mdeliveryservice.enums.OrderStatusName;
 import uz.mediasolutions.mdeliveryservice.enums.StepName;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
@@ -32,6 +29,7 @@ public class WebOrderServiceImpl implements WebOrderService {
     private final BasketRepository basketRepository;
     private final OrderProductRepository orderProductRepository;
     private final MakeService makeService;
+    private final ConstantsRepository constantsRepository;
 
     @Override
     public ApiResult<List<OrderWebDTO>> getAll(String chatId) {
@@ -65,15 +63,27 @@ public class WebOrderServiceImpl implements WebOrderService {
             TgUser tgUser = tgUserRepository.findByChatId(chatId);
             List<OrderProducts> orderProducts = universalMapper.toOrderProductsEntityList(dtoList);
             List<OrderProducts> saveAll = orderProductRepository.saveAll(orderProducts);
-            Basket basket = basketRepository.findByTgUserChatId(chatId);
-            basketRepository.delete(basket);
+
+            float productPrice = universalMapper.totalPrice(saveAll);
+            Constants constants = constantsRepository.findById(1L).orElseThrow(
+                    () -> RestException.restThrow("CONSTANTS NOT FOUND", HttpStatus.BAD_REQUEST));
 
             Order.OrderBuilder builder = Order.builder();
             builder.orderStatus(orderStatusRepository.findByName(OrderStatusName.NOT_COMPLETE));
             builder.user(tgUser);
             builder.orderProducts(saveAll);
-            builder.price(universalMapper.totalPrice(saveAll));
-            builder.totalPrice(universalMapper.totalPrice(saveAll)); //DELIVERY PRICE SHOULD BE ADDED
+            builder.price(productPrice);
+            builder.totalPrice(productPrice); //DELIVERY PRICE SHOULD BE ADDED
+            if (productPrice < constants.getMinOrderPrice()) {
+                throw RestException.restThrow("ORDER PRICE SHOULD BE HIGHER THAN " +
+                        constants.getMinOrderPrice(), HttpStatus.BAD_REQUEST);
+            }
+            if (!basketRepository.existsByTgUserChatId(chatId)) {
+                throw RestException.restThrow("YOU HAVE NOT BASKET", HttpStatus.BAD_REQUEST);
+            }
+            Basket basket = basketRepository.findByTgUserChatId(chatId);
+            basketRepository.delete(basket);
+
             Order order = builder.build();
             orderRepository.save(order);
             if (tgUser.getName() != null && tgUser.getPhoneNumber() != null) {

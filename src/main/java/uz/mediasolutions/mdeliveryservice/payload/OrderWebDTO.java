@@ -31,6 +31,8 @@ public class OrderWebDTO {
 
     private String comment;
 
+    private float paidSum;
+
     private float price;
 
     private float deliveryPrice;

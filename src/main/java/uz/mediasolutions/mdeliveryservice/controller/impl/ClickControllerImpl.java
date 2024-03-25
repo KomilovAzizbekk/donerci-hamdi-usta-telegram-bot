@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 import uz.mediasolutions.mdeliveryservice.controller.abs.ClickController;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
+import uz.mediasolutions.mdeliveryservice.payload.ClickInvoiceDTO;
 import uz.mediasolutions.mdeliveryservice.payload.ClickResDTO;
 import uz.mediasolutions.mdeliveryservice.service.abs.ClickService;
 
@@ -18,7 +19,7 @@ public class ClickControllerImpl implements ClickController {
 
 
     @Override
-    public ApiResult<ClickResDTO> createInvoice(float amount, String phoneNumber, String merchantTransId) throws NoSuchAlgorithmException, IOException {
-        return clickService.createInvoice(amount, phoneNumber, merchantTransId);
+    public ApiResult<?> createInvoice(ClickInvoiceDTO clickInvoiceDTO) {
+        return clickService.createInvoice(clickInvoiceDTO);
     }
 }

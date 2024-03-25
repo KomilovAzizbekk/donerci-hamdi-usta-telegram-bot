@@ -56,4 +56,5 @@ public interface Message {
     String NO_INFO = "no.info";
     String ORDER_PENDING = "order.pending";
     String PRODUCTS = "products";
+    String WITH_OWN = "with.own";
 }

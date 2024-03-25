@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -26,7 +25,7 @@ import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.repository.*;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
-import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +44,7 @@ public class MakeService {
     private final PaymentProvidersRepository paymentProvidersRepository;
     private final OrderStatusRepository orderStatusRepository;
     private final BranchRepository branchRepository;
+    private final ConstantsRepository constantsRepository;
 
     public static final String SUGGEST_COMPLAINT_CHANNEL_ID = "-1001903287909";
     public static final String LINK = "https://restoran-telegram-web-app.netlify.app/";
@@ -333,6 +333,9 @@ public class MakeService {
         String chatId = getChatId(update);
         TgUser tgUser = tgUserRepository.findByChatId(chatId);
         tgUser.setName(update.getMessage().getText());
+        if (tgUser.getPhoneNumber() != null) {
+            tgUser.setRegistered(true);
+        }
         tgUserRepository.save(tgUser);
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
@@ -380,7 +383,6 @@ public class MakeService {
         return whenChangePhoneNumber2(update);
     }
 
-
     public SendMessage whenIncorrectPhoneFormat1(Update update) {
         return whenIsDelivery1(update);
     }
@@ -406,6 +408,13 @@ public class MakeService {
 
     private SendMessage executeChangePhoneNumber(Update update) {
         String chatId = getChatId(update);
+
+        TgUser tgUser = tgUserRepository.findByChatId(chatId);
+        if (tgUser.getName() != null) {
+            tgUser.setRegistered(true);
+        }
+        tgUserRepository.save(tgUser);
+
         SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.PHONE_NUMBER_CHANGED,
                 getUserLanguage(chatId)));
         sendMessage.setReplyMarkup(forMainMenu(chatId));
@@ -449,6 +458,10 @@ public class MakeService {
     }
 
     public SendMessage whenIsDelivery(String chatId) {
+        TgUser tgUser = tgUserRepository.findByChatId(chatId);
+        tgUser.setRegistered(true);
+        tgUserRepository.save(tgUser);
+
         SendMessage sendMessage = new SendMessage(chatId,
                 getMessage(Message.IS_DELIVERY, getUserLanguage(chatId)));
         sendMessage.setReplyMarkup(forIsDelivery(chatId));
@@ -479,7 +492,6 @@ public class MakeService {
         return markup;
     }
 
-
     public SendMessage whenIsDelivery1(Update update) {
         String chatId = getChatId(update);
         TgUser tgUser = tgUserRepository.findByChatId(chatId);
@@ -507,6 +519,10 @@ public class MakeService {
     }
 
     private SendMessage executeIsDelivery(String chatId) {
+        TgUser tgUser = tgUserRepository.findByChatId(chatId);
+        tgUser.setRegistered(true);
+        tgUserRepository.save(tgUser);
+
         SendMessage sendMessage = new SendMessage(chatId,
                 getMessage(Message.IS_DELIVERY, getUserLanguage(chatId)));
         sendMessage.setReplyMarkup(forIsDelivery(chatId));
@@ -542,12 +558,12 @@ public class MakeService {
         String language = getUserLanguage(chatId);
 
         Sort sort = Sort.by(Sort.Order.asc("createdAt"));
-        List<Branch> branches = branchRepository.findAll(sort);
+        List<Branch> branches = branchRepository.findAllByActiveIsTrue(sort);
 
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
         List<KeyboardButton> keyboardButtons = new ArrayList<>();
 
-        if (language.equals("Uz")) {
+        if (language.equals(UZ)) {
             for (Branch market : branches)
                 keyboardButtons.add(new KeyboardButton(market.getNameUz()));
         } else {
@@ -595,14 +611,75 @@ public class MakeService {
         return markup;
     }
 
+    private static final double EARTH_RADIUS_KM = 6371;
+
+    public static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        double lat1Rad = Math.toRadians(lat1);
+        double lon1Rad = Math.toRadians(lon1);
+        double lat2Rad = Math.toRadians(lat2);
+        double lon2Rad = Math.toRadians(lon2);
+
+        double deltaLat = lat2Rad - lat1Rad;
+        double deltaLon = lon2Rad - lon1Rad;
+
+        double a = Math.pow(Math.sin(deltaLat / 2), 2) +
+                Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+                        Math.pow(Math.sin(deltaLon / 2), 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return EARTH_RADIUS_KM * c;
+    }
+
+    public Branch findClosestBranch(List<Branch> branches, double lat, double lon) {
+        if (branches == null || branches.isEmpty()) {
+            return null;
+        }
+
+        Branch closestBranch = branches.get(0);
+        double minDistance = calculateDistance(closestBranch.getLat(), closestBranch.getLon(),
+                lat, lon);
+
+        for (int i = 1; i < branches.size(); i++) {
+            double distance = calculateDistance(branches.get(i).getLat(), branches.get(i).getLon(),
+                    lat, lon);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestBranch = branches.get(i);
+            }
+        }
+
+        return closestBranch;
+    }
+
     public SendMessage whenChoosePayment(Update update) {
         String chatId = getChatId(update);
         List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
         Order order = orderList.get(0);
         if (update.getMessage().hasLocation()) {
             Location location = update.getMessage().getLocation();
-            order.setLon(location.getLongitude());
-            order.setLat(location.getLatitude());
+            Double longitude = location.getLongitude();
+            Double latitude = location.getLatitude();
+            order.setLon(longitude);
+            order.setLat(latitude);
+            Branch closestBranch = findClosestBranch(branchRepository.findAllByActiveIsTrue(), latitude,
+                    longitude);
+            double distance = calculateDistance(closestBranch.getLat(), closestBranch.getLon(), latitude, longitude);
+
+            DecimalFormat df = new DecimalFormat("#.##");
+            String formattedValue = df.format(distance);
+            distance = Double.parseDouble(formattedValue);
+
+            Constants constants = constantsRepository.findById(1L).orElseThrow(
+                    () -> RestException.restThrow("CONSTANTS NOT FOUND", HttpStatus.BAD_REQUEST));
+            if (distance < constants.getRadiusFreeDelivery() ||
+                    order.getPrice() > constants.getMinOrderPriceForFreeDelivery()) {
+                order.setDeliveryPrice(0);
+            } else {
+                float deliveryPrice = (float) (constants.getMinDeliveryPrice() +
+                                                        (distance - constants.getRadiusFreeDelivery()) * constants.getPricePerKilometer());
+                order.setDeliveryPrice(deliveryPrice);
+                order.setTotalPrice(order.getPrice() + deliveryPrice);
+            }
         } else if (update.getMessage().hasText() &&
                 branchRepository.existsByNameUzOrNameRu(update.getMessage().getText(), update.getMessage().getText())) {
             String text = update.getMessage().getText();
@@ -744,7 +821,6 @@ public class MakeService {
         return markup;
     }
 
-
     public SendMessage whenSendOrderToChannel(Update update) {
         String chatId = getChatId(update);
         String language = getUserLanguage(chatId);
@@ -785,7 +861,8 @@ public class MakeService {
                     getMessage(Message.IN_MAP, language));
         } else {
             assert branch != null;
-            address = String.format("<a href=\"https://yandex.com/navi/?whatshere%%5Bzoom%%5D=18&whatshere%%5Bpoint%%5D=%f%%2C%f&lang=uz&from=navi\">%s</a>",
+            address = getMessage(Message.WITH_OWN, language) + " - " +
+                    String.format("<a href=\"https://yandex.com/navi/?whatshere%%5Bzoom%%5D=18&whatshere%%5Bpoint%%5D=%f%%2C%f&lang=uz&from=navi\">%s</a>",
                     branch.getLon(),
                     branch.getLat(),
                     branchName);
@@ -845,7 +922,6 @@ public class MakeService {
         }
         return productsMessage.toString();
     }
-
 
     private InlineKeyboardMarkup forSendOrderToChannel(Update update) {
         String chatId = getChatId(update);
@@ -912,7 +988,8 @@ public class MakeService {
                     getMessage(Message.IN_MAP, language));
         } else {
             assert branch != null;
-            address = String.format("<a href=\"https://yandex.com/navi/?whatshere%%5Bzoom%%5D=18&whatshere%%5Bpoint%%5D=%f%%2C%f&lang=uz&from=navi\">%s</a>",
+            address = getMessage(Message.WITH_OWN, language) + " - " +
+                    String.format("<a href=\"https://yandex.com/navi/?whatshere%%5Bzoom%%5D=18&whatshere%%5Bpoint%%5D=%f%%2C%f&lang=uz&from=navi\">%s</a>",
                     branch.getLon(),
                     branch.getLat(),
                     branchName);

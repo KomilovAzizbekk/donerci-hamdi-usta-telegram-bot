@@ -166,6 +166,7 @@ public class UniversalMapperImpl implements UniversalMapper {
         builder.userId(tgUser.getId());
         builder.lon(order.getLon());
         builder.lat(order.getLat());
+        builder.paidSum(order.getPaidSum());
         builder.orderProducts(toOrderProductResDTOlist(order.getOrderProducts(), chatId));
         builder.price(order.getPrice());
         builder.comment(order.getComment());
