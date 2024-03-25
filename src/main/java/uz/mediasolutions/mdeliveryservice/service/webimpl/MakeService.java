@@ -23,6 +23,7 @@ import uz.mediasolutions.mdeliveryservice.enums.ProviderName;
 import uz.mediasolutions.mdeliveryservice.enums.StepName;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.repository.*;
+import uz.mediasolutions.mdeliveryservice.service.impl.TransactionServiceImpl;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
 import java.text.DecimalFormat;
@@ -45,6 +46,7 @@ public class MakeService {
     private final OrderStatusRepository orderStatusRepository;
     private final BranchRepository branchRepository;
     private final ConstantsRepository constantsRepository;
+    private final TransactionServiceImpl transactionService;
 
     public static final String SUGGEST_COMPLAINT_CHANNEL_ID = "-1001903287909";
     public static final String LINK = "https://restoran-telegram-web-app.netlify.app/";
@@ -792,10 +794,15 @@ public class MakeService {
         String text = update.getMessage().getText();
         List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
         Order order = orderList.get(0);
+
+        Transaction transaction = transactionService.createTransaction(order.getId());
+        order.setTransaction(transaction);
+
         if (!text.equals(getMessage(Message.SKIP_COMMENT, getUserLanguage(chatId)))) {
             order.setComment(text);
-            orderRepository.save(order);
         }
+        orderRepository.save(order);
+
         SendMessage sendMessage = new SendMessage(chatId,
                 String.format(getMessage(Message.FOR_PAYMENT, getUserLanguage(chatId)), order.getId()));
         sendMessage.setReplyMarkup(forGoPayment(update));

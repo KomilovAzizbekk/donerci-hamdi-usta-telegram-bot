@@ -14,6 +14,8 @@ public interface ClickFeign {
 
     @PostMapping("/invoice/create")
     ClickResDTO createInvoice(@RequestBody ClickInvoiceDTO clickInvoiceDTO,
+//                              @RequestHeader(HttpHeaders.ACCEPT) String accept,
+//                              @RequestHeader(HttpHeaders.CONTENT_TYPE) String contentType,
                               @RequestHeader(HttpHeaders.AUTHORIZATION) String auth);
 
 }

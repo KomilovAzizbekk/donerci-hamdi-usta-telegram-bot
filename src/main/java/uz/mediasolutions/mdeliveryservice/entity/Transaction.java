@@ -24,9 +24,12 @@ public class Transaction extends AbsLong {
     private PaymentProviders paymentProvider;
 
     @Column(name = "sum")
-    private Double sum;
+    private float sum;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private PaymentStatus status;
+
+    @OneToOne(mappedBy = "transaction")
+    private Order order;
 
 }

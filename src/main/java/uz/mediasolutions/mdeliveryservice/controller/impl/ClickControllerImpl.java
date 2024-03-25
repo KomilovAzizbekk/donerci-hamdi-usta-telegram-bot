@@ -19,7 +19,7 @@ public class ClickControllerImpl implements ClickController {
 
 
     @Override
-    public ApiResult<?> createInvoice(ClickInvoiceDTO clickInvoiceDTO) {
+    public ApiResult<?> createInvoice(ClickInvoiceDTO clickInvoiceDTO) throws NoSuchAlgorithmException {
         return clickService.createInvoice(clickInvoiceDTO);
     }
 }

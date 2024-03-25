@@ -8,6 +8,7 @@ import uz.mediasolutions.mdeliveryservice.payload.ClickInvoiceDTO;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Rest;
 
 import javax.validation.Valid;
+import java.security.NoSuchAlgorithmException;
 
 @RequestMapping(ClickController.CLICK)
 public interface ClickController {
@@ -16,5 +17,5 @@ public interface ClickController {
     String CREATE_INVOICE = "create-invoice";
 
     @PostMapping(CREATE_INVOICE)
-    ApiResult<?> createInvoice(@RequestBody @Valid ClickInvoiceDTO clickInvoiceDTO);
+    ApiResult<?> createInvoice(@RequestBody @Valid ClickInvoiceDTO clickInvoiceDTO) throws NoSuchAlgorithmException;
 }
