@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import uz.mediasolutions.mdeliveryservice.payload.ClickCreateInvoiceDTO;
 import uz.mediasolutions.mdeliveryservice.payload.ClickInvoiceDTO;
-import uz.mediasolutions.mdeliveryservice.payload.ClickResDTO;
+import uz.mediasolutions.mdeliveryservice.payload.CreateInvoiceResponseDTO;
 import uz.mediasolutions.mdeliveryservice.service.abs.ClickService;
 
 import java.nio.charset.StandardCharsets;
@@ -19,68 +18,69 @@ import java.security.NoSuchAlgorithmException;
 @RequiredArgsConstructor
 public class ClickServiceImpl implements ClickService {
 
-    private final RestTemplate restTemplate;
+    @Value("${click.base.url}")
+    private String clickBaseUrl;
 
-    private static final String BASE_URL = "https://api.click.uz/v2/merchant/invoice/create";
+    @Value("${click.service.id}")
+    private Integer clickServiceId;
 
-    @Value("${click.merchant.user_id}")
-    private static String MERCHANT_USER_ID;
+    @Value("${click.merchant.id}")
+    private Integer clickMerchantId;
 
-    @Value("${click.merchant.secret_key}")
-    private static String SECRET_KEY;
+    @Value("${click.merchant.user.id}")
+    private Integer clickMerchantUserId;
 
-    @Value("${click.merchant.service_id}")
-    private static Integer SERVICE_ID;
+    @Value("${click.secret.key}")
+    private String clickSecretKey;
 
-    @Value("${click.merchant.merchant_id}")
-    private static Integer MERCHANT_ID;
-
-    @Override
-    @Transactional
-    public HttpEntity<?> createInvoice(ClickInvoiceDTO dto) {
+    private String generateDigest(long millisecond) {
         try {
-            long currentSeconds = System.currentTimeMillis() / 1000;
-            String digest = generateDigest(currentSeconds);
-            String authHeader = MERCHANT_USER_ID + ":" + digest + ":" + currentSeconds;
+            String input = millisecond + clickSecretKey;
 
-            // Create request header
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-            headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-            headers.set("Auth", authHeader);
+            MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+            byte[] hashBytes = sha1.digest(input.getBytes(StandardCharsets.UTF_8));
 
-            // Create request body
-            ClickCreateInvoiceDTO clickInvoiceDTO = new ClickCreateInvoiceDTO(
-                    SERVICE_ID, dto.getAmount(), dto.getPhoneNumber(), dto.getMerchantTransId());
-
-            HttpEntity<ClickCreateInvoiceDTO> requestEntity = new HttpEntity<>(clickInvoiceDTO, headers);
-
-            ClickResDTO response = restTemplate.postForObject(BASE_URL, requestEntity, ClickResDTO.class);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Inernal server error!");
-        }
-    }
-
-
-    private static String generateDigest(long timestamp) {
-        String dataToDigest = timestamp + SECRET_KEY;
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-1");
-            byte[] hashedBytes = digest.digest(dataToDigest.getBytes(StandardCharsets.UTF_8));
+            // Convert the byte array to a hexadecimal string
             StringBuilder hexString = new StringBuilder();
-            for (byte b : hashedBytes) {
+            for (byte b : hashBytes) {
                 String hex = Integer.toHexString(0xff & b);
                 if (hex.length() == 1) {
                     hexString.append('0');
                 }
                 hexString.append(hex);
             }
-            return hexString.toString();
+
+            String sha1Hash = hexString.toString();
+            return sha1Hash;
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public HttpEntity<?> createInvoice(ClickInvoiceDTO dto) {
+        try {
+            long currentSecond = System.currentTimeMillis() / 1000;
+            String digest = generateDigest(currentSecond);
+            String authHeader = clickMerchantUserId + ":" + digest + ":" + currentSecond;
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+            headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+            headers.set("Auth", authHeader);
+            System.out.println("authHeader => " + authHeader);
+
+            ClickCreateInvoiceDTO createInvoiceDto = new ClickCreateInvoiceDTO(
+                    clickServiceId, dto.getAmount(), dto.getPhoneNumber(), dto.getMerchantTransId());
+            HttpEntity<ClickCreateInvoiceDTO> requestEntity = new HttpEntity<>(createInvoiceDto, headers);
+
+            CreateInvoiceResponseDTO response = restTemplate.postForObject(clickBaseUrl + "invoice/create",
+                    requestEntity, CreateInvoiceResponseDTO.class);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internel server error!");
+        }
     }
 }

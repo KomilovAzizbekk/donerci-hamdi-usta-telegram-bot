@@ -49,7 +49,7 @@ public class WebProductServiceImpl implements WebProductService {
     private Long getVariationId(Product product) {
         List<Variation> variations = product.getVariations();
         float lowestPrice = variations.get(0).getPrice();
-        Long id = null;
+        Long id = variations.get(0).getId();
         for (Variation variation : variations) {
             if (lowestPrice > variation.getPrice()) {
                 lowestPrice = variation.getPrice();

@@ -1,24 +1,17 @@
 package uz.mediasolutions.mdeliveryservice.payload;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.validation.constraints.NotNull;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class ClickInvoiceDTO {
 
-    @NotNull
-    @JsonProperty(value = "amount")
     private Float amount;
 
-    @JsonProperty(value = "phone_number")
     private String phoneNumber;
 
-    @JsonProperty(value = "merchant_trans_id")
     private String merchantTransId;
 }
