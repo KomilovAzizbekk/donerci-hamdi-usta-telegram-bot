@@ -10,7 +10,10 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class ClickInvoiceDTO {
+public class ClickCreateInvoiceDTO {
+
+    @JsonProperty(value = "service_id")
+    private Integer serviceId;
 
     @NotNull
     @JsonProperty(value = "amount")

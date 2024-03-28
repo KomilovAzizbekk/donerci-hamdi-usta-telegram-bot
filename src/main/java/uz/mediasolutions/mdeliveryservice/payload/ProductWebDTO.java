@@ -21,4 +21,6 @@ public class ProductWebDTO {
 
     private boolean oneVariation;
 
+    private Long variationId;
+
 }

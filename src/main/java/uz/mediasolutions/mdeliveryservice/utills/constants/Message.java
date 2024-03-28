@@ -57,4 +57,7 @@ public interface Message {
     String ORDER_PENDING = "order.pending";
     String PRODUCTS = "products";
     String WITH_OWN = "with.own";
+    String BACK_TO_MENU = "back.to.menu";
+    String NO_WORKING_BRANCH = "no.working.branch";
+    String ORDER_MSG_TO_USER = "order.msg.to.user";
 }

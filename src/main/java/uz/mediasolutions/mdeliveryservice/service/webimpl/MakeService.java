@@ -27,6 +27,7 @@ import uz.mediasolutions.mdeliveryservice.service.impl.TransactionServiceImpl;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
 import java.text.DecimalFormat;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -196,12 +197,15 @@ public class MakeService {
         button3.setText(getMessage(Message.MENU_MY_ORDERS, getUserLanguage(chatId)));
         button4.setText(getMessage(Message.MENU_SETTINGS, getUserLanguage(chatId)));
 
+        List<Branch> activeBranches = getActiveBranches();
+        boolean branchesWorking = !activeBranches.isEmpty();
+
         if (tgUser.getLanguage().getName().equals(LanguageName.UZ)) {
-            button1.setWebApp(new WebAppInfo(LINK + chatId + "/" + UZ));
-            button3.setWebApp(new WebAppInfo(LINK + chatId + "/" + UZ));
+            button1.setWebApp(new WebAppInfo(LINK + chatId + "/" + UZ + "/" + branchesWorking));
+            button3.setWebApp(new WebAppInfo(LINK + chatId + "/" + UZ + "/" + branchesWorking));
         } else {
-            button1.setWebApp(new WebAppInfo(LINK + chatId + "/" + RU));
-            button3.setWebApp(new WebAppInfo(LINK + chatId + "/" + RU));
+            button1.setWebApp(new WebAppInfo(LINK + chatId + "/" + RU + "/" + branchesWorking));
+            button3.setWebApp(new WebAppInfo(LINK + chatId + "/" + RU + "/" + branchesWorking));
         }
 
         row1.add(button1);
@@ -217,6 +221,32 @@ public class MakeService {
         markup.setSelective(true);
         markup.setResizeKeyboard(true);
         return markup;
+    }
+
+    public List<Branch> getActiveBranches() {
+        Sort sort = Sort.by(Sort.Order.asc("createdAt"));
+        List<Branch> branches = branchRepository.findAllByActiveIsTrue(sort);
+        List<Branch> activeBranches = new ArrayList<>();
+
+        for (Branch branch : branches) {
+            if (!branch.isClosesAfterMn()) {
+                if (branch.getOpeningTime().isBefore(LocalTime.now()) &&
+                        branch.getClosingTime().isAfter(LocalTime.now())) {
+                    activeBranches.add(branch);
+                }
+            } else {
+                if (branch.getOpeningTime().isBefore(LocalTime.now())) {
+                    if (branch.getClosingTime().isBefore(LocalTime.now())) {
+                        activeBranches.add(branch);
+                    }
+                } else {
+                    if (branch.getClosingTime().isAfter(LocalTime.now())) {
+                        activeBranches.add(branch);
+                    }
+                }
+            }
+        }
+        return activeBranches;
     }
 
     public SendMessage whenSuggestComplaint(Update update) {
@@ -548,33 +578,36 @@ public class MakeService {
             sendMessage.setReplyMarkup(forSendLocation(chatId));
         } else if (text.equals(getMessage(Message.PICK_UP, language))) {
             order.setDelivery(false);
+
+            List<Branch> activeBranches = getActiveBranches();
+
+            if (!activeBranches.isEmpty())
             sendMessage.setText(getMessage(Message.CHOOSE_BRANCH, language));
-            sendMessage.setReplyMarkup(forChooseBranch(chatId));
+            else sendMessage.setText(getMessage(Message.NO_WORKING_BRANCH, language));
+
+            sendMessage.setReplyMarkup(forChooseBranch(chatId, activeBranches));
         }
         orderRepository.save(order);
         setUserStep(chatId, StepName.CHOOSE_PAYMENT);
         return sendMessage;
     }
 
-    private ReplyKeyboardMarkup forChooseBranch(String chatId) {
+    private ReplyKeyboardMarkup forChooseBranch(String chatId, List<Branch> activeBranches) {
         String language = getUserLanguage(chatId);
-
-        Sort sort = Sort.by(Sort.Order.asc("createdAt"));
-        List<Branch> branches = branchRepository.findAllByActiveIsTrue(sort);
 
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
         List<KeyboardButton> keyboardButtons = new ArrayList<>();
-
-        if (language.equals(UZ)) {
-            for (Branch market : branches)
-                keyboardButtons.add(new KeyboardButton(market.getNameUz()));
-        } else {
-            for (Branch market : branches)
-                keyboardButtons.add(new KeyboardButton(market.getNameRu()));
-        }
-
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         KeyboardRow row = new KeyboardRow();
+
+        if (!activeBranches.isEmpty()) {
+            if (language.equals(UZ)) {
+                for (Branch branch : activeBranches)
+                    keyboardButtons.add(new KeyboardButton(branch.getNameUz()));
+            } else {
+                for (Branch branch : activeBranches)
+                    keyboardButtons.add(new KeyboardButton(branch.getNameRu()));
+            }
 
         for (KeyboardButton keyboardButton : keyboardButtons) {
             row.add(keyboardButton);
@@ -585,6 +618,11 @@ public class MakeService {
         }
 
         if (!row.isEmpty()) {
+            keyboardRows.add(row);
+        }
+        } else {
+            KeyboardButton button = new KeyboardButton(getMessage(Message.BACK_TO_MENU, language));
+            row.add(button);
             keyboardRows.add(row);
         }
 
@@ -761,7 +799,12 @@ public class MakeService {
             order.setPaymentProviders(paymentProvidersRepository.findByName(ProviderName.CASH));
         }
         Order saved = orderRepository.save(order);
-        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.SEND_COMMENT, getUserLanguage(chatId)));
+        SendMessage sendMessage = new SendMessage(chatId,
+                String.format(getMessage(Message.ORDER_MSG_TO_USER, getUserLanguage(chatId)),
+                        saved.getPrice(),
+                        saved.getDeliveryPrice(),
+                        saved.getTotalPrice()) + "\n\n" +
+                        getMessage(Message.SEND_COMMENT, getUserLanguage(chatId)));
         sendMessage.setReplyMarkup(forSendComment(update));
         if (saved.getPaymentProviders().getName().equals(ProviderName.CASH)) {
             setUserStep(chatId, StepName.SEND_ORDER_TO_CHANNEL);
@@ -803,8 +846,7 @@ public class MakeService {
         }
         orderRepository.save(order);
 
-        SendMessage sendMessage = new SendMessage(chatId,
-                String.format(getMessage(Message.FOR_PAYMENT, getUserLanguage(chatId)), order.getId()));
+        SendMessage sendMessage = new SendMessage(chatId, String.format(getMessage(Message.FOR_PAYMENT, getUserLanguage(chatId)), transaction.getId()));
         sendMessage.setReplyMarkup(forGoPayment(update));
         setUserStep(chatId, StepName.SEND_ORDER_TO_CHANNEL);
         return sendMessage;

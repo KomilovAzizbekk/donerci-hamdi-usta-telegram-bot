@@ -46,6 +46,19 @@ public class WebProductServiceImpl implements WebProductService {
         return lowestPrice;
     }
 
+    private Long getVariationId(Product product) {
+        List<Variation> variations = product.getVariations();
+        float lowestPrice = variations.get(0).getPrice();
+        Long id = null;
+        for (Variation variation : variations) {
+            if (lowestPrice > variation.getPrice()) {
+                lowestPrice = variation.getPrice();
+                id = variation.getId();
+            }
+        }
+        return id;
+    }
+
     private boolean oneVariation(Product product) {
         return product.getVariations().size() == 1;
     }
@@ -60,6 +73,7 @@ public class WebProductServiceImpl implements WebProductService {
         ProductWebDTO.ProductWebDTOBuilder builder = ProductWebDTO.builder();
         builder.id(product.getId());
         builder.price(getLowestPrice(product));
+        builder.variationId(getVariationId(product));
         builder.imageUrl(product.getImageUrl());
         builder.oneVariation(oneVariation(product));
         if (tgUser.getLanguage().getName().equals(LanguageName.UZ))

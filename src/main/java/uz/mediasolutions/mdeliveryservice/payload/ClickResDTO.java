@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ClickResDTO {
-
     @JsonProperty(value = "error_code")
     private Integer errorCode;
     
