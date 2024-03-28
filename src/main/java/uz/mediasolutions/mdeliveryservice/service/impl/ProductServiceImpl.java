@@ -86,9 +86,6 @@ public class ProductServiceImpl implements ProductService {
         if (productRepository.existsByNumberAndCategoryId(dto.getNumber(), dto.getCategoryId()) &&
                 !productRepository.existsByNumberAndId(dto.getNumber(), id)) {
             throw RestException.restThrow("NUMBER MUST ME UNIQUE", HttpStatus.BAD_REQUEST);
-        } else if (productRepository.existsByNameUzOrNameRu(dto.getNameUz(), dto.getNameRu()) &&
-                !productRepository.existsByNameUzOrNameRuAndId(dto.getNameUz(), dto.getNameRu(), id)) {
-            throw RestException.restThrow("NAME ALREADY EXISTED", HttpStatus.BAD_REQUEST);
         } else {
             Product product = productRepository.findById(id).orElseThrow(
                     () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));

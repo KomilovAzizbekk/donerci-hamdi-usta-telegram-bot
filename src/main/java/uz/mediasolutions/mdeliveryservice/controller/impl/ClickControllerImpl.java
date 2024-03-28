@@ -17,4 +17,14 @@ public class ClickControllerImpl implements ClickController {
     public HttpEntity<?> createInvoice(ClickInvoiceDTO dto) {
         return clickService.createInvoice(dto);
     }
+
+    @Override
+    public HttpEntity<?> statusInvoice(Long invoiceId) {
+        return clickService.statusInvoice(invoiceId);
+    }
+
+    @Override
+    public HttpEntity<?> paymentStatusCheck(String merchantTransId) {
+        return clickService.paymentStatusCheck(merchantTransId);
+    }
 }

@@ -26,10 +26,10 @@ public class MeasureUnit extends AbsDate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name_uz")
+    @Column(name = "name_uz", unique = true)
     private String nameUz;
 
-    @Column(name = "name_ru")
+    @Column(name = "name_ru", unique = true)
     private String nameRu;
 
     @OneToMany(mappedBy = "measure", cascade = CascadeType.ALL, orphanRemoval = true)

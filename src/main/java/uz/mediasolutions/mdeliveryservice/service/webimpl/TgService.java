@@ -13,6 +13,8 @@ import uz.mediasolutions.mdeliveryservice.repository.BranchRepository;
 import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class TgService extends TelegramLongPollingBot {
@@ -101,6 +103,10 @@ public class TgService extends TelegramLongPollingBot {
                 } else if (makeService.getUserStep(chatId).equals(StepName.CHOOSE_PAYMENT) &&
                         branchRepository.existsByNameUzOrNameRu(text, text)) {
                     execute(makeService.whenChoosePayment(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.CHOOSE_PAYMENT) &&
+                        text.equals(makeService.getMessage(Message.BACK_TO_MENU, makeService.getUserLanguage(chatId)))) {
+                    execute(makeService.getSendMessage(update,
+                            Objects.equals(makeService.getUserLanguage(chatId), "UZ") ? LanguageName.UZ : LanguageName.RU));
                 }
             } else if (update.hasMessage() && update.getMessage().hasContact()) {
                 if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT)) {

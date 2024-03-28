@@ -56,18 +56,13 @@ public class MeasureUnitServiceImpl implements MeasureUnitService {
 
     @Override
     public ApiResult<?> edit(Long id, MeasureUnitDTO dto) {
-        if (measureUnitRepository.existsByNameUzOrNameRu(dto.getNameUz(), dto.getNameRu()) &&
-                !measureUnitRepository.existsByNameUzOrNameRuAndId(dto.getNameUz(), dto.getNameRu(), id)) {
-            throw RestException.restThrow("NAME ALREADY EXISTED", HttpStatus.BAD_REQUEST);
-        } else {
-            MeasureUnit measureUnit = measureUnitRepository.findById(id).orElseThrow(
+        MeasureUnit measureUnit = measureUnitRepository.findById(id).orElseThrow(
                     () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
-            measureUnit.setNameUz(dto.getNameUz());
-            measureUnit.setNameRu(dto.getNameRu());
-            measureUnitRepository.save(measureUnit);
-            return ApiResult.success("EDITED SUCCESSFULLY");
+        measureUnit.setNameUz(dto.getNameUz());
+        measureUnit.setNameRu(dto.getNameRu());
+        measureUnitRepository.save(measureUnit);
+        return ApiResult.success("EDITED SUCCESSFULLY");
     }
-}
 
     @Override
     public ApiResult<?> delete(Long id) {

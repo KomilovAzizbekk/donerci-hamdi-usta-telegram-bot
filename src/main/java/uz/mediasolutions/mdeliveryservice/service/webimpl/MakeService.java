@@ -165,14 +165,15 @@ public class MakeService {
         return getSendMessage(update, LanguageName.RU);
     }
 
-    private SendMessage getSendMessage(Update update, LanguageName languageName) {
+    public SendMessage getSendMessage(Update update, LanguageName languageName) {
         String chatId = getChatId(update);
         TgUser tgUser = tgUserRepository.findByChatId(chatId);
         Language language = languageRepository.findByName(languageName);
         tgUser.setLanguage(language);
         tgUserRepository.save(tgUser);
         SendMessage sendMessage = new SendMessage(getChatId(update),
-                String.format(getMessage(Message.MENU_MSG, getUserLanguage(chatId)), getUsername(update)));
+                String.format(getMessage(Message.MENU_MSG, getUserLanguage(chatId)),
+                        update.getMessage().getFrom().getFirstName()));
         sendMessage.setReplyMarkup(forMainMenu(chatId));
         setUserStep(chatId, StepName.CHOOSE_FROM_MAIN_MENU);
         return sendMessage;
@@ -582,8 +583,9 @@ public class MakeService {
             List<Branch> activeBranches = getActiveBranches();
 
             if (!activeBranches.isEmpty())
-            sendMessage.setText(getMessage(Message.CHOOSE_BRANCH, language));
-            else sendMessage.setText(getMessage(Message.NO_WORKING_BRANCH, language));
+                sendMessage.setText(getMessage(Message.CHOOSE_BRANCH, language));
+            else
+                sendMessage.setText(getMessage(Message.NO_WORKING_BRANCH, language));
 
             sendMessage.setReplyMarkup(forChooseBranch(chatId, activeBranches));
         }
@@ -811,6 +813,7 @@ public class MakeService {
         } else {
             setUserStep(chatId, StepName.GO_TO_PAYMENT);
         }
+        sendMessage.enableHtml(true);
         return sendMessage;
     }
 

@@ -24,6 +24,4 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     boolean existsByNumberAndId(Long number, Long id);
 
     boolean existsByNameUzOrNameRu(String nameUz, String nameRu);
-
-    boolean existsByNameUzOrNameRuAndId(String nameUz, String nameRu, Long id);
 }

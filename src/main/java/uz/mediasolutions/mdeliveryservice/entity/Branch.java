@@ -3,13 +3,11 @@ package uz.mediasolutions.mdeliveryservice.entity;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.format.annotation.DateTimeFormat;
 import uz.mediasolutions.mdeliveryservice.entity.template.AbsLong;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @AllArgsConstructor
@@ -25,10 +23,10 @@ import java.time.LocalTime;
 @Table(name = "branches")
 public class Branch extends AbsLong {
 
-    @Column(name = "name_uz")
+    @Column(name = "name_uz", unique = true)
     private String nameUz;
 
-    @Column(name = "name_ru")
+    @Column(name = "name_ru", unique = true)
     private String nameRu;
 
     @Column(name = "lon")

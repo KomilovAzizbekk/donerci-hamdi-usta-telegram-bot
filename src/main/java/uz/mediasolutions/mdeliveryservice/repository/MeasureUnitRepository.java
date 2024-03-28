@@ -12,6 +12,4 @@ public interface MeasureUnitRepository extends JpaRepository<MeasureUnit, Long> 
     Page<MeasureUnit> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     boolean existsByNameUzOrNameRu(String nameUz, String nameRu);
-
-    boolean existsByNameUzOrNameRuAndId(String nameUz, String nameRu, Long id);
 }

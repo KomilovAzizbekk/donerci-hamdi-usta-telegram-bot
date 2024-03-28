@@ -29,10 +29,10 @@ public class Product extends AbsDate {
     @Column(nullable = false, name = "number")
     private Long number;
 
-    @Column(nullable = false, name = "name_uz")
+    @Column(nullable = false, name = "name_uz", unique = true)
     private String nameUz;
 
-    @Column(nullable = false, name = "name_ru")
+    @Column(nullable = false, name = "name_ru", unique = true)
     private String nameRu;
 
     @Column(name = "description_uz", columnDefinition = "text")

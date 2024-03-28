@@ -1,18 +1,18 @@
 package uz.mediasolutions.mdeliveryservice.payload;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Builder
-public class AccountDTO {
+public class PaymeInvoiceDTO {
 
-    @JsonProperty(value = "phone")
+    private String paramId;
+
+    private float amount;
+
     private String phone;
 
 }

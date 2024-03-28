@@ -81,9 +81,6 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryRepository.existsByNumber(categoryDTO.getNumber()) &&
         !categoryRepository.existsByNumberAndId(categoryDTO.getNumber(), id)) {
             throw RestException.restThrow("NUMBER MUST ME UNIQUE", HttpStatus.BAD_REQUEST);
-        } else if (categoryRepository.existsByNameUzOrNameRu(categoryDTO.getNameUz(), categoryDTO.getNameRu()) &&
-        !categoryRepository.existsByNameUzOrNameRuAndId(categoryDTO.getNameUz(), categoryDTO.getNameRu(), id)) {
-            throw RestException.restThrow("NAME ALREADY EXISTED", HttpStatus.BAD_REQUEST);
         } else {
             Category category = categoryRepository.findById(id).orElseThrow(
                     () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));

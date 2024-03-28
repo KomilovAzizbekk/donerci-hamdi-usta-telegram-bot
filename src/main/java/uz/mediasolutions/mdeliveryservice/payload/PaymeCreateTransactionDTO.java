@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 @Data
 public class PaymeCreateTransactionDTO {
 
+    @JsonProperty(value = "id")
+    private Long id;
+
     @JsonProperty(value = "method")
     private String method;
 

@@ -15,9 +15,6 @@ import uz.mediasolutions.mdeliveryservice.payload.LocationDTO;
 import uz.mediasolutions.mdeliveryservice.repository.BranchRepository;
 import uz.mediasolutions.mdeliveryservice.service.abs.BranchService;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-
 @Service
 @RequiredArgsConstructor
 public class BranchServiceImpl implements BranchService {
@@ -61,12 +58,14 @@ public class BranchServiceImpl implements BranchService {
 
     @Override
     public ApiResult<?> edit(Long id, BranchDTO branchDTO) {
-        if (branchRepository.existsByNameUzOrNameRu(branchDTO.getNameUz(), branchDTO.getNameRu()) &&
-                !branchRepository.existsByNameUzOrNameRuAndId(branchDTO.getNameUz(), branchDTO.getNameRu(), id)) {
-            throw RestException.restThrow("NAME ALREADY EXISTED", HttpStatus.BAD_REQUEST);
-        } else {
-            Branch branch = branchRepository.findById(id).orElseThrow(
-                    () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
+        Branch branch = branchRepository.findById(id).orElseThrow(
+                () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
+
+//        if (branchRepository.existsByNameUzOrNameRu(branchDTO.getNameUz(), branchDTO.getNameRu()) &&
+//                !branchRepository.findByNameUzOrNameRu(branchDTO.getNameUz(), branchDTO.getNameRu())
+//                        .equals(branch)) {
+//            throw RestException.restThrow("NAME ALREADY EXISTED", HttpStatus.BAD_REQUEST);
+//        } else {
             branch.setNameUz(branchDTO.getNameUz());
             branch.setNameRu(branchDTO.getNameRu());
             branch.setAddressUz(branchDTO.getAddressUz());
@@ -77,7 +76,7 @@ public class BranchServiceImpl implements BranchService {
             branch.setClosesAfterMn(branchDTO.isClosesAfterMn());
             branchRepository.save(branch);
             return ApiResult.success("EDITED SUCCESSFULLY");
-        }
+//        }
     }
 
     @Override

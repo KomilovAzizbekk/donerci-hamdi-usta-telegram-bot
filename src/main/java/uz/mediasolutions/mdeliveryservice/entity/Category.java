@@ -29,10 +29,10 @@ public class Category extends AbsDate {
     @Column(name = "number", nullable = false)
     private Long number;
 
-    @Column(name = "name_uz", nullable = false)
+    @Column(name = "name_uz", nullable = false, unique = true)
     private String nameUz;
 
-    @Column(name = "name_ru", nullable = false)
+    @Column(name = "name_ru", nullable = false, unique = true)
     private String nameRu;
 
     @Column(name = "description_uz", columnDefinition = "text")
