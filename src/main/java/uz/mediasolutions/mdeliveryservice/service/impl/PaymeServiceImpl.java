@@ -10,6 +10,7 @@ import uz.mediasolutions.mdeliveryservice.entity.Transaction;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.*;
+import uz.mediasolutions.mdeliveryservice.repository.TransactionRepository;
 import uz.mediasolutions.mdeliveryservice.service.abs.PaymeService;
 
 import java.util.UUID;
@@ -18,6 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PaymeServiceImpl implements PaymeService {
 
+    private final TransactionRepository transactionRepository;
 
     @Value("${payme.base.url}")
     private String paymeBaseUrl;

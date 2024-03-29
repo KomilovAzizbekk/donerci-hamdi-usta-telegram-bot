@@ -15,6 +15,10 @@ public class VariationResDTO {
 
     private Long number;
 
+    private String nameUz;
+
+    private String nameRu;
+
     private MeasureUnitDTO measureUnit;
 
     private float measure;

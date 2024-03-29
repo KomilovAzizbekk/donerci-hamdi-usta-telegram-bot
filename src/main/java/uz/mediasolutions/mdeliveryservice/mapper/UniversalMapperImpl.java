@@ -26,12 +26,19 @@ public class UniversalMapperImpl implements UniversalMapper {
             return null;
         }
 
+        TgUser tgUser = tgUserRepository.findByChatId(chatId);
+
         VariationWebDTO.VariationWebDTOBuilder builder = VariationWebDTO.builder();
         builder.price(variation.getPrice());
         builder.measure(variation.getMeasure());
         builder.measureUnit(toMeasureUnitDTO(variation.getMeasureUnit(), chatId));
         builder.id(variation.getId());
         builder.product(toProduct2WebDTO(variation.getProduct(), chatId));
+        if (tgUser.getLanguage().getName().equals(LanguageName.UZ)) {
+            builder.name(variation.getNameUz());
+        } else {
+            builder.name(variation.getNameRu());
+        }
         return builder.build();
     }
 

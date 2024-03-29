@@ -13,6 +13,8 @@ public class VariationWebDTO {
 
     private Long id;
 
+    private String name;
+
     private Product2WebDTO product;
 
     private MeasureUnitWebDTO measureUnit;

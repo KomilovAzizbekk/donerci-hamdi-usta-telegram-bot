@@ -25,6 +25,12 @@ public class Variation extends AbsDate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "name_uz", unique = true, nullable = false)
+    private String nameUz;
+
+    @Column(name = "name_ru", unique = true, nullable = false)
+    private String nameRu;
+
     @Column(name = "number", columnDefinition = "serial")
     private Long number;
 

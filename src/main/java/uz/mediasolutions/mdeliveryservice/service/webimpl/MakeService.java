@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
+import uz.mediasolutions.mdeliveryservice.controller.abs.ClickController;
 import uz.mediasolutions.mdeliveryservice.entity.*;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
 import uz.mediasolutions.mdeliveryservice.enums.OrderStatusName;
@@ -48,6 +49,7 @@ public class MakeService {
     private final BranchRepository branchRepository;
     private final ConstantsRepository constantsRepository;
     private final TransactionServiceImpl transactionService;
+    private final ClickController clickController;
 
     public static final String SUGGEST_COMPLAINT_CHANNEL_ID = "-1001903287909";
     public static final String LINK = "https://restoran-telegram-web-app.netlify.app/";
