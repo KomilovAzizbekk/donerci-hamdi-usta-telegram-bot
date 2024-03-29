@@ -43,9 +43,6 @@ public class Variation extends AbsDate {
     @Column(name = "price")
     private float price;
 
-    @Column(name = "count")
-    private Integer count;
-
     @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 }

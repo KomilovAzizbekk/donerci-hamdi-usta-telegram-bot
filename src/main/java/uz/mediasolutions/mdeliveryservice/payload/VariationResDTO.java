@@ -25,8 +25,6 @@ public class VariationResDTO {
 
     private float price;
 
-    private Integer count;
-
     private ProductDTO product;
 
 }
