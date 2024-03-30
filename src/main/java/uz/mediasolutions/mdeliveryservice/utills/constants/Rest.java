@@ -25,7 +25,7 @@ public interface Rest {
             FileImageController.IMAGE + "get/**",
             "/favicon.ico",
             WebBannerController.BANNER_WEB + "**",
-            WebBasketController.BASKET_WEB + "**",
+//            WebBasketController.BASKET_WEB + "**",
             WebCategoryController.CATEGORY_WEB + "**",
             WebProductController.PRODUCT_WEB + "**",
             WebVariationController.VARIATION_WEB + "**",

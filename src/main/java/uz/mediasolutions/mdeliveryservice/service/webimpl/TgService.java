@@ -5,14 +5,24 @@ import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import uz.mediasolutions.mdeliveryservice.entity.Branch;
+import uz.mediasolutions.mdeliveryservice.entity.Order;
 import uz.mediasolutions.mdeliveryservice.entity.TgUser;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
+import uz.mediasolutions.mdeliveryservice.enums.OrderStatusName;
 import uz.mediasolutions.mdeliveryservice.enums.StepName;
 import uz.mediasolutions.mdeliveryservice.repository.BranchRepository;
+import uz.mediasolutions.mdeliveryservice.repository.OrderRepository;
+import uz.mediasolutions.mdeliveryservice.repository.OrderStatusRepository;
 import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -22,6 +32,8 @@ public class TgService extends TelegramLongPollingBot {
     private final MakeService makeService;
     private final TgUserRepository tgUserRepository;
     private final BranchRepository branchRepository;
+    private final OrderRepository orderRepository;
+    private final OrderStatusRepository orderStatusRepository;
 
     @Override
     public String getBotUsername() {
@@ -94,6 +106,7 @@ public class TgService extends TelegramLongPollingBot {
                                 text.equals(makeService.getMessage(Message.CASH, makeService.getUserLanguage(chatId))))) {
                     execute(makeService.whenLeaveComment(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.GO_TO_PAYMENT)) {
+                    deleteMessage(update);
                     execute(makeService.whenGoPayment(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.SEND_ORDER_TO_CHANNEL)) {
                     execute(makeService.whenSendOrderToChannel(update));
@@ -138,5 +151,78 @@ public class TgService extends TelegramLongPollingBot {
                 }
             }
         }
+    }
+
+    public void deleteMessage(Update update) throws TelegramApiException {
+        SendMessage sendMessageRemove = new SendMessage();
+        sendMessageRemove.setChatId(update.getMessage().getChatId().toString());
+        sendMessageRemove.setText(".");
+        sendMessageRemove.setReplyMarkup(new ReplyKeyboardRemove(true));
+        org.telegram.telegrambots.meta.api.objects.Message message = execute(sendMessageRemove);
+        DeleteMessage deleteMessage = new DeleteMessage(update.getMessage().getChatId().toString(), message.getMessageId());
+        execute(deleteMessage);
+    }
+
+    public SendMessage whenSendOrderToChannelClick(String chatId) {
+        String language = makeService.getUserLanguage(chatId);
+        List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
+        Order order = orderList.get(0);
+        order.setOrderStatus(orderStatusRepository.findByName(OrderStatusName.PENDING));
+        orderRepository.save(order);
+
+        String address;
+        String branchName = null;
+        String providerName;
+        String orderStatus;
+        Branch branch = order.getBranch();
+        if (language.equals("UZ")) {
+            if (order.getBranch() != null) {
+                branchName = branch.getNameUz();
+            }
+            providerName = order.getPaymentProviders().getName().getNameUz();
+            orderStatus = order.getOrderStatus().getName().getNameUz();
+        } else {
+            if (order.getBranch() != null) {
+                branchName = branch.getNameRu();
+            }
+            providerName = order.getPaymentProviders().getName().getNameRu();
+            orderStatus = order.getOrderStatus().getName().getNameRu();
+        }
+        if (order.isDelivery()) {
+            address = String.format("<a href=\"https://yandex.com/navi/?whatshere%%5Bzoom%%5D=18&whatshere%%5Bpoint%%5D=%f%%2C%f&lang=uz&from=navi\">%s</a>",
+                    order.getLon(),
+                    order.getLat(),
+                    makeService.getMessage(Message.IN_MAP, language));
+        } else {
+            assert branch != null;
+            address = makeService.getMessage(Message.WITH_OWN, language) + " - " +
+                    String.format("<a href=\"https://yandex.com/navi/?whatshere%%5Bzoom%%5D=18&whatshere%%5Bpoint%%5D=%f%%2C%f&lang=uz&from=navi\">%s</a>",
+                            branch.getLon(),
+                            branch.getLat(),
+                            branchName);
+        }
+        String format = order.getUpdatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss"));
+
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(MakeService.SUGGEST_COMPLAINT_CHANNEL_ID);
+        sendMessage.setText(
+                String.format(makeService.getMessage(Message.ORDER_MSG, language),
+                        order.getId(),
+                        order.getUser().getName(),
+                        order.getUser().getChatId(),
+                        order.getUser().getPhoneNumber(),
+                        address,
+                        format,
+                        makeService.allOrderedProducts(chatId, order.getId()),
+                        order.getComment() == null ? makeService.getMessage(Message.NO_INFO, language) : order.getComment(),
+                        providerName,
+                        order.getPrice(),
+                        order.getDeliveryPrice(),
+                        order.getTotalPrice(),
+                        order.getPaidSum(),
+                        orderStatus));
+        sendMessage.setReplyMarkup(makeService.forSendOrderToChannel(chatId));
+        sendMessage.enableHtml(true);
+        return sendMessage;
     }
 }

@@ -2,42 +2,57 @@ package uz.mediasolutions.mdeliveryservice.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import uz.mediasolutions.mdeliveryservice.entity.template.AbsLong;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.Date;
+import java.util.UUID;
 
 @Entity
+@Table(name = "payment")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Payment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@EqualsAndHashCode(callSuper = true)
+public class Payment extends AbsLong implements Cloneable {
 
+    // QAYSI INVOICEGA TEGISHLI EKANLIGI
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private TgUser user;
+    @JoinColumn(name = "invoice_id")
+    private ClickInvoice invoice;
 
-    //USHBU TO'LOVDAN QANCHA TISHGANI
-    @Column(nullable = false)
-    private Double paySum;
+    // INVOICENI UMUMIY SUMMASI. { discountPrice } DAGI SUMMA
+    private Double invoicePrice;
 
-    private Timestamp payDate = new Timestamp(System.currentTimeMillis());
+    // QANCHA PUL TO'LANGANI
+    private Double paidAmount;
 
-    private Long orderTransactionId;
+    // TO'LANGAN PULDAN QOLGAN SUMMA.
+    // AGAR QOLDIQ QQOLGAN BO'LSA YOZILADI QOLDIQ QOLMASA 0 BO'LADI
+    private Double leftoverAmount;
 
-    private String transactionId;
+    private Date date = new Date();
 
-    private Boolean cancelled = false;
+    private Double percent = 0D;
 
+    private Boolean cancelled;
 
-    public Payment(TgUser user, Double paySum, Timestamp payDate, String transactionId) {
-        this.user = user;
-        this.paySum = paySum;
-        this.payDate = payDate;
-        this.transactionId = transactionId;
+    private String cancelDescription;
+
+    private String dateTime;
+
+    public Payment(ClickInvoice invoice, Double invoicePrise, Double paidAmount, Double leftoverAmount, UUID cashierId, Date date) {
+        this.invoice = invoice;
+        this.paidAmount = paidAmount;
+        this.leftoverAmount = leftoverAmount;
+        this.date = date;
     }
 
-
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

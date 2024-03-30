@@ -4,8 +4,10 @@ import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import uz.mediasolutions.mdeliveryservice.entity.template.AbsLong;
+import uz.mediasolutions.mdeliveryservice.enums.InvoiceStatusEnum;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,22 +22,30 @@ import javax.persistence.*;
 @Table(name = "click_invoices")
 public class ClickInvoice extends AbsLong {
 
-    @Column(name = "amount", nullable = false)
-    private float amount;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private TgUser user;
 
-    @Column(name = "phone_number")
-    private String phoneNumber;
+    @Column(name = "user_id")
+    private Long userId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    private Transaction transaction;
+    @Column(name = "some_id")
+    private String someId  ;
 
-    @Column(name = "invoice_id")
-    private Long invoiceId;
+    private Double price = 0d;
 
-    @Column(name = "invoice_status")
-    private Long invoiceStatus;
+    private Double paidAmount = 0d;
 
-    @Column(name = "invoice_status_note")
-    private String invoiceStatusNote;
+    // INVOICE NING HOLATI
+    @Column(name = "invoice_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private InvoiceStatusEnum status;
+
+    // TO'LANGAN PULDAN QOLGAN SUMMA.
+    // AGAR QOLDIQ QQOLGAN BO'LSA YOZILADI QOLDIQ QOLMASA 0 BO'LADI
+    @Column(name = "left_amount")
+    private Double leftoverAmount = 0d;
+
+    private String type;
 
 }

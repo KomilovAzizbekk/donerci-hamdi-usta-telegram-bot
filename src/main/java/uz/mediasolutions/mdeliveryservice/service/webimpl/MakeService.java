@@ -1,8 +1,12 @@
 package uz.mediasolutions.mdeliveryservice.service.webimpl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.object.UpdatableSqlQuery;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -23,7 +27,9 @@ import uz.mediasolutions.mdeliveryservice.enums.OrderStatusName;
 import uz.mediasolutions.mdeliveryservice.enums.ProviderName;
 import uz.mediasolutions.mdeliveryservice.enums.StepName;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
+import uz.mediasolutions.mdeliveryservice.payload.ResClickOrderDTO;
 import uz.mediasolutions.mdeliveryservice.repository.*;
+import uz.mediasolutions.mdeliveryservice.service.impl.ClickServiceImpl;
 import uz.mediasolutions.mdeliveryservice.service.impl.TransactionServiceImpl;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
@@ -34,6 +40,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static uz.mediasolutions.mdeliveryservice.enums.InvoiceStatusEnum.PENDING;
 
 @Service
 @RequiredArgsConstructor
@@ -48,8 +56,13 @@ public class MakeService {
     private final OrderStatusRepository orderStatusRepository;
     private final BranchRepository branchRepository;
     private final ConstantsRepository constantsRepository;
-    private final TransactionServiceImpl transactionService;
-    private final ClickController clickController;
+    private final ClickInvoiceRepository clickInvoiceRepository;
+
+    @Value("${click.service.id}")
+    private String clickServiceId;
+
+    @Value("${click.merchant.id}")
+    private String clickMerchantId;
 
     public static final String SUGGEST_COMPLAINT_CHANNEL_ID = "-1001903287909";
     public static final String LINK = "https://restoran-telegram-web-app.netlify.app/";
@@ -575,24 +588,23 @@ public class MakeService {
 
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
-        if (text.equals(getMessage(Message.DELIVERY, language))) {
-            order.setDelivery(true);
-            sendMessage.setText(getMessage(Message.SEND_LOCATION, language));
-            sendMessage.setReplyMarkup(forSendLocation(chatId));
-        } else if (text.equals(getMessage(Message.PICK_UP, language))) {
-            order.setDelivery(false);
+        List<Branch> activeBranches = getActiveBranches();
 
-            List<Branch> activeBranches = getActiveBranches();
-
-            if (!activeBranches.isEmpty())
+        if (activeBranches.isEmpty()) {
+            sendMessage.setText(getMessage(Message.NO_WORKING_BRANCH, language));
+        } else {
+            if (text.equals(getMessage(Message.DELIVERY, language))) {
+                order.setDelivery(true);
+                sendMessage.setText(getMessage(Message.SEND_LOCATION, language));
+                sendMessage.setReplyMarkup(forSendLocation(chatId, activeBranches));
+            } else if (text.equals(getMessage(Message.PICK_UP, language))) {
+                order.setDelivery(false);
                 sendMessage.setText(getMessage(Message.CHOOSE_BRANCH, language));
-            else
-                sendMessage.setText(getMessage(Message.NO_WORKING_BRANCH, language));
-
-            sendMessage.setReplyMarkup(forChooseBranch(chatId, activeBranches));
+                sendMessage.setReplyMarkup(forChooseBranch(chatId, activeBranches));
+            }
+            orderRepository.save(order);
+            setUserStep(chatId, StepName.CHOOSE_PAYMENT);
         }
-        orderRepository.save(order);
-        setUserStep(chatId, StepName.CHOOSE_PAYMENT);
         return sendMessage;
     }
 
@@ -636,15 +648,19 @@ public class MakeService {
         return markup;
     }
 
-    private ReplyKeyboardMarkup forSendLocation(String chatId) {
+    private ReplyKeyboardMarkup forSendLocation(String chatId, List<Branch> activeBranches) {
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
         List<KeyboardRow> rowList = new ArrayList<>();
         KeyboardRow row1 = new KeyboardRow();
 
         KeyboardButton button1 = new KeyboardButton();
 
-        button1.setText(getMessage(Message.FOR_LOCATION, getUserLanguage(chatId)));
-        button1.setRequestLocation(true);
+        if (!activeBranches.isEmpty()) {
+            button1.setText(getMessage(Message.FOR_LOCATION, getUserLanguage(chatId)));
+            button1.setRequestLocation(true);
+        } else {
+            button1.setText(getMessage(Message.BACK_TO_MENU, getUserLanguage(chatId)));
+        }
 
         row1.add(button1);
 
@@ -843,37 +859,69 @@ public class MakeService {
         List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
         Order order = orderList.get(0);
 
-        Transaction transaction = transactionService.createTransaction(order.getId());
-        order.setTransaction(transaction);
-
         if (!text.equals(getMessage(Message.SKIP_COMMENT, getUserLanguage(chatId)))) {
             order.setComment(text);
         }
         orderRepository.save(order);
 
-        SendMessage sendMessage = new SendMessage(chatId, String.format(getMessage(Message.FOR_PAYMENT, getUserLanguage(chatId)), transaction.getId()));
-        sendMessage.setReplyMarkup(forGoPayment(update));
-        setUserStep(chatId, StepName.SEND_ORDER_TO_CHANNEL);
+        ResClickOrderDTO dto = createForTg((double) order.getTotalPrice(), chatId).getBody();
+
+        assert dto != null;
+        SendMessage sendMessage = new SendMessage(chatId, String.format(getMessage(Message.FOR_PAYMENT, getUserLanguage(chatId)), dto.getTransactionParam()));
+        sendMessage.setReplyMarkup(forGoPayment(update, dto.getPaymentUrl()));
         return sendMessage;
     }
 
-    private ReplyKeyboardMarkup forGoPayment(Update update) {
-        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> rowList = new ArrayList<>();
-        KeyboardRow row1 = new KeyboardRow();
 
-        KeyboardButton button1 = new KeyboardButton();
+    public HttpEntity<ResClickOrderDTO> createForTg(Double amount, String chatId) {
+        TgUser tgUser = tgUserRepository.findByChatId(chatId);
 
-        button1.setText(getMessage(Message.GO_PAYMENT, getUserLanguage(getChatId(update))));
+        Constants constants = constantsRepository.findById(1L).orElseThrow(
+                () -> RestException.restThrow("CONSTANTS NOT FOUND", HttpStatus.BAD_REQUEST));
+
+        if (amount < constants.getMinOrderPrice()) throw RestException.restThrow("MIN ORDER PRICE = " +
+                constants.getMinOrderPrice(), HttpStatus.BAD_REQUEST);
+        ClickInvoice invoice = ClickInvoice.builder()
+                .status(PENDING)
+                .user(tgUser)
+                .userId(tgUser.getId())
+                .price(amount)
+                .leftoverAmount(amount)
+                .paidAmount(0D)
+                .build();
+        clickInvoiceRepository.save(invoice);
+
+        ResClickOrderDTO resClickOrderDTO = new ResClickOrderDTO(
+                clickMerchantId,
+                clickServiceId,
+                invoice.getId().toString(),
+                amount
+        );
+        return ResponseEntity.ok(resClickOrderDTO);
+    }
+
+    private InlineKeyboardMarkup forGoPayment(Update update, String url) {
+        String chatId = getChatId(update);
+
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+
+        InlineKeyboardButton button1 = new InlineKeyboardButton();
+
+        button1.setText(getMessage(Message.GO_PAYMENT, getUserLanguage(chatId)));
+        button1.setUrl(url);
+
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
 
         row1.add(button1);
 
-        rowList.add(row1);
-        markup.setKeyboard(rowList);
-        markup.setSelective(true);
-        markup.setResizeKeyboard(true);
-        return markup;
+        rowsInline.add(row1);
+
+        markupInline.setKeyboard(rowsInline);
+
+        return markupInline;
     }
+
 
     public SendMessage whenSendOrderToChannel(Update update) {
         String chatId = getChatId(update);
@@ -941,12 +989,12 @@ public class MakeService {
                         order.getTotalPrice(),
                         order.getPaidSum(),
                         orderStatus));
-        sendMessage.setReplyMarkup(forSendOrderToChannel(update));
+        sendMessage.setReplyMarkup(forSendOrderToChannel(chatId));
         sendMessage.enableHtml(true);
         return sendMessage;
     }
 
-    private String allOrderedProducts(String chatId, Long orderId) {
+    String allOrderedProducts(String chatId, Long orderId) {
         String language = getUserLanguage(chatId);
         Order order = orderRepository.findById(orderId).orElseThrow(
                 () -> RestException.restThrow("ID NOT FOUND", HttpStatus.BAD_REQUEST));
@@ -977,8 +1025,7 @@ public class MakeService {
         return productsMessage.toString();
     }
 
-    private InlineKeyboardMarkup forSendOrderToChannel(Update update) {
-        String chatId = getChatId(update);
+    InlineKeyboardMarkup forSendOrderToChannel(String chatId) {
         List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
         Order order = orderList.get(0);
 

@@ -3,8 +3,10 @@ package uz.mediasolutions.mdeliveryservice.controller.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.mediasolutions.mdeliveryservice.controller.abs.ClickController;
 import uz.mediasolutions.mdeliveryservice.payload.ClickInvoiceDTO;
+import uz.mediasolutions.mdeliveryservice.payload.ClickOrderDTO;
 import uz.mediasolutions.mdeliveryservice.service.abs.ClickService;
 
 @RestController
@@ -14,17 +16,27 @@ public class ClickControllerImpl implements ClickController {
     private final ClickService clickService;
 
     @Override
-    public HttpEntity<?> createInvoice(ClickInvoiceDTO dto) {
-        return clickService.createInvoice(dto);
+    public HttpEntity<?> createInvoice(ClickInvoiceDTO dto, String chatId) {
+        return clickService.createInvoice(dto, chatId);
     }
 
     @Override
-    public HttpEntity<?> statusInvoice(Long invoiceId) {
-        return clickService.statusInvoice(invoiceId);
+    public HttpEntity<?> create(Double amount, String chatId) {
+        return clickService.create(amount, chatId);
     }
 
     @Override
-    public HttpEntity<?> paymentStatusCheck(String merchantTransId) {
-        return clickService.paymentStatusCheck(merchantTransId);
+    public ClickOrderDTO prepareMethod(ClickOrderDTO clickDTO) throws TelegramApiException {
+        return clickService.prepareMethod(clickDTO);
+    }
+
+    @Override
+    public ClickOrderDTO completeMethod(ClickOrderDTO clickDTO) {
+        return clickService.completeMethod(clickDTO);
+    }
+
+    @Override
+    public ClickOrderDTO getInfo(ClickOrderDTO clickDTO) {
+        return clickService.getInfo(clickDTO);
     }
 }

@@ -26,7 +26,7 @@ public class WebOrderServiceImpl implements WebOrderService {
     private final UniversalMapper universalMapper;
     private final OrderStatusRepository orderStatusRepository;
     private final TgService tgService;
-    private final BasketRepository basketRepository;
+//    private final BasketRepository basketRepository;
     private final OrderProductRepository orderProductRepository;
     private final MakeService makeService;
     private final ConstantsRepository constantsRepository;
@@ -78,11 +78,11 @@ public class WebOrderServiceImpl implements WebOrderService {
                 throw RestException.restThrow("ORDER PRICE SHOULD BE HIGHER THAN " +
                         constants.getMinOrderPrice(), HttpStatus.BAD_REQUEST);
             }
-            if (!basketRepository.existsByTgUserChatId(chatId)) {
-                throw RestException.restThrow("YOU HAVE NOT BASKET", HttpStatus.BAD_REQUEST);
-            }
-            Basket basket = basketRepository.findByTgUserChatId(chatId);
-            basketRepository.delete(basket);
+//            if (!basketRepository.existsByTgUserChatId(chatId)) {
+//                throw RestException.restThrow("YOU HAVE NOT BASKET", HttpStatus.BAD_REQUEST);
+//            }
+//            Basket basket = basketRepository.findByTgUserChatId(chatId);
+//            basketRepository.delete(basket);
 
             Order order = builder.build();
             orderRepository.save(order);

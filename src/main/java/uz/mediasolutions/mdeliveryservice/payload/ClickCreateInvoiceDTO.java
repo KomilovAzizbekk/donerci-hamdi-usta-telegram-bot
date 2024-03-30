@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 public class ClickCreateInvoiceDTO {
 
     @JsonProperty(value = "service_id")
-    private Integer serviceId;
+    private String serviceId;
 
     @NotNull
     @JsonProperty(value = "amount")

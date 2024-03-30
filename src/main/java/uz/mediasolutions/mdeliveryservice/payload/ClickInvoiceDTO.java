@@ -14,4 +14,5 @@ public class ClickInvoiceDTO {
     private String phoneNumber;
 
     private String merchantTransId;
+
 }

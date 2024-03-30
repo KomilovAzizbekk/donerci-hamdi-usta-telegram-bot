@@ -3,6 +3,7 @@ package uz.mediasolutions.mdeliveryservice.exceptions;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.http.HttpStatus;
+import uz.mediasolutions.mdeliveryservice.component.MessageService;
 import uz.mediasolutions.mdeliveryservice.manual.ErrorData;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Rest;
 
@@ -78,5 +79,16 @@ public class RestException extends RuntimeException {
     public static RestException restThrow(String userMsg, int errorCode, HttpStatus httpStatus) {
 
         return new RestException(userMsg, errorCode, httpStatus);
+    }
+
+    /**
+     * @param resourceKey - {@link org.springframework.context.MessageSource} bo'yicha kelishi kerak. Masalan "GROUP"
+     * @return Guruh topilmadi!
+     */
+    public static RestException notFound(String resourceKey) {
+        return new RestException(
+                MessageService.notFound(resourceKey),
+                HttpStatus.NOT_FOUND
+        );
     }
 }
