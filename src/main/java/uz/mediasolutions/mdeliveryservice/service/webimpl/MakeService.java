@@ -6,7 +6,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.object.UpdatableSqlQuery;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -20,17 +19,14 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
-import uz.mediasolutions.mdeliveryservice.controller.abs.ClickController;
 import uz.mediasolutions.mdeliveryservice.entity.*;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
 import uz.mediasolutions.mdeliveryservice.enums.OrderStatusName;
 import uz.mediasolutions.mdeliveryservice.enums.ProviderName;
 import uz.mediasolutions.mdeliveryservice.enums.StepName;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
-import uz.mediasolutions.mdeliveryservice.payload.ResClickOrderDTO;
+import uz.mediasolutions.mdeliveryservice.payload.click.ResClickOrderDTO;
 import uz.mediasolutions.mdeliveryservice.repository.*;
-import uz.mediasolutions.mdeliveryservice.service.impl.ClickServiceImpl;
-import uz.mediasolutions.mdeliveryservice.service.impl.TransactionServiceImpl;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
 import java.text.DecimalFormat;
@@ -758,21 +754,16 @@ public class MakeService {
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
         List<KeyboardRow> rowList = new ArrayList<>();
         KeyboardRow row1 = new KeyboardRow();
-        KeyboardRow row2 = new KeyboardRow();
 
         KeyboardButton button1 = new KeyboardButton();
         KeyboardButton button2 = new KeyboardButton();
-        KeyboardButton button3 = new KeyboardButton();
 
         button1.setText(getMessage(Message.CLICK, getUserLanguage(chatId)));
-        button2.setText(getMessage(Message.PAYME, getUserLanguage(chatId)));
-        button3.setText(getMessage(Message.CASH, getUserLanguage(chatId)));
+        button2.setText(getMessage(Message.CASH, getUserLanguage(chatId)));
         row1.add(button1);
         row1.add(button2);
-        row2.add(button3);
 
         rowList.add(row1);
-        rowList.add(row2);
         markup.setKeyboard(rowList);
         markup.setSelective(true);
         markup.setResizeKeyboard(true);
@@ -909,6 +900,7 @@ public class MakeService {
         InlineKeyboardButton button1 = new InlineKeyboardButton();
 
         button1.setText(getMessage(Message.GO_PAYMENT, getUserLanguage(chatId)));
+
         button1.setUrl(url);
 
         List<InlineKeyboardButton> row1 = new ArrayList<>();
@@ -1004,7 +996,8 @@ public class MakeService {
             float p = orderProduct.getCount() * orderProduct.getVariation().getPrice();
             if (language.equals("UZ")) {
                 productsMessage.append("\n").append(String.format(getMessage(Message.PRODUCTS, language),
-                        orderProduct.getVariation().getProduct().getNameUz(),
+                        orderProduct.getVariation().getProduct().getNameUz() + " " +
+                        orderProduct.getVariation().getNameUz(),
                         orderProduct.getVariation().getMeasure(),
                         orderProduct.getVariation().getMeasureUnit().getNameUz(),
                         orderProduct.getVariation().getPrice(),
@@ -1013,7 +1006,8 @@ public class MakeService {
                         p));
             } else {
                 productsMessage.append("\n").append(String.format(getMessage(Message.PRODUCTS, language),
-                        orderProduct.getVariation().getProduct().getNameRu(),
+                        orderProduct.getVariation().getProduct().getNameRu() + " " +
+                        orderProduct.getVariation().getNameRu(),
                         orderProduct.getVariation().getMeasure(),
                         orderProduct.getVariation().getMeasureUnit().getNameRu(),
                         orderProduct.getVariation().getPrice(),
@@ -1139,21 +1133,6 @@ public class MakeService {
         sendMessage.enableHtml(true);
         sendMessage.setReplyMarkup(forMainMenu(chatId));
         setUserStep(chatId, StepName.CHOOSE_FROM_MAIN_MENU);
-        return sendMessage;
-    }
-
-    public SendMessage whenSendOrderToUser(Update update) {
-        String chatId = getChatId(update);
-        String language = getUserLanguage(chatId);
-
-        List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
-        Order order = orderList.get(0);
-
-        SendMessage sendMessage = new SendMessage(chatId,
-                String.format(getMessage(Message.ORDER_PENDING, language), order.getId()));
-        sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
-        sendMessage.enableHtml(true);
-        setUserStep(chatId, StepName.PENDING_ORDER);
         return sendMessage;
     }
 }

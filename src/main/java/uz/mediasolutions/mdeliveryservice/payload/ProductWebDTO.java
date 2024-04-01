@@ -17,6 +17,8 @@ public class ProductWebDTO {
 
     private String imageUrl;
 
+    private String variationName;
+
     private float price;
 
     private boolean oneVariation;

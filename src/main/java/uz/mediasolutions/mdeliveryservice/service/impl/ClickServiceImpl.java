@@ -2,29 +2,23 @@ package uz.mediasolutions.mdeliveryservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.guieffect.qual.UIPackage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import uz.mediasolutions.mdeliveryservice.component.MessageService;
 import uz.mediasolutions.mdeliveryservice.entity.*;
 import uz.mediasolutions.mdeliveryservice.exceptions.ClickException;
 import uz.mediasolutions.mdeliveryservice.exceptions.ClickExceptionNoRollBack;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.mapper.ClickOrderMapper;
-import uz.mediasolutions.mdeliveryservice.payload.*;
+import uz.mediasolutions.mdeliveryservice.payload.click.*;
 import uz.mediasolutions.mdeliveryservice.repository.*;
 import uz.mediasolutions.mdeliveryservice.service.abs.ClickService;
-import uz.mediasolutions.mdeliveryservice.service.webimpl.MakeService;
 import uz.mediasolutions.mdeliveryservice.service.webimpl.TgService;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -94,34 +88,6 @@ public class ClickServiceImpl implements ClickService {
     }
 
     @Override
-    public HttpEntity<?> createInvoice(ClickInvoiceDTO dto, String chatId) {
-        try {
-            ResClickOrderDTO clickOrderDTO = create(Double.valueOf(dto.getAmount()), chatId).getBody();
-            String authHeader = generateAuthHeader();
-
-            RestTemplate restTemplate = new RestTemplate();
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-            headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-            headers.set("Auth", authHeader);
-            System.out.println("authHeader => " + authHeader);
-
-            assert clickOrderDTO != null;
-            ClickCreateInvoiceDTO createInvoiceDto = new ClickCreateInvoiceDTO(
-                    clickServiceId, dto.getAmount(), dto.getPhoneNumber(), clickOrderDTO.getTransactionParam());
-            HttpEntity<ClickCreateInvoiceDTO> requestEntity = new HttpEntity<>(createInvoiceDto, headers);
-
-            CreateInvoiceResponseDTO response = restTemplate.postForObject(clickBaseUrl + "invoice/create",
-                    requestEntity, CreateInvoiceResponseDTO.class);
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Internal server error!");
-        }
-    }
-
-    @Override
     public HttpEntity<ResClickOrderDTO> create(Double amount, String chatId) {
         TgUser tgUser = tgUserRepository.findByChatId(chatId);
         log.info("User {} , Amount {}", tgUser, amount);
@@ -150,6 +116,86 @@ public class ClickServiceImpl implements ClickService {
         log.info("Generated Invoice Id: {}, Amount: {}, ", invoice.getId(), invoice.getPaidAmount());
         return ResponseEntity.ok(resClickOrderDTO);
     }
+
+    @Override
+    public HttpEntity<?> createInvoice(ClickInvoiceDTO dto, String chatId) {
+        try {
+            ResClickOrderDTO clickOrderDTO = create(Double.valueOf(dto.getAmount()), chatId).getBody();
+            String authHeader = generateAuthHeader();
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+            headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+            headers.set("Auth", authHeader);
+            System.out.println("authHeader => " + authHeader);
+
+            assert clickOrderDTO != null;
+            ClickCreateInvoiceDTO createInvoiceDto = new ClickCreateInvoiceDTO(
+                    clickServiceId, dto.getAmount(), dto.getPhoneNumber(), clickOrderDTO.getTransactionParam());
+            HttpEntity<ClickCreateInvoiceDTO> requestEntity = new HttpEntity<>(createInvoiceDto, headers);
+
+            CreateInvoiceResponseDTO response = restTemplate.postForObject(clickBaseUrl + "invoice/create",
+                    requestEntity, CreateInvoiceResponseDTO.class);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Internal server error!");
+        }
+    }
+
+
+//    @Override
+//    public HttpEntity<?> getInvoiceStatus(String serviceId, String invoiceId) {
+//        try {
+//            String authHeader = generateAuthHeader();
+//
+//            RestTemplate restTemplate = new RestTemplate();
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+//            headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+//            headers.set("Auth", authHeader);
+//
+//            HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+//            String url = String.format("%s/invoice/status/%s/%s", clickBaseUrl, serviceId, invoiceId);
+//
+//            ResponseEntity<StatusInvoiceResponseDTO> response = restTemplate.exchange(
+//                    url,
+//                    HttpMethod.GET,
+//                    requestEntity,
+//                    StatusInvoiceResponseDTO.class);
+//            return ResponseEntity.ok(response.getBody());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(500).body("Internal server error!");
+//        }
+//    }
+//
+//    @Override
+//    public HttpEntity<?> paymentStatusByMerchantTransId(int serviceId, String merchantTransId) {
+//        try {
+//        String authHeader = generateAuthHeader();
+//
+//        RestTemplate restTemplate = new RestTemplate();
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+//        headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+//        headers.set("Auth", authHeader);
+//
+//        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+//        String url = String.format("%s/payment/status_by_mti/%d/%s", clickBaseUrl, serviceId, merchantTransId);
+//
+//        ResponseEntity<PaymentStatusResponseDTO> response = restTemplate.exchange(url,
+//                HttpMethod.GET,
+//                requestEntity,
+//                PaymentStatusResponseDTO.class);
+//        return ResponseEntity.ok(response.getBody());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(500).body("Internal server error!");
+//        }
+//    }
 
     @Override
     @Transactional(noRollbackFor = ClickException.class)
@@ -181,6 +227,7 @@ public class ClickServiceImpl implements ClickService {
         );
 
         tgService.execute(tgService.whenSendOrderToChannelClick(invoice.getUser().getChatId()));
+        tgService.execute(tgService.whenSendOrderToUser(invoice.getUser().getChatId()));
 
         log.info("preparePayment clickOrderDTO {}", clickOrderDTO);
         return clickOrderDTO;

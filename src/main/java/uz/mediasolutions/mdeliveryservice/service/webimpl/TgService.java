@@ -107,10 +107,12 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenLeaveComment(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.GO_TO_PAYMENT)) {
                     deleteMessage(update);
-                    execute(makeService.whenGoPayment(update));
+                    org.telegram.telegrambots.meta.api.objects.Message message = execute(makeService.whenGoPayment(update));
+                    tgUser.setMessageId(message.getMessageId());
+                    tgUserRepository.save(tgUser);
                 } else if (makeService.getUserStep(chatId).equals(StepName.SEND_ORDER_TO_CHANNEL)) {
                     execute(makeService.whenSendOrderToChannel(update));
-                    execute(makeService.whenSendOrderToUser(update));
+                    execute(whenSendOrderToUser(chatId));
                 } else if (makeService.getUserStep(chatId).equals(StepName.ORDER_CHOOSE)) {
                     execute(makeService.whenChosen(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.CHOOSE_PAYMENT) &&
@@ -223,6 +225,20 @@ public class TgService extends TelegramLongPollingBot {
                         orderStatus));
         sendMessage.setReplyMarkup(makeService.forSendOrderToChannel(chatId));
         sendMessage.enableHtml(true);
+        return sendMessage;
+    }
+
+    public SendMessage whenSendOrderToUser(String chatId) {
+        String language = makeService.getUserLanguage(chatId);
+
+        List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
+        Order order = orderList.get(0);
+
+        SendMessage sendMessage = new SendMessage(chatId,
+                String.format(makeService.getMessage(Message.ORDER_PENDING, language), order.getId()));
+        sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
+        sendMessage.enableHtml(true);
+        makeService.setUserStep(chatId, StepName.PENDING_ORDER);
         return sendMessage;
     }
 }

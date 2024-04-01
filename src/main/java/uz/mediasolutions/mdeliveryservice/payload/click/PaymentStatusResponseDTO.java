@@ -1,4 +1,4 @@
-package uz.mediasolutions.mdeliveryservice.payload;
+package uz.mediasolutions.mdeliveryservice.payload.click;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -8,18 +8,18 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class StatusInvoiceResponseDTO {
+public class PaymentStatusResponseDTO {
 
     @JsonProperty("error_code")
-    private Integer errorCode;
+    private int errorCode;
 
     @JsonProperty("error_note")
     private String errorNote;
 
-    @JsonProperty("invoice_status")
-    private Long invoiceStatus;
+    @JsonProperty("payment_id")
+    private long paymentId;
 
-    @JsonProperty("invoice_status_note")
-    private String invoiceStatusNote;
+    @JsonProperty("merchant_trans_id")
+    private String merchantTransId;
 
 }

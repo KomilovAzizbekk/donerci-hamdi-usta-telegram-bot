@@ -5,8 +5,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.mediasolutions.mdeliveryservice.controller.abs.ClickController;
-import uz.mediasolutions.mdeliveryservice.payload.ClickInvoiceDTO;
-import uz.mediasolutions.mdeliveryservice.payload.ClickOrderDTO;
+import uz.mediasolutions.mdeliveryservice.payload.click.ClickInvoiceDTO;
+import uz.mediasolutions.mdeliveryservice.payload.click.ClickOrderDTO;
 import uz.mediasolutions.mdeliveryservice.service.abs.ClickService;
 
 @RestController
@@ -24,6 +24,16 @@ public class ClickControllerImpl implements ClickController {
     public HttpEntity<?> create(Double amount, String chatId) {
         return clickService.create(amount, chatId);
     }
+
+//    @Override
+//    public HttpEntity<?> getInvoiceStatus(String serviceId, String invoiceId) {
+//        return clickService.getInvoiceStatus(serviceId, invoiceId);
+//    }
+//
+//    @Override
+//    public HttpEntity<?> getPaymentStatusByMerchantTransId(int serviceId, String merchantTransId) {
+//        return clickService.paymentStatusByMerchantTransId(serviceId, merchantTransId);
+//    }
 
     @Override
     public ClickOrderDTO prepareMethod(ClickOrderDTO clickDTO) throws TelegramApiException {

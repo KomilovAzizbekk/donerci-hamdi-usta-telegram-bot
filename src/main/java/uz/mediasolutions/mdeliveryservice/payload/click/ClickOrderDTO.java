@@ -1,4 +1,4 @@
-package uz.mediasolutions.mdeliveryservice.payload;
+package uz.mediasolutions.mdeliveryservice.payload.click;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,9 +12,6 @@ import java.io.Serializable;
 
 /**
  * This class not documented :(
- *
- * @author Muhammad Mo'minov
- * @since 7/15/2022
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor

@@ -1,4 +1,4 @@
-package uz.mediasolutions.mdeliveryservice.payload;
+package uz.mediasolutions.mdeliveryservice.payload.click;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

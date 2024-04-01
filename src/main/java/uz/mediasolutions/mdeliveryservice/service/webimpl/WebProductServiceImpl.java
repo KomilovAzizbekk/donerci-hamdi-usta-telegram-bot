@@ -12,6 +12,7 @@ import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.ProductWebDTO;
 import uz.mediasolutions.mdeliveryservice.repository.ProductRepository;
 import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
+import uz.mediasolutions.mdeliveryservice.repository.VariationRepository;
 import uz.mediasolutions.mdeliveryservice.service.webabs.WebProductService;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class WebProductServiceImpl implements WebProductService {
 
     private final ProductRepository productRepository;
     private final TgUserRepository tgUserRepository;
+    private final VariationRepository variationRepository;
 
     @Override
     public ApiResult<List<ProductWebDTO>> getAllByCategoryId(String chatId, Long categoryId) {
@@ -70,16 +72,22 @@ public class WebProductServiceImpl implements WebProductService {
 
         TgUser tgUser = tgUserRepository.findByChatId(chatId);
 
+        Variation variation = variationRepository.findById(getVariationId(product)).orElseThrow(
+                () -> RestException.restThrow("VARIATION ID NOT FOUND", HttpStatus.BAD_REQUEST));
+
         ProductWebDTO.ProductWebDTOBuilder builder = ProductWebDTO.builder();
         builder.id(product.getId());
         builder.price(getLowestPrice(product));
         builder.variationId(getVariationId(product));
         builder.imageUrl(product.getImageUrl());
         builder.oneVariation(oneVariation(product));
-        if (tgUser.getLanguage().getName().equals(LanguageName.UZ))
+        if (tgUser.getLanguage().getName().equals(LanguageName.UZ)) {
             builder.name(product.getNameUz());
-        else
+            builder.variationName(variation.getNameUz());
+        } else {
             builder.name(product.getNameRu());
+            builder.variationName(variation.getNameRu());
+        }
         return builder.build();
     }
 
