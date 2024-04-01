@@ -961,7 +961,7 @@ public class MakeService {
                     branch.getLat(),
                     branchName);
         }
-        String format = order.getUpdatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss"));
+        String format = order.getUpdatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss"));
 
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(SUGGEST_COMPLAINT_CHANNEL_ID);
@@ -1090,7 +1090,7 @@ public class MakeService {
                     branchName);
         }
 
-        String format = order.getUpdatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss"));
+        String format = order.getUpdatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss"));
 
         EditMessageText editMessageText = new EditMessageText();
         editMessageText.setChatId(SUGGEST_COMPLAINT_CHANNEL_ID);

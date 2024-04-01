@@ -39,4 +39,6 @@ public class OrderWebDTO {
 
     private float totalPrice;
 
+    private String createdAt;
+
 }

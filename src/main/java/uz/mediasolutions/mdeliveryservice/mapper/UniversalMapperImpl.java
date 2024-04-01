@@ -10,6 +10,7 @@ import uz.mediasolutions.mdeliveryservice.payload.*;
 import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
 import uz.mediasolutions.mdeliveryservice.repository.VariationRepository;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -179,6 +180,7 @@ public class UniversalMapperImpl implements UniversalMapper {
         builder.comment(order.getComment());
         builder.deliveryPrice(order.getDeliveryPrice());
         builder.totalPrice(order.getTotalPrice());
+        builder.createdAt(order.getUpdatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss")));
         if (tgUser.getLanguage().getName().equals(LanguageName.UZ)) {
             builder.status(order.getOrderStatus().getName().getNameUz());
             builder.paymentProviderName(order.getPaymentProviders().getName().getNameUz());

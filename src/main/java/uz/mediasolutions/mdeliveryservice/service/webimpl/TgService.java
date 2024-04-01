@@ -203,7 +203,7 @@ public class TgService extends TelegramLongPollingBot {
                             branch.getLat(),
                             branchName);
         }
-        String format = order.getUpdatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss"));
+        String format = order.getUpdatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss"));
 
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(MakeService.SUGGEST_COMPLAINT_CHANNEL_ID);

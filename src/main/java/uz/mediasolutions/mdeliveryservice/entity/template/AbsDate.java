@@ -25,6 +25,6 @@ public abstract class AbsDate implements Serializable {
 
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    private Timestamp updatedAt;
 
 }
