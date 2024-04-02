@@ -240,25 +240,29 @@ public class MakeService {
         List<Branch> branches = branchRepository.findAllByActiveIsTrue(sort);
         List<Branch> activeBranches = new ArrayList<>();
 
-        for (Branch branch : branches) {
-            if (!branch.isClosesAfterMn()) {
-                if (branch.getOpeningTime().isBefore(LocalTime.now()) &&
-                        branch.getClosingTime().isAfter(LocalTime.now())) {
-                    activeBranches.add(branch);
-                }
-            } else {
-                if (branch.getOpeningTime().isBefore(LocalTime.now())) {
-                    if (branch.getClosingTime().isBefore(LocalTime.now())) {
+        if (branches.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            for (Branch branch : branches) {
+                if (!branch.isClosesAfterMn()) {
+                    if (branch.getOpeningTime().isBefore(LocalTime.now()) &&
+                            branch.getClosingTime().isAfter(LocalTime.now())) {
                         activeBranches.add(branch);
                     }
                 } else {
-                    if (branch.getClosingTime().isAfter(LocalTime.now())) {
-                        activeBranches.add(branch);
+                    if (branch.getOpeningTime().isBefore(LocalTime.now())) {
+                        if (branch.getClosingTime().isBefore(LocalTime.now())) {
+                            activeBranches.add(branch);
+                        }
+                    } else {
+                        if (branch.getClosingTime().isAfter(LocalTime.now())) {
+                            activeBranches.add(branch);
+                        }
                     }
                 }
             }
+            return activeBranches;
         }
-        return activeBranches;
     }
 
     public SendMessage whenSuggestComplaint(Update update) {
@@ -961,7 +965,7 @@ public class MakeService {
                     branch.getLat(),
                     branchName);
         }
-        String format = order.getUpdatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss"));
+        String format = order.getUpdatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
 
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(SUGGEST_COMPLAINT_CHANNEL_ID);
@@ -1090,7 +1094,7 @@ public class MakeService {
                     branchName);
         }
 
-        String format = order.getUpdatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss"));
+        String format = order.getUpdatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
 
         EditMessageText editMessageText = new EditMessageText();
         editMessageText.setChatId(SUGGEST_COMPLAINT_CHANNEL_ID);

@@ -180,7 +180,7 @@ public class UniversalMapperImpl implements UniversalMapper {
         builder.comment(order.getComment());
         builder.deliveryPrice(order.getDeliveryPrice());
         builder.totalPrice(order.getTotalPrice());
-        builder.createdAt(order.getUpdatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH-mm-ss")));
+        builder.createdAt(order.getCreatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
         if (tgUser.getLanguage().getName().equals(LanguageName.UZ)) {
             builder.status(order.getOrderStatus().getName().getNameUz());
             builder.paymentProviderName(order.getPaymentProviders().getName().getNameUz());
