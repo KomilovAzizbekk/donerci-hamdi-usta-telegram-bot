@@ -22,6 +22,19 @@ public class UniversalMapperImpl implements UniversalMapper {
     private final VariationRepository variationRepository;
 
     @Override
+    public List<VariationWebDTO> toVariationWebDTOList(List<Variation> variations, String chatId) {
+        if (variations == null) {
+            return null;
+        }
+
+        List<VariationWebDTO> variationWebDTOS = new ArrayList<>();
+        for (Variation variation : variations) {
+            variationWebDTOS.add(toVariationWebDTO(variation, chatId));
+        }
+        return variationWebDTOS;
+    }
+
+    @Override
     public VariationWebDTO toVariationWebDTO(Variation variation, String chatId) {
         if (variation == null) {
             return null;
@@ -73,8 +86,10 @@ public class UniversalMapperImpl implements UniversalMapper {
         builder.id(product.getId());
         if (tgUser.getLanguage().getName().equals(LanguageName.UZ)) {
             builder.name(product.getNameUz());
+            builder.description(product.getDescriptionUz());
         } else {
             builder.name(product.getNameRu());
+            builder.description(product.getDescriptionRu());
         }
         return builder.build();
     }

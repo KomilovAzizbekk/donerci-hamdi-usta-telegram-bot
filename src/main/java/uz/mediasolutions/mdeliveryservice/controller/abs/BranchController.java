@@ -17,6 +17,8 @@ public interface BranchController {
 
     String GET_ALL = "get-all";
 
+    String ACTIVE = "active";
+
     String GET_BY_ID = "get/{id}";
 
     String ADD = "add";
@@ -26,6 +28,9 @@ public interface BranchController {
     String EDIT_LOCATION = "edit-loc/{id}";
 
     String DELETE = "delete/{id}";
+
+    @GetMapping(ACTIVE)
+    ApiResult<?> hasActive();
 
     @GetMapping(GET_ALL)
     ApiResult<Page<BranchDTO>> getAll(@RequestParam(defaultValue = Rest.DEFAULT_PAGE_NUMBER) int page,

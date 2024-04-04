@@ -17,4 +17,6 @@ public class Product2WebDTO {
 
     private String imageUrl;
 
+    private String description;
+
 }

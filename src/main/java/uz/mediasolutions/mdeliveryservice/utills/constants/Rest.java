@@ -1,9 +1,6 @@
 package uz.mediasolutions.mdeliveryservice.utills.constants;
 
-import uz.mediasolutions.mdeliveryservice.controller.abs.AuthController;
-import uz.mediasolutions.mdeliveryservice.controller.abs.ClickController;
-import uz.mediasolutions.mdeliveryservice.controller.abs.FileImageController;
-import uz.mediasolutions.mdeliveryservice.controller.abs.LanguageController;
+import uz.mediasolutions.mdeliveryservice.controller.abs.*;
 import uz.mediasolutions.mdeliveryservice.controller.web.abs.*;
 
 import java.util.HashMap;
@@ -30,7 +27,8 @@ public interface Rest {
             WebProductController.PRODUCT_WEB + "**",
             WebVariationController.VARIATION_WEB + "**",
             WebOrderController.ORDER_WEB + "**",
-            ClickController.CLICK + "**"
+            ClickController.CLICK + "**",
+            BranchController.BRANCH + BranchController.ACTIVE
     };
 
     String AUTHORIZATION_HEADER = "Authorization";

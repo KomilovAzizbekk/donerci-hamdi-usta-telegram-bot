@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface UniversalMapper {
 
+    List<VariationWebDTO> toVariationWebDTOList(List<Variation> variations, String chatId);
+
     VariationWebDTO toVariationWebDTO(Variation variation, String chatId);
 
     MeasureUnitWebDTO toMeasureUnitDTO(MeasureUnit measureUnit, String chatId);

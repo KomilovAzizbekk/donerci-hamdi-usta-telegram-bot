@@ -18,4 +18,6 @@ public interface BranchService {
 
     ApiResult<?> editLocation(Long id, LocationDTO locationDTO);
 
+    ApiResult<?> hasActive();
+
 }

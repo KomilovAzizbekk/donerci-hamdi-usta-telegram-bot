@@ -32,9 +32,6 @@ public class TgUser extends AbsLong {
     @Column(name = "username")
     private String username;
 
-    @Column(name = "message_id")
-    private Integer messageId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     private Language language;
 

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uz.mediasolutions.mdeliveryservice.entity.Branch;
@@ -14,6 +15,10 @@ import uz.mediasolutions.mdeliveryservice.payload.BranchDTO;
 import uz.mediasolutions.mdeliveryservice.payload.LocationDTO;
 import uz.mediasolutions.mdeliveryservice.repository.BranchRepository;
 import uz.mediasolutions.mdeliveryservice.service.abs.BranchService;
+
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -97,5 +102,40 @@ public class BranchServiceImpl implements BranchService {
         branch.setLon(locationDTO.getLon());
         branchRepository.save(branch);
         return ApiResult.success("EDITED SUCCESSFULLY");
+    }
+
+    @Override
+    public ApiResult<?> hasActive() {
+        Sort sort = Sort.by(Sort.Order.asc("createdAt"));
+        List<Branch> branches = branchRepository.findAllByActiveIsTrue(sort);
+        List<Branch> activeBranches = new ArrayList<>();
+
+        if (branches.isEmpty()) {
+            return ApiResult.success(false);
+        } else {
+            for (Branch branch : branches) {
+                if (!branch.isClosesAfterMn()) {
+                    if (branch.getOpeningTime().isBefore(LocalTime.now()) &&
+                            branch.getClosingTime().isAfter(LocalTime.now())) {
+                        activeBranches.add(branch);
+                    }
+                } else {
+                    if (branch.getOpeningTime().isBefore(LocalTime.now())) {
+                        if (branch.getClosingTime().isBefore(LocalTime.now())) {
+                            activeBranches.add(branch);
+                        }
+                    } else {
+                        if (branch.getClosingTime().isAfter(LocalTime.now())) {
+                            activeBranches.add(branch);
+                        }
+                    }
+                }
+            }
+            if (activeBranches.isEmpty()) {
+                return ApiResult.success(false);
+            } else {
+                return ApiResult.success(true);
+            }
+        }
     }
 }

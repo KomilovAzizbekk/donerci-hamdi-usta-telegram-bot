@@ -2,6 +2,7 @@ package uz.mediasolutions.mdeliveryservice.controller.abs;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.payload.BannerDTO;
@@ -20,7 +21,7 @@ public interface BannerController {
 
     String UPLOAD = "upload";
 
-    String DELETE = "delete/{id}";
+    String DELETE = "delete/{id}";  
 
     @GetMapping(GET_ALL)
     ApiResult<Page<BannerDTO>> getAll(@RequestParam(defaultValue = Rest.DEFAULT_PAGE_NUMBER) int page,

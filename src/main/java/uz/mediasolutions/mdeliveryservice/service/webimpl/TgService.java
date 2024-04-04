@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -22,6 +23,7 @@ import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,14 +39,14 @@ public class TgService extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "uygogo_bot";
-//        return "sakaka_bot";
+//        return "uygogo_bot";
+        return "sakaka_bot";
     }
 
     @Override
     public String getBotToken() {
-        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
-//        return "6052104473:AAEscLILevwPMcG_00PYqAf-Kpb7eIUCIGg";
+//        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
+        return "6052104473:AAEscLILevwPMcG_00PYqAf-Kpb7eIUCIGg";
     }
 
     @SneakyThrows
@@ -107,9 +109,7 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenLeaveComment(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.GO_TO_PAYMENT)) {
                     deleteMessage(update);
-                    org.telegram.telegrambots.meta.api.objects.Message message = execute(makeService.whenGoPayment(update));
-                    tgUser.setMessageId(message.getMessageId());
-                    tgUserRepository.save(tgUser);
+                    execute(makeService.whenGoPayment(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.SEND_ORDER_TO_CHANNEL)) {
                     execute(makeService.whenSendOrderToChannel(update));
                     execute(whenSendOrderToUser(chatId));
@@ -122,6 +122,10 @@ public class TgService extends TelegramLongPollingBot {
                         text.equals(makeService.getMessage(Message.BACK_TO_MENU, makeService.getUserLanguage(chatId)))) {
                     execute(makeService.getSendMessage(update,
                             Objects.equals(makeService.getUserLanguage(chatId), "UZ") ? LanguageName.UZ : LanguageName.RU));
+                } else if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT)) {
+                    execute(makeService.whenIncorrectPhoneFormat(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT_1)) {
+                    execute(makeService.whenIncorrectPhoneFormat1(update));
                 }
             } else if (update.hasMessage() && update.getMessage().hasContact()) {
                 if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT)) {
@@ -170,7 +174,8 @@ public class TgService extends TelegramLongPollingBot {
         List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
         Order order = orderList.get(0);
         order.setOrderStatus(orderStatusRepository.findByName(OrderStatusName.PENDING));
-        orderRepository.save(order);
+        order.setPaidSum(order.getTotalPrice());
+        Order saved = orderRepository.save(order);
 
         String address;
         String branchName = null;
@@ -221,7 +226,7 @@ public class TgService extends TelegramLongPollingBot {
                         order.getPrice(),
                         order.getDeliveryPrice(),
                         order.getTotalPrice(),
-                        order.getPaidSum(),
+                        saved.getPaidSum(),
                         orderStatus));
         sendMessage.setReplyMarkup(makeService.forSendOrderToChannel(chatId));
         sendMessage.enableHtml(true);
@@ -234,11 +239,28 @@ public class TgService extends TelegramLongPollingBot {
         List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
         Order order = orderList.get(0);
 
-        SendMessage sendMessage = new SendMessage(chatId,
-                String.format(makeService.getMessage(Message.ORDER_PENDING, language), order.getId()));
-        sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(String.format(
+                makeService.getMessage(Message.ORDER_PENDING, language), order.getId()));
         sendMessage.enableHtml(true);
+        sendMessage.setReplyMarkup(makeService.forMainMenu(chatId));
         makeService.setUserStep(chatId, StepName.PENDING_ORDER);
         return sendMessage;
+    }
+
+    public List<String> branchNames(Update update) {
+        String chatId = makeService.getChatId(update);
+        List<Branch> branches = branchRepository.findAllByActiveIsTrue();
+        List<String> branchNames = new ArrayList<>();
+        String language = makeService.getUserLanguage(chatId);
+        for (Branch branch : branches) {
+            if (language.equals("UZ")) {
+                branchNames.add(branch.getNameUz().trim());
+            } else {
+                branchNames.add(branch.getNameRu().trim());
+            }
+        }
+        return branchNames;
     }
 }

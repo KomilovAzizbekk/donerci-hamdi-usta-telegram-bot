@@ -209,16 +209,14 @@ public class MakeService {
         button3.setText(getMessage(Message.MENU_MY_ORDERS, getUserLanguage(chatId)));
         button4.setText(getMessage(Message.MENU_SETTINGS, getUserLanguage(chatId)));
 
-        List<Branch> activeBranches = getActiveBranches();
-        boolean branchesWorking = !activeBranches.isEmpty();
-
         if (tgUser.getLanguage().getName().equals(LanguageName.UZ)) {
-            button1.setWebApp(new WebAppInfo(LINK + chatId + "/" + UZ + "/" + branchesWorking));
-            button3.setWebApp(new WebAppInfo(LINK + chatId + "/" + UZ + "/" + branchesWorking));
+            button1.setWebApp(new WebAppInfo(LINK + chatId + "/" + UZ));
+            button3.setWebApp(new WebAppInfo(LINK + "orders/" + chatId + "/" + UZ));
         } else {
-            button1.setWebApp(new WebAppInfo(LINK + chatId + "/" + RU + "/" + branchesWorking));
-            button3.setWebApp(new WebAppInfo(LINK + chatId + "/" + RU + "/" + branchesWorking));
+            button1.setWebApp(new WebAppInfo(LINK + chatId + "/" + RU));
+            button3.setWebApp(new WebAppInfo(LINK + "orders/" + chatId + "/" + RU));
         }
+
 
         row1.add(button1);
         row2.add(button2);
@@ -592,6 +590,7 @@ public class MakeService {
 
         if (activeBranches.isEmpty()) {
             sendMessage.setText(getMessage(Message.NO_WORKING_BRANCH, language));
+            sendMessage.setReplyMarkup(forSendLocation(chatId, activeBranches));
         } else {
             if (text.equals(getMessage(Message.DELIVERY, language))) {
                 order.setDelivery(true);
@@ -602,8 +601,8 @@ public class MakeService {
                 sendMessage.setText(getMessage(Message.CHOOSE_BRANCH, language));
                 sendMessage.setReplyMarkup(forChooseBranch(chatId, activeBranches));
             }
-            orderRepository.save(order);
             setUserStep(chatId, StepName.CHOOSE_PAYMENT);
+            orderRepository.save(order);
         }
         return sendMessage;
     }
