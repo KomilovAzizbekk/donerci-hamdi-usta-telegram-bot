@@ -39,14 +39,14 @@ public class TgService extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-//        return "uygogo_bot";
-        return "sakaka_bot";
+        return "uygogo_bot";
+//        return "sakaka_bot";
     }
 
     @Override
     public String getBotToken() {
-//        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
-        return "6052104473:AAEscLILevwPMcG_00PYqAf-Kpb7eIUCIGg";
+        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
+//        return "6052104473:AAEscLILevwPMcG_00PYqAf-Kpb7eIUCIGg";
     }
 
     @SneakyThrows
@@ -211,7 +211,7 @@ public class TgService extends TelegramLongPollingBot {
         String format = order.getUpdatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
 
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(MakeService.SUGGEST_COMPLAINT_CHANNEL_ID);
+        sendMessage.setChatId(MakeService.ORDER_CHANNEL_ID);
         sendMessage.setText(
                 String.format(makeService.getMessage(Message.ORDER_MSG, language),
                         order.getId(),

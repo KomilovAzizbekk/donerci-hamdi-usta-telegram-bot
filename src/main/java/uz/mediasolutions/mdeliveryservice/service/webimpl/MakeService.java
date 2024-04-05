@@ -61,7 +61,8 @@ public class MakeService {
     private String clickMerchantId;
 
     public static final String SUGGEST_COMPLAINT_CHANNEL_ID = "-1001903287909";
-    public static final String LINK = "https://restoran-telegram-web-app.netlify.app/";
+    public static final String ORDER_CHANNEL_ID = "-1001903287909";
+    public static final String LINK = "https://hamdi-usta-bot-web-app.netlify.app/";
     public static final String UZ = "UZ";
     public static final String RU = "RU";
 
@@ -967,7 +968,7 @@ public class MakeService {
         String format = order.getUpdatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
 
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(SUGGEST_COMPLAINT_CHANNEL_ID);
+        sendMessage.setChatId(ORDER_CHANNEL_ID);
         sendMessage.setText(
                 String.format(getMessage(Message.ORDER_MSG, language),
                         order.getId(),
@@ -1096,7 +1097,7 @@ public class MakeService {
         String format = order.getUpdatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
 
         EditMessageText editMessageText = new EditMessageText();
-        editMessageText.setChatId(SUGGEST_COMPLAINT_CHANNEL_ID);
+        editMessageText.setChatId(ORDER_CHANNEL_ID);
         editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
         editMessageText.enableHtml(true);
         editMessageText.setText(
