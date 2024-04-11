@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import uz.mediasolutions.mdeliveryservice.entity.*;
+import uz.mediasolutions.mdeliveryservice.entity.payme.Client;
 import uz.mediasolutions.mdeliveryservice.enums.*;
 import uz.mediasolutions.mdeliveryservice.repository.*;
 import uz.mediasolutions.mdeliveryservice.service.webimpl.TgService;
@@ -33,6 +34,7 @@ public class DataLoader implements CommandLineRunner {
     private final ConstantsRepository constantsRepository;
     private final OrderStatusRepository orderStatusRepository;
     private final PaymentProvidersRepository paymentProvidersRepository;
+    private final ClientRepository clientRepository;
 
     @Value("${spring.sql.init.mode}")
     private String mode;
@@ -47,6 +49,8 @@ public class DataLoader implements CommandLineRunner {
             e.printStackTrace();
         }
 
+        addClients();
+
         if (mode.equals("always")) {
             addRole();
             addAdmin();
@@ -57,8 +61,15 @@ public class DataLoader implements CommandLineRunner {
             addConstants();
             addOrderStatus();
             addPaymentProviders();
+
         }
 
+    }
+
+    private void addClients() {
+        if (!clientRepository.existsByPhoneNumber("Paycom")) {
+            clientRepository.save(new Client("Paycom", passwordEncoder.encode("Va8KhzYP%gf0FJJ4ufnI97t2s4??89g#RCFw")));
+        }
     }
 
     private void addPaymentProviders() {

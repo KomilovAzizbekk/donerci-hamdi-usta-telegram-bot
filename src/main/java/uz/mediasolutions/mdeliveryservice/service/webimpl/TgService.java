@@ -169,7 +169,7 @@ public class TgService extends TelegramLongPollingBot {
         execute(deleteMessage);
     }
 
-    public SendMessage whenSendOrderToChannelClick(String chatId) {
+    public SendMessage whenSendOrderToChannelClickOrPayme(String chatId) {
         String language = makeService.getUserLanguage(chatId);
         List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
         Order order = orderList.get(0);

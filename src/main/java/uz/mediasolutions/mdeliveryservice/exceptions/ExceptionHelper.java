@@ -1,5 +1,6 @@
 package uz.mediasolutions.mdeliveryservice.exceptions;
 
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
@@ -197,6 +198,7 @@ public class ExceptionHelper {
                         Rest.SERVER_ERROR),
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 
     @ExceptionHandler(value = {AsyncRequestTimeoutException.class})
     public ResponseEntity<ApiResult<ErrorData>> handleException(AsyncRequestTimeoutException ex) {

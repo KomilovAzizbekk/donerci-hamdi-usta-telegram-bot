@@ -1,22 +1,18 @@
 package uz.mediasolutions.mdeliveryservice.controller.abs;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
-import uz.mediasolutions.mdeliveryservice.payload.PaymeCreateTransactionDTO;
-import uz.mediasolutions.mdeliveryservice.payload.PaymeInvoiceDTO;
+import net.minidev.json.JSONObject;
+import org.springframework.web.bind.annotation.*;
+import uz.mediasolutions.mdeliveryservice.payload.payme.*;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Rest;
 
-import javax.validation.Valid;
 
-@RequestMapping(PaymeController.CLICK)
+@RequestMapping(PaymeController.PAYME)
 public interface PaymeController {
 
-    String CLICK = Rest.BASE_PATH + "payme/";
-    String CREATE_TRANSACTION = "create-transaction";
+    String PAYME = Rest.BASE_PATH + "payme/";
 
-    @PostMapping(CREATE_TRANSACTION)
-    HttpEntity<?> createTransaction(@RequestBody PaymeInvoiceDTO dto);
+    @PostMapping
+    JSONObject post(@RequestBody PaycomRequestForm requestForm,
+                    @RequestHeader(value = "Authorization", required = false) String authorization);
+
 }

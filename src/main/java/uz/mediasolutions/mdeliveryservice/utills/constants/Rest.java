@@ -28,6 +28,7 @@ public interface Rest {
             WebVariationController.VARIATION_WEB + "**",
             WebOrderController.ORDER_WEB + "**",
             ClickController.CLICK + "**",
+            PaymeController.PAYME + "**",
             BranchController.BRANCH + BranchController.ACTIVE
     };
 
