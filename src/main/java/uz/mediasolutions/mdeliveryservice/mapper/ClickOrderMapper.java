@@ -2,7 +2,7 @@ package uz.mediasolutions.mdeliveryservice.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import uz.mediasolutions.mdeliveryservice.entity.ClickOrder;
+import uz.mediasolutions.mdeliveryservice.entity.click.ClickOrder;
 import uz.mediasolutions.mdeliveryservice.payload.click.ClickOrderDTO;
 
 /**

@@ -1,8 +1,9 @@
-package uz.mediasolutions.mdeliveryservice.entity;
+package uz.mediasolutions.mdeliveryservice.entity.click;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import uz.mediasolutions.mdeliveryservice.entity.TgUser;
 import uz.mediasolutions.mdeliveryservice.entity.template.AbsLong;
 import uz.mediasolutions.mdeliveryservice.enums.InvoiceStatusEnum;
 

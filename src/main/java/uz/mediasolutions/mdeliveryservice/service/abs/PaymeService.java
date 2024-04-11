@@ -1,10 +1,10 @@
 package uz.mediasolutions.mdeliveryservice.service.abs;
 
-import org.springframework.http.HttpEntity;
-import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
-import uz.mediasolutions.mdeliveryservice.payload.PaymeCreateTransactionDTO;
-import uz.mediasolutions.mdeliveryservice.payload.PaymeInvoiceDTO;
+import net.minidev.json.JSONObject;
+import uz.mediasolutions.mdeliveryservice.payload.payme.*;
+
 
 public interface PaymeService {
-    HttpEntity<?> createTransaction(PaymeInvoiceDTO dto);
+    JSONObject payWithPayme(PaycomRequestForm requestForm, String authorization);
+
 }

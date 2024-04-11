@@ -1,4 +1,4 @@
-package uz.mediasolutions.mdeliveryservice.entity;
+package uz.mediasolutions.mdeliveryservice.entity.click;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

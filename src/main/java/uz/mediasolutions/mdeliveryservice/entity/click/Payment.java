@@ -1,13 +1,13 @@
-package uz.mediasolutions.mdeliveryservice.entity;
+package uz.mediasolutions.mdeliveryservice.entity.click;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import uz.mediasolutions.mdeliveryservice.entity.click.ClickInvoice;
 import uz.mediasolutions.mdeliveryservice.entity.template.AbsLong;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.UUID;
 

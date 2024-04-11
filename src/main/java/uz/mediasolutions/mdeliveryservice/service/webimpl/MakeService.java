@@ -20,19 +20,21 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo;
 import uz.mediasolutions.mdeliveryservice.entity.*;
-import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
-import uz.mediasolutions.mdeliveryservice.enums.OrderStatusName;
-import uz.mediasolutions.mdeliveryservice.enums.ProviderName;
-import uz.mediasolutions.mdeliveryservice.enums.StepName;
+import uz.mediasolutions.mdeliveryservice.entity.click.ClickInvoice;
+import uz.mediasolutions.mdeliveryservice.entity.payme.OrderTransaction;
+import uz.mediasolutions.mdeliveryservice.enums.*;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.payload.click.ResClickOrderDTO;
 import uz.mediasolutions.mdeliveryservice.repository.*;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,6 +55,7 @@ public class MakeService {
     private final BranchRepository branchRepository;
     private final ConstantsRepository constantsRepository;
     private final ClickInvoiceRepository clickInvoiceRepository;
+    private final OrderTransactionRepository transactionRepository;
 
     @Value("${click.service.id}")
     private String clickServiceId;
@@ -60,8 +63,11 @@ public class MakeService {
     @Value("${click.merchant.id}")
     private String clickMerchantId;
 
-    public static final String SUGGEST_COMPLAINT_CHANNEL_ID = "-1001903287909";
-    public static final String ORDER_CHANNEL_ID = "-1001903287909";
+    @Value("${payme.merchant.id}")
+    private String paymeMerchantId;
+
+    public static final String SUGGEST_COMPLAINT_CHANNEL_ID = "-1001999340738";
+    public static final String ORDER_CHANNEL_ID = "-1002032767091";
     public static final String LINK = "https://hamdi-usta-bot-web-app.netlify.app/";
     public static final String UZ = "UZ";
     public static final String RU = "RU";
@@ -758,16 +764,23 @@ public class MakeService {
         ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
         List<KeyboardRow> rowList = new ArrayList<>();
         KeyboardRow row1 = new KeyboardRow();
+        KeyboardRow row2 = new KeyboardRow();
 
         KeyboardButton button1 = new KeyboardButton();
         KeyboardButton button2 = new KeyboardButton();
+        KeyboardButton button3 = new KeyboardButton();
 
         button1.setText(getMessage(Message.CLICK, getUserLanguage(chatId)));
-        button2.setText(getMessage(Message.CASH, getUserLanguage(chatId)));
+        button2.setText(getMessage(Message.PAYME, getUserLanguage(chatId)));
+        button3.setText(getMessage(Message.CASH, getUserLanguage(chatId)));
+
         row1.add(button1);
         row1.add(button2);
+        row2.add(button3);
 
         rowList.add(row1);
+        rowList.add(row2);
+
         markup.setKeyboard(rowList);
         markup.setSelective(true);
         markup.setResizeKeyboard(true);
@@ -859,12 +872,32 @@ public class MakeService {
         }
         orderRepository.save(order);
 
-        ResClickOrderDTO dto = createForTg((double) order.getTotalPrice(), chatId).getBody();
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
 
-        assert dto != null;
-        SendMessage sendMessage = new SendMessage(chatId, String.format(getMessage(Message.FOR_PAYMENT, getUserLanguage(chatId)), dto.getTransactionParam()));
-        sendMessage.setReplyMarkup(forGoPayment(update, dto.getPaymentUrl()));
+        if (order.getPaymentProviders().getName().equals(ProviderName.CLICK)) {
+            ResClickOrderDTO dto = createForTg((double) order.getTotalPrice(), chatId).getBody();
+            assert dto != null;
+            sendMessage.setText(String.format(getMessage(Message.FOR_PAYMENT, getUserLanguage(chatId)), dto.getTransactionParam()));
+            sendMessage.setReplyMarkup(forGoPayment(update, dto.getPaymentUrl()));
+        } else if (order.getPaymentProviders().getName().equals(ProviderName.PAYME)) {
+
+            OrderTransaction newTransaction = new OrderTransaction(paymeMerchantId, new Timestamp(System.currentTimeMillis()),
+                    TransactionState.STATE_IN_PROGRESS, order);
+            OrderTransaction save = transactionRepository.save(newTransaction);
+
+            sendMessage.setText(String.format(getMessage(Message.FOR_PAYMENT, getUserLanguage(chatId)), save.getId()));
+            sendMessage.setReplyMarkup(forGoPayment(update,
+                    createPaymentUrl(order.getId(), (int) order.getTotalPrice())));
+        }
+
         return sendMessage;
+    }
+
+    public String createPaymentUrl(Long orderId, Integer amount) {
+        String formatUrl = "m=" + paymeMerchantId + ";ac.order_id=" + orderId + ";a=" + amount;
+        String encoded = Base64.getEncoder().encodeToString(formatUrl.getBytes());
+        return "https://checkout.paycom.uz/" + encoded;
     }
 
 

@@ -7,9 +7,11 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.mediasolutions.mdeliveryservice.entity.*;
+import uz.mediasolutions.mdeliveryservice.entity.click.ClickInvoice;
+import uz.mediasolutions.mdeliveryservice.entity.click.ClickOrder;
+import uz.mediasolutions.mdeliveryservice.entity.click.Payment;
 import uz.mediasolutions.mdeliveryservice.exceptions.ClickException;
 import uz.mediasolutions.mdeliveryservice.exceptions.ClickExceptionNoRollBack;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
@@ -226,7 +228,7 @@ public class ClickServiceImpl implements ClickService {
                 clickDTO.getError_note()
         );
 
-        tgService.execute(tgService.whenSendOrderToChannelClick(invoice.getUser().getChatId()));
+        tgService.execute(tgService.whenSendOrderToChannelClickOrPayme(invoice.getUser().getChatId()));
         tgService.execute(tgService.whenSendOrderToUser(invoice.getUser().getChatId()));
 
         log.info("preparePayment clickOrderDTO {}", clickOrderDTO);
