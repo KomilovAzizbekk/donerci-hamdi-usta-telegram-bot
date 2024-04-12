@@ -34,6 +34,8 @@ public class OrderTransaction {
 
     private Integer reason;
 
+    private String paymentUrl;
+
     @Enumerated(EnumType.STRING)
     private TransactionState state;
 
@@ -44,6 +46,14 @@ public class OrderTransaction {
     @Column(name = "order_id")
     private Long orderId;
 
+
+    public OrderTransaction(String paymentUrl, String paycomId, Timestamp createTime, TransactionState transactionState, Order order) {
+        this.paymentUrl = paymentUrl;
+        this.paycomId = paycomId;
+        this.createTime = createTime;
+        this.state = transactionState;
+        this.order = order;
+    }
 
     public OrderTransaction(String paycomId, Timestamp createTime, TransactionState transactionState, Order order) {
         this.paycomId = paycomId;

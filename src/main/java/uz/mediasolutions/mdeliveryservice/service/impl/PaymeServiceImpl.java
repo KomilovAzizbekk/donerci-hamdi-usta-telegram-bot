@@ -46,9 +46,6 @@ public class PaymeServiceImpl implements PaymeService {
     @Value("${payme.merchant.id}")
     private String paymeMerchantId;
 
-    @Value("${payme.merchant.key}")
-    private String paymeMerchantKey;
-
     public String createPaymentUrl(Long orderId, Integer amount) {
         String formatUrl = "m=" + paymeMerchantId + ";ac.order_id=" + orderId + ";a=" + amount;
         String encoded = Base64.getEncoder().encodeToString(formatUrl.getBytes());

@@ -19,8 +19,6 @@ public interface UniversalMapper {
 
     List<OrderProductResDTO> toOrderProductResDTOlist(List<OrderProducts> orderProducts, String chatId);
 
-    BasketWebDTO toBasketWebDTO(Basket basket, String chatId);
-
     float totalPrice(List<OrderProducts> orderProducts);
 
     List<OrderProducts> toOrderProductsEntityList(List<OrderProductDTO> dtoList);

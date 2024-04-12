@@ -882,13 +882,14 @@ public class MakeService {
             sendMessage.setReplyMarkup(forGoPayment(update, dto.getPaymentUrl()));
         } else if (order.getPaymentProviders().getName().equals(ProviderName.PAYME)) {
 
-            OrderTransaction newTransaction = new OrderTransaction(paymeMerchantId, new Timestamp(System.currentTimeMillis()),
+            String paymentUrl = createPaymentUrl(order.getId(), (int) order.getTotalPrice());
+            OrderTransaction newTransaction = new OrderTransaction(paymentUrl,
+                    paymeMerchantId, new Timestamp(System.currentTimeMillis()),
                     TransactionState.STATE_IN_PROGRESS, order);
             OrderTransaction save = transactionRepository.save(newTransaction);
 
             sendMessage.setText(String.format(getMessage(Message.FOR_PAYMENT, getUserLanguage(chatId)), save.getId()));
-            sendMessage.setReplyMarkup(forGoPayment(update,
-                    createPaymentUrl(order.getId(), (int) order.getTotalPrice())));
+            sendMessage.setReplyMarkup(forGoPayment(update, paymentUrl));
         }
 
         return sendMessage;

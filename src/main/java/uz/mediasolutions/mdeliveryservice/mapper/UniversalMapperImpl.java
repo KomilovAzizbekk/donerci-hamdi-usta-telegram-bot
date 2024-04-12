@@ -121,21 +121,6 @@ public class UniversalMapperImpl implements UniversalMapper {
     }
 
     @Override
-    public BasketWebDTO toBasketWebDTO(Basket basket, String chatId) {
-        if (basket == null) {
-            return null;
-        }
-
-        BasketWebDTO.BasketWebDTOBuilder basketWebDTO = BasketWebDTO.builder();
-
-        basketWebDTO.id(basket.getId());
-        basketWebDTO.totalPrice(totalPrice(basket.getOrderProducts()));
-        basketWebDTO.orderProducts(toOrderProductResDTOlist(basket.getOrderProducts(), chatId));
-
-        return basketWebDTO.build();
-    }
-
-    @Override
     public float totalPrice(List<OrderProducts> orderProducts) {
         if (orderProducts == null) {
             return 0;
