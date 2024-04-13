@@ -43,16 +43,6 @@ public class PaymeServiceImpl implements PaymeService {
     private final ClientRepository clientRepository;
 
 
-    @Value("${payme.merchant.id}")
-    private String paymeMerchantId;
-
-    public String createPaymentUrl(Long orderId, Integer amount) {
-        String formatUrl = "m=" + paymeMerchantId + ";ac.order_id=" + orderId + ";a=" + amount;
-        String encoded = Base64.getEncoder().encodeToString(formatUrl.getBytes());
-        return "https://checkout.paycom.uz/" + encoded;
-    }
-
-
     public boolean checkPerformTransaction(PaycomRequestForm requestForm, JSONRPC2Response response) {
 
         //PAYCOMDAN ACOUNT FIELDI KELMASA

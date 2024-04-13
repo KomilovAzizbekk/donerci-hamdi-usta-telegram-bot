@@ -7,7 +7,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import uz.mediasolutions.mdeliveryservice.entity.*;
 import uz.mediasolutions.mdeliveryservice.entity.payme.Client;
@@ -42,12 +41,8 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-        try {
-            TgService tgService = applicationContext.getBean(TgService.class);
-            telegramBotsApi.registerBot(tgService);
-        } catch (TelegramApiRequestException e) {
-            e.printStackTrace();
-        }
+        TgService tgService = applicationContext.getBean(TgService.class);
+        telegramBotsApi.registerBot(tgService);
 
         addClients();
 
