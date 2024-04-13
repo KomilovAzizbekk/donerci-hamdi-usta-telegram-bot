@@ -118,11 +118,6 @@
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 			<version>3.1.5</version>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>com.github.briandilley.jsonrpc4j</groupId>-->
-<!--			<artifactId>jsonrpc4j</artifactId>-->
-<!--			<version>1.6</version>-->
-<!--		</dependency>-->
 		<dependency>
 			<groupId>com.thetransactioncompany</groupId>
 			<artifactId>jsonrpc2-base</artifactId>

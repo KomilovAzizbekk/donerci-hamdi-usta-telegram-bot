@@ -265,6 +265,13 @@ public class PaymeServiceImpl implements PaymeService {
     @SneakyThrows
     private boolean checkPaycomUserAuth(String basicAuth, JSONRPC2Response response) {
 
+        if (basicAuth == null) {
+            response.setError(new JSONRPC2Error(-32504,
+                    "Error authentication",
+                    "auth"));
+            return true;
+        }
+
         basicAuth = basicAuth.substring("Basic".length()).trim();
 
         byte[] decode = Base64.getDecoder().decode(basicAuth);
@@ -282,11 +289,13 @@ public class PaymeServiceImpl implements PaymeService {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(client, null, new ArrayList<>());
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                response.setError(new JSONRPC2Error(-32504,
+                        "Error authentication",
+                        "auth"));
+                return true;
             }
         }
-        response.setError(new JSONRPC2Error(-32504,
-                "Error authentication",
-                "auth"));
         return false;
     }
 
@@ -296,32 +305,30 @@ public class PaymeServiceImpl implements PaymeService {
         JSONRPC2Response response = new JSONRPC2Response(requestForm.getId());
 
         //BASIC AUTH BO'SH BO'LSA YOKI XATO KELGAN BO'LSA ERROR RESPONSE BERAMIZ
-        if (authorization == null || checkPaycomUserAuth(authorization, response)) {
+        if (checkPaycomUserAuth(authorization, response)) {
             return response.toJSONObject();
+        }
 
-        } else {
-
-            //PAYCOM QAYSI METHODDA KELAYOTGANLIGIGA QARAB ISH BAJARAMIZ
-            switch (requestForm.getMethod()) {
-                case "CheckPerformTransaction":
-                    checkPerformTransaction(requestForm, response);
-                    break;
-                case "CreateTransaction":
-                    createTransaction(requestForm, response);
-                    break;
-                case "PerformTransaction":
-                    performTransaction(requestForm, response);
-                    break;
-                case "CancelTransaction":
-                    cancelTransaction(requestForm, response);
-                    break;
-                case "CheckTransaction":
-                    checkTransaction(requestForm, response);
-                    break;
-                case "GetStatement":
-                    getStatement(requestForm, response);
-                    break;
-            }
+        //PAYCOM QAYSI METHODDA KELAYOTGANLIGIGA QARAB ISH BAJARAMIZ
+        switch (requestForm.getMethod()) {
+            case "CheckPerformTransaction":
+                checkPerformTransaction(requestForm, response);
+                break;
+            case "CreateTransaction":
+                createTransaction(requestForm, response);
+                break;
+            case "PerformTransaction":
+                performTransaction(requestForm, response);
+                break;
+            case "CancelTransaction":
+                cancelTransaction(requestForm, response);
+                break;
+            case "CheckTransaction":
+                checkTransaction(requestForm, response);
+                break;
+            case "GetStatement":
+                getStatement(requestForm, response);
+                break;
         }
 
         return response.toJSONObject();

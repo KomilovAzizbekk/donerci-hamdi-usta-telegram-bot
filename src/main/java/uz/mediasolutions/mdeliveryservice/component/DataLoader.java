@@ -68,7 +68,8 @@ public class DataLoader implements CommandLineRunner {
 
     private void addClients() {
         if (!clientRepository.existsByPhoneNumber("Paycom")) {
-            clientRepository.save(new Client("Paycom", passwordEncoder.encode("Va8KhzYP%gf0FJJ4ufnI97t2s4??89g#RCFw")));
+            clientRepository.save(new Client("Paycom",
+                    passwordEncoder.encode("BnD@EaCf089XT@b%77D5B#7GTxXOveaxbcP8")));
         }
     }
 
