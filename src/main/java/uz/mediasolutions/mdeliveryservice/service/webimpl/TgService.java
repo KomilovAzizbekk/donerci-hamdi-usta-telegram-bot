@@ -175,7 +175,7 @@ public class TgService extends TelegramLongPollingBot {
         Order order = orderList.get(0);
         order.setOrderStatus(orderStatusRepository.findByName(OrderStatusName.PENDING));
         order.setPaidSum(order.getTotalPrice());
-        Order saved = orderRepository.save(order);
+        orderRepository.save(order);
 
         String address;
         String branchName = null;
@@ -226,7 +226,7 @@ public class TgService extends TelegramLongPollingBot {
                         order.getPrice(),
                         order.getDeliveryPrice(),
                         order.getTotalPrice(),
-                        saved.getPaidSum(),
+                        order.getPaidSum(),
                         orderStatus));
         sendMessage.setReplyMarkup(makeService.forSendOrderToChannel(chatId));
         sendMessage.enableHtml(true);
@@ -245,7 +245,6 @@ public class TgService extends TelegramLongPollingBot {
                 makeService.getMessage(Message.ORDER_PENDING, language), order.getId()));
         sendMessage.enableHtml(true);
         sendMessage.setReplyMarkup(makeService.forMainMenu(chatId));
-        makeService.setUserStep(chatId, StepName.PENDING_ORDER);
         return sendMessage;
     }
 

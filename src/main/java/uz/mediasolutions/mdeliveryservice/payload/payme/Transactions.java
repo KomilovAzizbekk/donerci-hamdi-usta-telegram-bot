@@ -23,13 +23,13 @@ public class Transactions {
     private Account account;
 
     @JsonProperty(value = "cancel_time")
-    private Long cancelTime;
+    private long cancelTime;
 
     @JsonProperty(value = "create_time")
-    private Long createTime;
+    private long createTime;
 
     @JsonProperty(value = "perform_time")
-    private Long performTime;
+    private long performTime;
 
     private String transaction;
 

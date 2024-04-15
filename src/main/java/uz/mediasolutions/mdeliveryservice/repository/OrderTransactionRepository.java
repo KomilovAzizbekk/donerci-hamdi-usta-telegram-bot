@@ -12,9 +12,10 @@ import java.util.Optional;
 public interface OrderTransactionRepository extends JpaRepository<OrderTransaction, Long> {
 
     Optional<OrderTransaction> findByPaycomId(String id);
-    Optional<OrderTransaction> findByPaycomIdAndOrderId(String id, Long orderId);
 
-    Optional<OrderTransaction> findByOrderId(Long id);
+    boolean existsByPaycomIdAndOrderId(String id, Long orderId);
+
+    boolean existsByOrderId(Long id);
 
     List<OrderTransaction> findAllByStateAndCreateTimeBetween(TransactionState state, Timestamp from, Timestamp to);
 

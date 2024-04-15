@@ -1,5 +1,6 @@
 package uz.mediasolutions.mdeliveryservice.payload.payme.res;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,13 +12,16 @@ import java.util.Date;
 @NoArgsConstructor
 public class CheckTransactionResult {
 
-    private Date createTime;
+    @JsonProperty(value = "create_time")
+    private long createTime;
 
-    private Date performTime;
+    @JsonProperty(value = "perform_time")
+    private long performTime;
 
-    private Date cancelTime;
+    @JsonProperty(value = "cancel_time")
+    private long cancelTime;
 
-    private Long transaction;
+    private String transaction;
 
     private Integer state;
 
