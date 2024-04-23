@@ -40,4 +40,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByCategoryIdAndVariationsIsNotEmptyAndActiveIsTrueAndCategoryActiveIsTrueAndVariationsActiveIsTrueOrderByNumberAsc(@Param("categoryId") Long categoryId);
 
     List<Product> findAllByCategoryId(Long id);
+
+    @Query(value = "select * from products p where p.id=:id", nativeQuery = true)
+    Product getProduct(Long id);
 }

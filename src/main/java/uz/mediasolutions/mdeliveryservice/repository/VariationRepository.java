@@ -3,6 +3,7 @@ package uz.mediasolutions.mdeliveryservice.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import uz.mediasolutions.mdeliveryservice.entity.Variation;
 
 import java.util.List;
@@ -24,5 +25,8 @@ public interface VariationRepository extends JpaRepository<Variation, Long> {
     List<Variation> findAllByProductIdAndActiveIsTrueOrderByNumberAsc(Long productId);
 
     List<Variation> findAllByMeasureUnitId(Long measureUnitId);
+
+    @Query(value = "select * from variations v where v.id=:id", nativeQuery = true)
+    Variation getVariation(Long id);
 
 }
