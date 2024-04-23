@@ -7,17 +7,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uz.mediasolutions.mdeliveryservice.entity.Category;
+import uz.mediasolutions.mdeliveryservice.entity.Product;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.mapper.CategoryMapper;
 import uz.mediasolutions.mdeliveryservice.payload.CategoryDTO;
 import uz.mediasolutions.mdeliveryservice.repository.CategoryRepository;
+import uz.mediasolutions.mdeliveryservice.repository.ProductRepository;
+import uz.mediasolutions.mdeliveryservice.repository.VariationRepository;
 import uz.mediasolutions.mdeliveryservice.service.abs.CategoryService;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -26,6 +30,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final ProductRepository productRepository;
+    private final VariationRepository variationRepository;
 
     @Override
     public ApiResult<Page<CategoryDTO>> getAll(int page, int size, String name, boolean active) {
@@ -116,8 +122,13 @@ public class CategoryServiceImpl implements CategoryService {
             Path path = Paths.get(imagePath);
             Files.deleteIfExists(path);
         }
+        List<Product> products = productRepository.findAllByCategoryId(category.getId());
         try {
             categoryRepository.deleteById(id);
+            productRepository.deleteAll(products);
+            for (Product product : products) {
+                variationRepository.deleteAll(variationRepository.findAllByProductId(product.getId()));
+            }
             return ApiResult.success("DELETED SUCCESSFULLY");
         } catch (Exception e) {
             throw RestException.restThrow("CANNOT DELETE", HttpStatus.CONFLICT);

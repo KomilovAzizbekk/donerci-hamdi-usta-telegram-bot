@@ -15,6 +15,7 @@ import uz.mediasolutions.mdeliveryservice.payload.ProductDTO;
 import uz.mediasolutions.mdeliveryservice.payload.ProductResDTO;
 import uz.mediasolutions.mdeliveryservice.repository.CategoryRepository;
 import uz.mediasolutions.mdeliveryservice.repository.ProductRepository;
+import uz.mediasolutions.mdeliveryservice.repository.VariationRepository;
 import uz.mediasolutions.mdeliveryservice.service.abs.ProductService;
 
 import java.io.IOException;
@@ -30,6 +31,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
+    private final VariationRepository variationRepository;
 
     @Override
     public ApiResult<Page<ProductResDTO>> getAll(int page, int size, String search, boolean active) {
@@ -126,6 +128,7 @@ public class ProductServiceImpl implements ProductService {
         }
         try {
             productRepository.deleteById(id);
+            variationRepository.deleteAll(variationRepository.findAllByProductId(product.getId()));
             return ApiResult.success("DELETED SUCCESSFULLY");
         } catch (Exception e) {
             throw RestException.restThrow("CANNOT DELETE", HttpStatus.CONFLICT);

@@ -3,7 +3,10 @@ package uz.mediasolutions.mdeliveryservice.entity;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import uz.mediasolutions.mdeliveryservice.entity.template.AbsDate;
+import uz.mediasolutions.mdeliveryservice.entity.template.AbsDateDeleted;
 import uz.mediasolutions.mdeliveryservice.entity.template.AbsLong;
 
 import javax.persistence.*;
@@ -19,8 +22,10 @@ import java.util.List;
 @DynamicInsert
 @DynamicUpdate
 @Entity
+@Where(clause = "deleted=false")
+@SQLDelete(sql = "UPDATE products SET deleted=true WHERE id=?")
 @Table(name = "products")
-public class Product extends AbsDate {
+public class Product extends AbsDateDeleted {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,13 +49,9 @@ public class Product extends AbsDate {
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Variation> variations;
-
     @Column(name = "image_url")
     private String imageUrl;
 
     @Column(name = "active")
     private boolean active;
-
 }

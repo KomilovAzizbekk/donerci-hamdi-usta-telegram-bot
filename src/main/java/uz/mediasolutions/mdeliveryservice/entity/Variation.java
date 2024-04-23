@@ -3,7 +3,10 @@ package uz.mediasolutions.mdeliveryservice.entity;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import uz.mediasolutions.mdeliveryservice.entity.template.AbsDate;
+import uz.mediasolutions.mdeliveryservice.entity.template.AbsDateDeleted;
 import uz.mediasolutions.mdeliveryservice.entity.template.AbsLong;
 
 import javax.persistence.*;
@@ -18,8 +21,10 @@ import javax.persistence.*;
 @DynamicInsert
 @DynamicUpdate
 @Entity
+@Where(clause = "deleted=false")
+@SQLDelete(sql = "UPDATE variations SET deleted=true WHERE id=?")
 @Table(name = "variations")
-public class Variation extends AbsDate {
+public class Variation extends AbsDateDeleted {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

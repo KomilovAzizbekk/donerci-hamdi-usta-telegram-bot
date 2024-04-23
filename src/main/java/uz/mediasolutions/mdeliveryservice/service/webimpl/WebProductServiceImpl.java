@@ -32,15 +32,6 @@ public class WebProductServiceImpl implements WebProductService {
             List<Product> products = productRepository
                     .findAllByCategoryIdAndVariationsIsNotEmptyAndActiveIsTrueAndCategoryActiveIsTrueAndVariationsActiveIsTrueOrderByNumberAsc(categoryId);
             List<ProductWebDTO> productWebDTOList = toProductWebDTOList(products, chatId);
-//            if (!productWebDTOList.isEmpty()) {
-//                for (ProductWebDTO productWebDTO : productWebDTOList) {
-//                    Variation variation = variationRepository.findById(productWebDTO.getVariationId()).orElseThrow(
-//                            () -> RestException.restThrow("VARIATION NOT FOUND", HttpStatus.BAD_REQUEST));
-//                    if (!variation.isActive()) {
-//                        productWebDTOList.remove(productWebDTO);
-//                    }
-//                }
-//            }
             return ApiResult.success(productWebDTOList);
         } else {
             throw RestException.restThrow("USER ID NOT FOUND", HttpStatus.BAD_REQUEST);
@@ -48,7 +39,7 @@ public class WebProductServiceImpl implements WebProductService {
     }
 
     private float getLowestPrice(Product product) {
-        List<Variation> variations = product.getVariations();
+        List<Variation> variations = variationRepository.findAllByProductId(product.getId());
         float lowestPrice = variations.get(0).getPrice();
         for (Variation variation : variations) {
             if (lowestPrice > variation.getPrice())
@@ -58,7 +49,7 @@ public class WebProductServiceImpl implements WebProductService {
     }
 
     private Long getVariationId(Product product) {
-        List<Variation> variations = product.getVariations();
+        List<Variation> variations = variationRepository.findAllByProductId(product.getId());
         float lowestPrice = variations.get(0).getPrice();
         Long id = variations.get(0).getId();
         for (Variation variation : variations) {
@@ -71,7 +62,8 @@ public class WebProductServiceImpl implements WebProductService {
     }
 
     private boolean oneVariation(Product product) {
-        return product.getVariations().size() == 1;
+        List<Variation> variations = variationRepository.findAllByProductId(product.getId());
+        return variations.size() == 1;
     }
 
     private ProductWebDTO toProductWebDTO(Product product, String chatId) {
