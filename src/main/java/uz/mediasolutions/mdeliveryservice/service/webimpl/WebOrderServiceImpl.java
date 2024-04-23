@@ -26,7 +26,6 @@ public class WebOrderServiceImpl implements WebOrderService {
     private final UniversalMapper universalMapper;
     private final OrderStatusRepository orderStatusRepository;
     private final TgService tgService;
-//    private final BasketRepository basketRepository;
     private final OrderProductRepository orderProductRepository;
     private final MakeService makeService;
     private final ConstantsRepository constantsRepository;

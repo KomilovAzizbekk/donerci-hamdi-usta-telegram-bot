@@ -40,6 +40,9 @@ public class Variation extends AbsDate {
     @Column(name = "measure")
     private float measure;
 
+    @Column(name = "active")
+    private boolean active;
+
     @Column(name = "price")
     private float price;
 

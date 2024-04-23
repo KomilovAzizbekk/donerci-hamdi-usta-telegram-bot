@@ -30,8 +30,17 @@ public class WebProductServiceImpl implements WebProductService {
     public ApiResult<List<ProductWebDTO>> getAllByCategoryId(String chatId, Long categoryId) {
         if (tgUserRepository.existsByChatId(chatId)) {
             List<Product> products = productRepository
-                    .findAllByCategoryIdAndVariationsIsNotEmptyAndActiveIsTrueAndCategoryActiveIsTrueOrderByNumberAsc(categoryId);
+                    .findAllByCategoryIdAndVariationsIsNotEmptyAndActiveIsTrueAndCategoryActiveIsTrueAndVariationsActiveIsTrueOrderByNumberAsc(categoryId);
             List<ProductWebDTO> productWebDTOList = toProductWebDTOList(products, chatId);
+//            if (!productWebDTOList.isEmpty()) {
+//                for (ProductWebDTO productWebDTO : productWebDTOList) {
+//                    Variation variation = variationRepository.findById(productWebDTO.getVariationId()).orElseThrow(
+//                            () -> RestException.restThrow("VARIATION NOT FOUND", HttpStatus.BAD_REQUEST));
+//                    if (!variation.isActive()) {
+//                        productWebDTOList.remove(productWebDTO);
+//                    }
+//                }
+//            }
             return ApiResult.success(productWebDTOList);
         } else {
             throw RestException.restThrow("USER ID NOT FOUND", HttpStatus.BAD_REQUEST);

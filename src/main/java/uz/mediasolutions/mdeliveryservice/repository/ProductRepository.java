@@ -24,5 +24,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     boolean existsByNameUzOrNameRu(String nameUz, String nameRu);
 
-    List<Product> findAllByCategoryIdAndVariationsIsNotEmptyAndActiveIsTrueAndCategoryActiveIsTrueOrderByNumberAsc(Long categoryId);
+    List<Product> findAllByCategoryIdAndVariationsIsNotEmptyAndActiveIsTrueAndCategoryActiveIsTrueAndVariationsActiveIsTrueOrderByNumberAsc(Long categoryId);
 }
