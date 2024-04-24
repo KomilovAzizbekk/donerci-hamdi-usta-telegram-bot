@@ -201,7 +201,7 @@ public class ClickServiceImpl implements ClickService {
 
     @Override
     @Transactional(noRollbackFor = ClickException.class)
-    public ClickOrderDTO prepareMethod(ClickOrderDTO clickDTO) throws TelegramApiException {
+    public ClickOrderDTO prepareMethod(ClickOrderDTO clickDTO) {
         log.info("preparePayment clickDTO: {}", clickDTO);
 
         checkClickSignKeyPrepare(clickDTO);
@@ -228,16 +228,13 @@ public class ClickServiceImpl implements ClickService {
                 clickDTO.getError_note()
         );
 
-        tgService.execute(tgService.whenSendOrderToChannelClickOrPayme(invoice.getUser().getChatId()));
-        tgService.execute(tgService.whenSendOrderToUser(invoice.getUser().getChatId()));
-
         log.info("preparePayment clickOrderDTO {}", clickOrderDTO);
         return clickOrderDTO;
 
     }
 
     @Override
-    public ClickOrderDTO completeMethod(ClickOrderDTO clickDTO) {
+    public ClickOrderDTO completeMethod(ClickOrderDTO clickDTO) throws TelegramApiException {
         log.info("completePayment clickDTO: {}", clickDTO);
 
         checkClickSignKeyComplete(clickDTO);
@@ -296,6 +293,10 @@ public class ClickServiceImpl implements ClickService {
         clickOrder.setPayment(payment);
         clickOrderRepository.save(clickOrder);
         log.info("completePayment clickOrder {}", clickOrder);
+
+        tgService.execute(tgService.whenSendOrderToChannelClick(invoice.getUser().getChatId()));
+        tgService.execute(tgService.whenSendOrderToUser(invoice.getUser().getChatId()));
+        tgService.execute(tgService.whenX(invoice.getUser().getChatId()));
 
         return new ClickOrderDTO(
                 clickDTO.getClick_trans_id(),

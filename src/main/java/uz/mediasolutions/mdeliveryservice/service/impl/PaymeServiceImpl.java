@@ -197,8 +197,10 @@ public class PaymeServiceImpl implements PaymeService {
                     transactionRepository.save(transaction);
 
                     try {
-                        tgService.execute(tgService.whenSendOrderToUser(transaction.getOrder().getUser().getChatId()));
-                        tgService.execute(tgService.whenSendOrderToChannelClickOrPayme(transaction.getOrder().getUser().getChatId()));
+                        tgService.execute(tgService.whenSendOrderToUserPayme(transaction.getOrder().getUser().getChatId(),
+                                transaction.getOrder()));
+                        tgService.execute(tgService.whenSendOrderToChannelPayme(transaction.getOrder().getUser().getChatId(),
+                                transaction.getOrder()));
                     } catch (TelegramApiException e) {
                         e.printStackTrace();
                     }

@@ -12,7 +12,7 @@ public interface VariationRepository extends JpaRepository<Variation, Long> {
 
     Page<Variation> findAllByOrderByNumberAsc(Pageable pageable);
 
-    List<Variation> findAllByProductId(Long productId);
+    List<Variation> findAllByProductIdAndActiveIsTrue(Long productId);
 
     Page<Variation> findAllByProductNameRuContainsIgnoreCaseOrProductNameUzContainsIgnoreCaseOrMeasureUnitNameRuContainsIgnoreCaseOrMeasureUnitNameUzContainsIgnoreCaseOrderByNumberAsc(String pNameUz, String pNameRu, String mNameUz, String mNameRu, Pageable pageable);
 
@@ -29,4 +29,5 @@ public interface VariationRepository extends JpaRepository<Variation, Long> {
     @Query(value = "select * from variations v where v.id=:id", nativeQuery = true)
     Variation getVariation(Long id);
 
+    List<Variation> findAllByProductId(Long id);
 }

@@ -77,20 +77,18 @@ public class WebOrderServiceImpl implements WebOrderService {
                 throw RestException.restThrow("ORDER PRICE SHOULD BE HIGHER THAN " +
                         constants.getMinOrderPrice(), HttpStatus.BAD_REQUEST);
             }
-//            if (!basketRepository.existsByTgUserChatId(chatId)) {
-//                throw RestException.restThrow("YOU HAVE NOT BASKET", HttpStatus.BAD_REQUEST);
-//            }
-//            Basket basket = basketRepository.findByTgUserChatId(chatId);
-//            basketRepository.delete(basket);
 
             Order order = builder.build();
             orderRepository.save(order);
-            if (tgUser.getName() != null && tgUser.getPhoneNumber() != null) {
+            if (tgUser.getName() != null && tgUser.getPhoneNumber() != null && tgUser.getBirthday() != null) {
                 makeService.setUserStep(chatId, StepName.IS_DELIVERY);
                 tgService.execute(makeService.whenIsDelivery(chatId));
             } else if (tgUser.getName() == null) {
                 makeService.setUserStep(chatId, StepName.ORDER_REGISTER_NAME);
                 tgService.execute(makeService.whenOrderRegName(chatId));
+            } else if (tgUser.getBirthday() == null) {
+                makeService.setUserStep(chatId, StepName.ORDER_REGISTER_BIRTHDAY);
+                tgService.execute(makeService.whenOrderRegBirthday(chatId));
             } else {
                 makeService.setUserStep(chatId, StepName.ORDER_REGISTER_PHONE);
                 tgService.execute(makeService.whenOrderRegPhone(chatId));

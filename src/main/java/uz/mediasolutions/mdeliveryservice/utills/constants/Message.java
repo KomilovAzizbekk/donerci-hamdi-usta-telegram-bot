@@ -60,4 +60,6 @@ public interface Message {
     String BACK_TO_MENU = "back.to.menu";
     String NO_WORKING_BRANCH = "no.working.branch";
     String ORDER_MSG_TO_USER = "order.msg.to.user";
+    String THANKS = "thanks";
+    String ENTER_BIRTHDAY = "enter.birthday";
 }

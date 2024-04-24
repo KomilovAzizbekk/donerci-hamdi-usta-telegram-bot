@@ -274,10 +274,8 @@ public class MakeService {
         String chatId = getChatId(update);
 
         setUserStep(chatId, StepName.SEND_SUGGESTION_COMPLAINT);
-        SendMessage sendMessage =  new SendMessage(chatId, getMessage(Message.SEND_SUG_COMP,
+        return new SendMessage(chatId, getMessage(Message.SEND_SUG_COMP,
                 getUserLanguage(chatId)));
-        sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
-        return sendMessage;
     }
 
     public SendMessage whenSendSuggestComplaint(Update update) {
@@ -315,7 +313,6 @@ public class MakeService {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText(getMessage(Message.SETTINGS, getUserLanguage(chatId)));
-        sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
         setUserStep(chatId, StepName.MENU_SETTINGS);
         return sendMessage;
     }
@@ -790,6 +787,28 @@ public class MakeService {
     public SendMessage whenOrderRegName(String chatId) {
         SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.ENTER_NAME, getUserLanguage(chatId)));
         sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
+
+        setUserStep(chatId, StepName.ORDER_REGISTER_BIRTHDAY);
+        return sendMessage;
+    }
+
+    public SendMessage whenOrderRegBirthday(String chatId) {
+        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.ENTER_BIRTHDAY, getUserLanguage(chatId)));
+        sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
+        sendMessage.enableHtml(true);
+        setUserStep(chatId, StepName.ORDER_REGISTER_PHONE);
+        return sendMessage;
+    }
+
+    public SendMessage whenOrderRegBirthday1(Update update) {
+        String chatId = getChatId(update);
+        String name = update.getMessage().getText();
+        TgUser tgUser = tgUserRepository.findByChatId(chatId);
+        tgUser.setName(name);
+        tgUserRepository.save(tgUser);
+
+        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.ENTER_BIRTHDAY, getUserLanguage(chatId)));
+        sendMessage.enableHtml(true);
         setUserStep(chatId, StepName.ORDER_REGISTER_PHONE);
         return sendMessage;
     }
@@ -803,9 +822,9 @@ public class MakeService {
 
     public SendMessage whenOrderRegPhone1(Update update) {
         String chatId = getChatId(update);
-        String name = update.getMessage().getText();
+        String birthday = update.getMessage().getText();
         TgUser tgUser = tgUserRepository.findByChatId(chatId);
-        tgUser.setName(name);
+        tgUser.setBirthday(birthday);
         tgUserRepository.save(tgUser);
 
         SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.ENTER_PHONE_NUMBER, getUserLanguage(chatId)));

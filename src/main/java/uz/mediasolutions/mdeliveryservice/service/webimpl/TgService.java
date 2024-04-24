@@ -82,14 +82,12 @@ public class TgService extends TelegramLongPollingBot {
                 } else if (makeService.getUserStep(chatId).equals(StepName.MAIN_MENU) &&
                         text.equals(makeService.getMessage(Message.RUSSIAN, "UZ"))) {
                     execute(makeService.whenRu(update));
-                } else if (makeService.getUserStep(chatId).equals(StepName.CHOOSE_FROM_MAIN_MENU) &&
-                        text.equals(makeService.getMessage(Message.MENU_SUG_COMP, makeService.getUserLanguage(chatId)))) {
+                } else if (text.equals(makeService.getMessage(Message.MENU_SUG_COMP, makeService.getUserLanguage(chatId)))) {
                     execute(makeService.whenSuggestComplaint(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.SEND_SUGGESTION_COMPLAINT)) {
                     execute(makeService.whenSendSuggestComplaint(update));
                     execute(makeService.whenSendSuggestComplaintToChannel(update));
-                } else if (makeService.getUserStep(chatId).equals(StepName.CHOOSE_FROM_MAIN_MENU) &&
-                        text.equals(makeService.getMessage(Message.MENU_SETTINGS, makeService.getUserLanguage(chatId)))) {
+                } else if (text.equals(makeService.getMessage(Message.MENU_SETTINGS, makeService.getUserLanguage(chatId)))) {
                     execute(makeService.whenSettings1(update));
                     execute(makeService.whenSettings2(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.CHANGE_NAME)) {
@@ -98,6 +96,8 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenChangePhoneNumber2(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.CHANGE_LANGUAGE)) {
                     execute(makeService.whenChangeLanguage2(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.ORDER_REGISTER_BIRTHDAY)) {
+                    execute(makeService.whenOrderRegBirthday1(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.ORDER_REGISTER_PHONE)) {
                     execute(makeService.whenOrderRegPhone1(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.IS_DELIVERY)) {
@@ -110,6 +110,7 @@ public class TgService extends TelegramLongPollingBot {
                 } else if (makeService.getUserStep(chatId).equals(StepName.GO_TO_PAYMENT)) {
                     deleteMessage(update);
                     execute(makeService.whenGoPayment(update));
+                    execute(whenX(chatId));
                 } else if (makeService.getUserStep(chatId).equals(StepName.SEND_ORDER_TO_CHANNEL)) {
                     execute(makeService.whenSendOrderToChannel(update));
                     execute(whenSendOrderToUser(chatId));
@@ -159,6 +160,14 @@ public class TgService extends TelegramLongPollingBot {
         }
     }
 
+    public SendMessage whenX(String chatId) {
+        SendMessage sendMessage = new SendMessage(chatId,
+                makeService.getMessage(Message.THANKS, makeService.getUserLanguage(chatId)));
+        sendMessage.setReplyMarkup(makeService.forMainMenu(chatId));
+        makeService.setUserStep(chatId, StepName.CHOOSE_FROM_MAIN_MENU);
+        return sendMessage;
+    }
+
     public void deleteMessage(Update update) throws TelegramApiException {
         SendMessage sendMessageRemove = new SendMessage();
         sendMessageRemove.setChatId(update.getMessage().getChatId().toString());
@@ -169,7 +178,7 @@ public class TgService extends TelegramLongPollingBot {
         execute(deleteMessage);
     }
 
-    public SendMessage whenSendOrderToChannelClickOrPayme(String chatId) {
+    public SendMessage whenSendOrderToChannelClick(String chatId) {
         String language = makeService.getUserLanguage(chatId);
         List<Order> orderList = orderRepository.findAllByUserChatIdOrderByCreatedAtDesc(chatId);
         Order order = orderList.get(0);
@@ -233,6 +242,70 @@ public class TgService extends TelegramLongPollingBot {
         return sendMessage;
     }
 
+    public SendMessage whenSendOrderToChannelPayme(String chatId, Order order) {
+        String language = makeService.getUserLanguage(chatId);
+
+        order.setOrderStatus(orderStatusRepository.findByName(OrderStatusName.PENDING));
+        order.setPaidSum(order.getTotalPrice());
+        orderRepository.save(order);
+
+        String address;
+        String branchName = null;
+        String providerName;
+        String orderStatus;
+        Branch branch = order.getBranch();
+        if (language.equals("UZ")) {
+            if (order.getBranch() != null) {
+                branchName = branch.getNameUz();
+            }
+            providerName = order.getPaymentProviders().getName().getNameUz();
+            orderStatus = order.getOrderStatus().getName().getNameUz();
+        } else {
+            if (order.getBranch() != null) {
+                branchName = branch.getNameRu();
+            }
+            providerName = order.getPaymentProviders().getName().getNameRu();
+            orderStatus = order.getOrderStatus().getName().getNameRu();
+        }
+        if (order.isDelivery()) {
+            address = String.format("<a href=\"https://yandex.com/navi/?whatshere%%5Bzoom%%5D=18&whatshere%%5Bpoint%%5D=%f%%2C%f&lang=uz&from=navi\">%s</a>",
+                    order.getLon(),
+                    order.getLat(),
+                    makeService.getMessage(Message.IN_MAP, language));
+        } else {
+            assert branch != null;
+            address = makeService.getMessage(Message.WITH_OWN, language) + " - " +
+                    String.format("<a href=\"https://yandex.com/navi/?whatshere%%5Bzoom%%5D=18&whatshere%%5Bpoint%%5D=%f%%2C%f&lang=uz&from=navi\">%s</a>",
+                            branch.getLon(),
+                            branch.getLat(),
+                            branchName);
+        }
+        String format = order.getUpdatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
+
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(MakeService.ORDER_CHANNEL_ID);
+        sendMessage.setText(
+                String.format(makeService.getMessage(Message.ORDER_MSG, language),
+                        order.getId(),
+                        order.getUser().getName(),
+                        order.getUser().getChatId(),
+                        order.getUser().getPhoneNumber(),
+                        address,
+                        format,
+                        makeService.allOrderedProducts(chatId, order.getId()),
+                        order.getComment() == null ? makeService.getMessage(Message.NO_INFO, language) : order.getComment(),
+                        providerName,
+                        order.getPrice(),
+                        order.getDeliveryPrice(),
+                        order.getTotalPrice(),
+                        order.getPaidSum(),
+                        orderStatus));
+        sendMessage.setReplyMarkup(makeService.forSendOrderToChannel(chatId));
+        sendMessage.enableHtml(true);
+        return sendMessage;
+    }
+
+
     public SendMessage whenSendOrderToUser(String chatId) {
         String language = makeService.getUserLanguage(chatId);
 
@@ -245,21 +318,21 @@ public class TgService extends TelegramLongPollingBot {
                 makeService.getMessage(Message.ORDER_PENDING, language), order.getId()));
         sendMessage.enableHtml(true);
         sendMessage.setReplyMarkup(makeService.forMainMenu(chatId));
+        makeService.setUserStep(chatId, StepName.CHOOSE_FROM_MAIN_MENU);
         return sendMessage;
     }
 
-    public List<String> branchNames(Update update) {
-        String chatId = makeService.getChatId(update);
-        List<Branch> branches = branchRepository.findAllByActiveIsTrue();
-        List<String> branchNames = new ArrayList<>();
+    public SendMessage whenSendOrderToUserPayme(String chatId, Order order) {
         String language = makeService.getUserLanguage(chatId);
-        for (Branch branch : branches) {
-            if (language.equals("UZ")) {
-                branchNames.add(branch.getNameUz().trim());
-            } else {
-                branchNames.add(branch.getNameRu().trim());
-            }
-        }
-        return branchNames;
+
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(String.format(
+                makeService.getMessage(Message.ORDER_PENDING, language), order.getId()));
+        sendMessage.enableHtml(true);
+        sendMessage.setReplyMarkup(makeService.forMainMenu(chatId));
+        makeService.setUserStep(chatId, StepName.CHOOSE_FROM_MAIN_MENU);
+        return sendMessage;
     }
+
 }
