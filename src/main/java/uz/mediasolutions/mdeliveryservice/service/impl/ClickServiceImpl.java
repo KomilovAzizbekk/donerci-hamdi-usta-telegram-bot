@@ -296,7 +296,6 @@ public class ClickServiceImpl implements ClickService {
 
         tgService.execute(tgService.whenSendOrderToChannelClick(invoice.getUser().getChatId()));
         tgService.execute(tgService.whenSendOrderToUser(invoice.getUser().getChatId()));
-        tgService.execute(tgService.whenX(invoice.getUser().getChatId()));
 
         return new ClickOrderDTO(
                 clickDTO.getClick_trans_id(),

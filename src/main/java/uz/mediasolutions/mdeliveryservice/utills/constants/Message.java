@@ -62,4 +62,5 @@ public interface Message {
     String ORDER_MSG_TO_USER = "order.msg.to.user";
     String THANKS = "thanks";
     String ENTER_BIRTHDAY = "enter.birthday";
+    String CELEBRATION = "celebration";
 }

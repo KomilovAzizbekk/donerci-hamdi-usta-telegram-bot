@@ -172,6 +172,7 @@ public class MakeService {
         markup.setKeyboard(rowList);
         markup.setSelective(true);
         markup.setResizeKeyboard(true);
+        markup.setIsPersistent(true);
         return markup;
     }
 
@@ -237,6 +238,7 @@ public class MakeService {
         markup.setKeyboard(rowList);
         markup.setSelective(true);
         markup.setResizeKeyboard(true);
+        markup.setIsPersistent(true);
         return markup;
     }
 
@@ -274,8 +276,10 @@ public class MakeService {
         String chatId = getChatId(update);
 
         setUserStep(chatId, StepName.SEND_SUGGESTION_COMPLAINT);
-        return new SendMessage(chatId, getMessage(Message.SEND_SUG_COMP,
+        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.SEND_SUG_COMP,
                 getUserLanguage(chatId)));
+        sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
+        return sendMessage;
     }
 
     public SendMessage whenSendSuggestComplaint(Update update) {
@@ -313,6 +317,7 @@ public class MakeService {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText(getMessage(Message.SETTINGS, getUserLanguage(chatId)));
+        sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
         setUserStep(chatId, StepName.MENU_SETTINGS);
         return sendMessage;
     }
@@ -453,6 +458,7 @@ public class MakeService {
         markup.setKeyboard(rowList);
         markup.setSelective(true);
         markup.setResizeKeyboard(true);
+        markup.setIsPersistent(true);
         return markup;
     }
 
@@ -539,6 +545,7 @@ public class MakeService {
         markup.setKeyboard(rowList);
         markup.setSelective(true);
         markup.setResizeKeyboard(true);
+        markup.setIsPersistent(true);
         return markup;
     }
 
@@ -648,6 +655,7 @@ public class MakeService {
         markup.setKeyboard(keyboardRows);
         markup.setSelective(true);
         markup.setResizeKeyboard(true);
+        markup.setIsPersistent(true);
         return markup;
     }
 
@@ -671,6 +679,7 @@ public class MakeService {
         markup.setKeyboard(rowList);
         markup.setSelective(true);
         markup.setResizeKeyboard(true);
+        markup.setIsPersistent(true);
         return markup;
     }
 
@@ -781,13 +790,13 @@ public class MakeService {
         markup.setKeyboard(rowList);
         markup.setSelective(true);
         markup.setResizeKeyboard(true);
+        markup.setIsPersistent(true);
         return markup;
     }
 
     public SendMessage whenOrderRegName(String chatId) {
         SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.ENTER_NAME, getUserLanguage(chatId)));
         sendMessage.setReplyMarkup(new ReplyKeyboardRemove(true));
-
         setUserStep(chatId, StepName.ORDER_REGISTER_BIRTHDAY);
         return sendMessage;
     }
@@ -877,6 +886,7 @@ public class MakeService {
         markup.setKeyboard(rowList);
         markup.setSelective(true);
         markup.setResizeKeyboard(true);
+        markup.setIsPersistent(true);
         return markup;
     }
 

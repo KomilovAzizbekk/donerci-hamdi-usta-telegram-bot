@@ -82,14 +82,16 @@ public class TgService extends TelegramLongPollingBot {
                 } else if (makeService.getUserStep(chatId).equals(StepName.MAIN_MENU) &&
                         text.equals(makeService.getMessage(Message.RUSSIAN, "UZ"))) {
                     execute(makeService.whenRu(update));
-                } else if (text.equals(makeService.getMessage(Message.MENU_SUG_COMP, makeService.getUserLanguage(chatId)))) {
+                } else if (makeService.getUserStep(chatId).equals(StepName.CHOOSE_FROM_MAIN_MENU) &&
+                        text.equals(makeService.getMessage(Message.MENU_SUG_COMP, makeService.getUserLanguage(chatId)))) {
                     execute(makeService.whenSuggestComplaint(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.CHOOSE_FROM_MAIN_MENU) &&
+                        text.equals(makeService.getMessage(Message.MENU_SETTINGS, makeService.getUserLanguage(chatId)))) {
+                    execute(makeService.whenSettings1(update));
+                    execute(makeService.whenSettings2(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.SEND_SUGGESTION_COMPLAINT)) {
                     execute(makeService.whenSendSuggestComplaint(update));
                     execute(makeService.whenSendSuggestComplaintToChannel(update));
-                } else if (text.equals(makeService.getMessage(Message.MENU_SETTINGS, makeService.getUserLanguage(chatId)))) {
-                    execute(makeService.whenSettings1(update));
-                    execute(makeService.whenSettings2(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.CHANGE_NAME)) {
                     execute(makeService.whenChangeName2(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.CHANGE_PHONE_NUMBER)) {
@@ -110,7 +112,6 @@ public class TgService extends TelegramLongPollingBot {
                 } else if (makeService.getUserStep(chatId).equals(StepName.GO_TO_PAYMENT)) {
                     deleteMessage(update);
                     execute(makeService.whenGoPayment(update));
-                    execute(whenX(chatId));
                 } else if (makeService.getUserStep(chatId).equals(StepName.SEND_ORDER_TO_CHANNEL)) {
                     execute(makeService.whenSendOrderToChannel(update));
                     execute(whenSendOrderToUser(chatId));
@@ -156,16 +157,10 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenAcceptOrRejectOrder(data, update));
                     execute(makeService.whenSendResToUser(data));
                 }
+            } else if (update.hasMessage() && update.getMessage().hasPhoto()) {
+                System.out.println(update.getMessage().getPhoto().get(0).getFileId());
             }
         }
-    }
-
-    public SendMessage whenX(String chatId) {
-        SendMessage sendMessage = new SendMessage(chatId,
-                makeService.getMessage(Message.THANKS, makeService.getUserLanguage(chatId)));
-        sendMessage.setReplyMarkup(makeService.forMainMenu(chatId));
-        makeService.setUserStep(chatId, StepName.CHOOSE_FROM_MAIN_MENU);
-        return sendMessage;
     }
 
     public void deleteMessage(Update update) throws TelegramApiException {

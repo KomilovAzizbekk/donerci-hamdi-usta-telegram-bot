@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import uz.mediasolutions.mdeliveryservice.entity.TgUser;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TgUserRepository extends JpaRepository<TgUser, Long> {
@@ -18,4 +19,6 @@ public interface TgUserRepository extends JpaRepository<TgUser, Long> {
     boolean existsByChatId(String chatId);
 
     Optional<TgUser> findByPhoneNumber(String username);
+
+    List<TgUser> findAllByBirthdayStartingWithOrBirthdayStartingWith(String birthday, String birthday2);
 }
