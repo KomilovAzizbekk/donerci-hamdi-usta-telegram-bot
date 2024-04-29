@@ -94,11 +94,6 @@ public class ClickServiceImpl implements ClickService {
         TgUser tgUser = tgUserRepository.findByChatId(chatId);
         log.info("User {} , Amount {}", tgUser, amount);
 
-        Constants constants = constantsRepository.findById(1L).orElseThrow(
-                () -> RestException.restThrow("CONSTANTS NOT FOUND", HttpStatus.BAD_REQUEST));
-
-        if (amount < constants.getMinOrderPrice()) throw RestException.restThrow("MIN ORDER PRICE = " +
-                constants.getMinOrderPrice(), HttpStatus.BAD_REQUEST);
         ClickInvoice invoice = ClickInvoice.builder()
                 .status(PENDING)
                 .user(tgUser)
@@ -147,57 +142,6 @@ public class ClickServiceImpl implements ClickService {
         }
     }
 
-
-//    @Override
-//    public HttpEntity<?> getInvoiceStatus(String serviceId, String invoiceId) {
-//        try {
-//            String authHeader = generateAuthHeader();
-//
-//            RestTemplate restTemplate = new RestTemplate();
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-//            headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-//            headers.set("Auth", authHeader);
-//
-//            HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-//            String url = String.format("%s/invoice/status/%s/%s", clickBaseUrl, serviceId, invoiceId);
-//
-//            ResponseEntity<StatusInvoiceResponseDTO> response = restTemplate.exchange(
-//                    url,
-//                    HttpMethod.GET,
-//                    requestEntity,
-//                    StatusInvoiceResponseDTO.class);
-//            return ResponseEntity.ok(response.getBody());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(500).body("Internal server error!");
-//        }
-//    }
-//
-//    @Override
-//    public HttpEntity<?> paymentStatusByMerchantTransId(int serviceId, String merchantTransId) {
-//        try {
-//        String authHeader = generateAuthHeader();
-//
-//        RestTemplate restTemplate = new RestTemplate();
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-//        headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-//        headers.set("Auth", authHeader);
-//
-//        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-//        String url = String.format("%s/payment/status_by_mti/%d/%s", clickBaseUrl, serviceId, merchantTransId);
-//
-//        ResponseEntity<PaymentStatusResponseDTO> response = restTemplate.exchange(url,
-//                HttpMethod.GET,
-//                requestEntity,
-//                PaymentStatusResponseDTO.class);
-//        return ResponseEntity.ok(response.getBody());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(500).body("Internal server error!");
-//        }
-//    }
 
     @Override
     @Transactional(noRollbackFor = ClickException.class)

@@ -30,6 +30,8 @@ import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -747,8 +749,10 @@ public class MakeService {
                     order.getPrice() > constants.getMinOrderPriceForFreeDelivery()) {
                 order.setDeliveryPrice(0);
             } else {
-                float deliveryPrice = (float) (constants.getMinDeliveryPrice() +
+                int deliveryPrice = (int) (constants.getMinDeliveryPrice() +
                                                         (distance - constants.getRadiusFreeDelivery()) * constants.getPricePerKilometer());
+                deliveryPrice = deliveryPrice/1000;
+                deliveryPrice = deliveryPrice*1000;
                 order.setDeliveryPrice(deliveryPrice);
                 order.setTotalPrice(order.getPrice() + deliveryPrice);
             }
@@ -829,16 +833,41 @@ public class MakeService {
         return sendMessage;
     }
 
+
+    public static boolean isValidDateFormat(String dateString) {
+        String dateFormat = "dd.MM.yyyy";
+        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+        sdf.setLenient(false); // This will make the SimpleDateFormat strictly follow the pattern
+
+        try {
+            sdf.parse(dateString);
+            return true;
+        } catch (ParseException e) {
+            return false;
+        }
+    }
+
+    public SendMessage whenIncorrectBirthday(Update update) {
+        return whenOrderRegPhone1(update);
+    }
+
     public SendMessage whenOrderRegPhone1(Update update) {
         String chatId = getChatId(update);
         String birthday = update.getMessage().getText();
-        TgUser tgUser = tgUserRepository.findByChatId(chatId);
-        tgUser.setBirthday(birthday);
-        tgUserRepository.save(tgUser);
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        if (!isValidDateFormat(birthday)) {
+            sendMessage.setText(getMessage(Message.INCORRECT_BIRTHDAY_FORMAT, getUserLanguage(chatId)));
+            setUserStep(chatId, StepName.INCORRECT_BIRTHDAY_FORMAT);
+        } else {
+            TgUser tgUser = tgUserRepository.findByChatId(chatId);
+            tgUser.setBirthday(birthday);
+            tgUserRepository.save(tgUser);
 
-        SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.ENTER_PHONE_NUMBER, getUserLanguage(chatId)));
-        sendMessage.setReplyMarkup(forPhoneNumber(chatId));
-        setUserStep(chatId, StepName.IS_DELIVERY);
+            sendMessage.setText(getMessage(Message.ENTER_PHONE_NUMBER, getUserLanguage(chatId)));
+            sendMessage.setReplyMarkup(forPhoneNumber(chatId));
+            setUserStep(chatId, StepName.IS_DELIVERY);
+        }
         return sendMessage;
     }
 
@@ -933,11 +962,6 @@ public class MakeService {
     public HttpEntity<ResClickOrderDTO> createForTg(Double amount, String chatId) {
         TgUser tgUser = tgUserRepository.findByChatId(chatId);
 
-        Constants constants = constantsRepository.findById(1L).orElseThrow(
-                () -> RestException.restThrow("CONSTANTS NOT FOUND", HttpStatus.BAD_REQUEST));
-
-        if (amount < constants.getMinOrderPrice()) throw RestException.restThrow("MIN ORDER PRICE = " +
-                constants.getMinOrderPrice(), HttpStatus.BAD_REQUEST);
         ClickInvoice invoice = ClickInvoice.builder()
                 .status(PENDING)
                 .user(tgUser)

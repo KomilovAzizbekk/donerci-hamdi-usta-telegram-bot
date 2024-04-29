@@ -5,9 +5,6 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -31,7 +28,6 @@ import java.sql.Timestamp;
 import java.util.*;
 
 @Service
-//@AutoJsonRpcServiceImpl
 @RequiredArgsConstructor
 public class PaymeServiceImpl implements PaymeService {
 
@@ -89,7 +85,7 @@ public class PaymeServiceImpl implements PaymeService {
 
         //ORDER SUM BILAN PAYCOMDAN KELGAN SUM TENGLIGI TEKSHIRILYAPTI
         Order order = optionalOrder.get();
-        if (((int) order.getTotalPrice()) *100 != requestForm.getParams().getAmount()) {
+        if (((long) order.getTotalPrice()) * 100 != requestForm.getParams().getAmount()) {
             response.setError(new JSONRPC2Error(
                     -31001,
                     "Wrong amount",
@@ -124,7 +120,7 @@ public class PaymeServiceImpl implements PaymeService {
             return;
         }
 
-        if (requestForm.getParams().getAmount() != ((int) orderOptional.get().getTotalPrice()) *100) {
+        if (requestForm.getParams().getAmount() != ((long) orderOptional.get().getTotalPrice()) *100) {
             response.setError(new JSONRPC2Error(
                     -31001,
                     "Wrong amount",
@@ -277,11 +273,11 @@ public class PaymeServiceImpl implements PaymeService {
             Transactions transactions = new Transactions(
                     orderTransaction.getPaycomId(),
                     orderTransaction.getPaycomTime(),
-                    (int) orderTransaction.getOrder().getTotalPrice(),
+                    (long) orderTransaction.getOrder().getTotalPrice(),
                     new Account(orderTransaction.getOrder().getId()),
+                    orderTransaction.getCancelTime() != null ? orderTransaction.getCancelTime().getTime() : 0,
                     orderTransaction.getCreateTime().getTime(),
                     orderTransaction.getPerformTime().getTime(),
-                    orderTransaction.getCancelTime().getTime(),
                     orderTransaction.getId().toString(),
                     orderTransaction.getState().getCode(),
                     orderTransaction.getReason()

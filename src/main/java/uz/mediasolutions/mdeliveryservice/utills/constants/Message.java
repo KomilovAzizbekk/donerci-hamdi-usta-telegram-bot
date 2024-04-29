@@ -63,4 +63,5 @@ public interface Message {
     String THANKS = "thanks";
     String ENTER_BIRTHDAY = "enter.birthday";
     String CELEBRATION = "celebration";
+    String INCORRECT_BIRTHDAY_FORMAT = "incorrect.birthday.format";
 }

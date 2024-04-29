@@ -48,6 +48,13 @@ public class RestException extends RuntimeException {
         this.status = status;
     }
 
+    private RestException(String userMsg, double fieldValue, HttpStatus status) {
+        super(userMsg);
+        this.userMsg = userMsg;
+        this.fieldValue = fieldValue;
+        this.status = status;
+    }
+
     private RestException(String userMsg, int errorCode, HttpStatus status) {
         super(userMsg);
         this.errors = Collections.singletonList(new ErrorData(userMsg, errorCode));
@@ -62,6 +69,10 @@ public class RestException extends RuntimeException {
 
     public static RestException restThrow(String userMsg, HttpStatus httpStatus) {
         return new RestException(userMsg, httpStatus);
+    }
+
+    public static RestException restThrow(String userMsg, double fieldValue, HttpStatus httpStatus) {
+        return new RestException(userMsg, fieldValue, httpStatus);
     }
 
     public static RestException restThrow(String resourceName, String fieldName, Object fieldValue, String userMsg) {

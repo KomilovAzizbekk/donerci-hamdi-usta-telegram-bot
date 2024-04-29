@@ -39,14 +39,14 @@ public class TgService extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "uygogo_bot";
-//        return "sakaka_bot";
+//        return "uygogo_bot";
+        return "DonerciHamdiUsta_bot";
     }
 
     @Override
     public String getBotToken() {
-        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
-//        return "6052104473:AAEscLILevwPMcG_00PYqAf-Kpb7eIUCIGg";
+//        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
+        return "6269725878:AAFukIydPyHKrpfDhM47kO-z8RqYydB211c";
     }
 
     @SneakyThrows
@@ -63,6 +63,9 @@ public class TgService extends TelegramLongPollingBot {
                     makeService.getUserLanguage(chatId))));
         } else if (update.hasMessage() && update.getMessage().hasText() &&
                 update.getMessage().getText().equals("/start") &&
+                !tgUserRepository.existsByChatId(chatId)) {
+            execute(makeService.whenStart(update));
+        } else if (update.hasMessage() && update.getMessage().hasText() &&
                 !tgUserRepository.existsByChatId(chatId)) {
             execute(makeService.whenStart(update));
         } else if (update.hasMessage() && update.getMessage().hasText() &&
@@ -128,6 +131,8 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenIncorrectPhoneFormat(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT_1)) {
                     execute(makeService.whenIncorrectPhoneFormat1(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_BIRTHDAY_FORMAT)) {
+                    execute(makeService.whenIncorrectBirthday(update));
                 }
             } else if (update.hasMessage() && update.getMessage().hasContact()) {
                 if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT)) {

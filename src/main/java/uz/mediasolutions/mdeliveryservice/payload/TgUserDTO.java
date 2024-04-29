@@ -21,6 +21,8 @@ public class TgUserDTO {
 
     private String username;
 
+    private String birthday;
+
     private boolean registered;
 
     private boolean admin;

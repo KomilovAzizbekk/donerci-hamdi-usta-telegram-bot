@@ -64,6 +64,11 @@ public class ApiResult<T> {
         this.errors = errors;
     }
 
+    public ApiResult(String errorMsg, Integer data, Integer errorCode) {
+        this.success = false;
+        this.errors = Collections.singletonList(new ErrorData(errorMsg, data, errorCode));
+    }
+
     public static <E> ApiResult<E> success(E data, HttpHeaders headers) {
         return new ApiResult<>(data, true, headers);
     }
@@ -90,6 +95,10 @@ public class ApiResult<T> {
 
     public static ApiResult<ErrorData> error(String errorMsg, Integer errorCode) {
         return new ApiResult<>(errorMsg, errorCode);
+    }
+
+    public static ApiResult<ErrorData> error(String errorMsg, Integer data, Integer errorCode) {
+        return new ApiResult<>(errorMsg, data, errorCode);
     }
 
 }
