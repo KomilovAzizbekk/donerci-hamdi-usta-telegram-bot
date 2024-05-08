@@ -8,12 +8,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uz.mediasolutions.mdeliveryservice.entity.Branch;
+import uz.mediasolutions.mdeliveryservice.entity.Constants;
 import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
 import uz.mediasolutions.mdeliveryservice.manual.ApiResult;
 import uz.mediasolutions.mdeliveryservice.mapper.BranchMapper;
+import uz.mediasolutions.mdeliveryservice.payload.ActiveDTO;
 import uz.mediasolutions.mdeliveryservice.payload.BranchDTO;
 import uz.mediasolutions.mdeliveryservice.payload.LocationDTO;
 import uz.mediasolutions.mdeliveryservice.repository.BranchRepository;
+import uz.mediasolutions.mdeliveryservice.repository.ConstantsRepository;
 import uz.mediasolutions.mdeliveryservice.service.abs.BranchService;
 
 import java.time.LocalTime;
@@ -26,6 +29,7 @@ public class BranchServiceImpl implements BranchService {
 
     private final BranchRepository branchRepository;
     private final BranchMapper branchMapper;
+    private final ConstantsRepository constantsRepository;
 
     @Override
     public ApiResult<Page<BranchDTO>> getAll(int page, int size, String name) {
@@ -117,11 +121,14 @@ public class BranchServiceImpl implements BranchService {
                     }
                 }
             }
-            if (activeBranches.isEmpty()) {
-                return ApiResult.success(false);
-            } else {
-                return ApiResult.success(true);
+            boolean activeBranch = !activeBranches.isEmpty();
+            boolean botWorking = false;
+            Constants constants = constantsRepository.findById(1L).orElseThrow(
+                    () -> RestException.restThrow("CONSTANTS IS NOT FOUND", HttpStatus.BAD_REQUEST));
+            if (constants.getBotWorking() == 1) {
+                botWorking = true;
             }
+            return ApiResult.success(new ActiveDTO(activeBranch, botWorking));
         }
     }
 }

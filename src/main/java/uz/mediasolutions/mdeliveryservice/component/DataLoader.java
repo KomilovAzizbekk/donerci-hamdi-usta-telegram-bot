@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.generics.BotSession;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import uz.mediasolutions.mdeliveryservice.entity.*;
 import uz.mediasolutions.mdeliveryservice.entity.payme.Client;
@@ -38,11 +39,13 @@ public class DataLoader implements CommandLineRunner {
     @Value("${spring.sql.init.mode}")
     private String mode;
 
+    BotSession botSession = new DefaultBotSession();
+
     @Override
     public void run(String... args) throws Exception {
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
         TgService tgService = applicationContext.getBean(TgService.class);
-        telegramBotsApi.registerBot(tgService);
+        botSession = telegramBotsApi.registerBot(tgService);
 
         addClients();
 
@@ -56,8 +59,8 @@ public class DataLoader implements CommandLineRunner {
             addConstants();
             addOrderStatus();
             addPaymentProviders();
-
         }
+
     }
 
     private void addClients() {
@@ -87,7 +90,7 @@ public class DataLoader implements CommandLineRunner {
         Constants constants = Constants.builder()
                 .minOrderPriceForFreeDelivery(0)
                 .minOrderPrice(0)
-                .botWorking(0)
+                .botWorking(1)
                 .pricePerKilometer(0)
                 .minDeliveryPrice(0)
                 .radiusFreeDelivery(0)

@@ -2,6 +2,7 @@ package uz.mediasolutions.mdeliveryservice.service.webimpl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -11,21 +12,21 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import uz.mediasolutions.mdeliveryservice.entity.Branch;
+import uz.mediasolutions.mdeliveryservice.entity.Constants;
 import uz.mediasolutions.mdeliveryservice.entity.Order;
 import uz.mediasolutions.mdeliveryservice.entity.TgUser;
 import uz.mediasolutions.mdeliveryservice.enums.LanguageName;
 import uz.mediasolutions.mdeliveryservice.enums.OrderStatusName;
 import uz.mediasolutions.mdeliveryservice.enums.StepName;
-import uz.mediasolutions.mdeliveryservice.repository.BranchRepository;
-import uz.mediasolutions.mdeliveryservice.repository.OrderRepository;
-import uz.mediasolutions.mdeliveryservice.repository.OrderStatusRepository;
-import uz.mediasolutions.mdeliveryservice.repository.TgUserRepository;
+import uz.mediasolutions.mdeliveryservice.exceptions.RestException;
+import uz.mediasolutions.mdeliveryservice.repository.*;
 import uz.mediasolutions.mdeliveryservice.utills.constants.Message;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,22 +37,26 @@ public class TgService extends TelegramLongPollingBot {
     private final BranchRepository branchRepository;
     private final OrderRepository orderRepository;
     private final OrderStatusRepository orderStatusRepository;
+    private final ConstantsRepository constantsRepository;
 
     @Override
     public String getBotUsername() {
-        return "uygogo_bot";
-//        return "DonerciHamdiUsta_bot";
+//        return "uygogo_bot";
+        return "DonerciHamdiUsta_bot";
     }
 
     @Override
     public String getBotToken() {
-        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
-//        return "6269725878:AAFukIydPyHKrpfDhM47kO-z8RqYydB211c";
+//        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
+        return "6269725878:AAFukIydPyHKrpfDhM47kO-z8RqYydB211c";
     }
 
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
+//        Constants constants = constantsRepository.findById(1L).orElseThrow(
+//                () -> RestException.restThrow("Constants not found", HttpStatus.BAD_REQUEST));
+//        if (constants.getBotWorking() == 1) {
         String chatId = makeService.getChatId(update);
         TgUser tgUser = tgUserRepository.findByChatId(chatId);
         boolean existsByChatId = tgUserRepository.existsByChatId(chatId);
@@ -166,6 +171,7 @@ public class TgService extends TelegramLongPollingBot {
                 System.out.println(update.getMessage().getPhoto().get(0).getFileId());
             }
         }
+//        }
     }
 
     public void deleteMessage(Update update) throws TelegramApiException {

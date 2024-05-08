@@ -145,6 +145,7 @@ public class MakeService {
         TgUser tgUser = TgUser.builder().chatId(chatId)
                 .admin(false)
                 .registered(false)
+                .language(languageRepository.findByName(LanguageName.UZ))
                 .banned(false)
                 .username(getUsername(update))
                 .chatId(chatId)
@@ -226,7 +227,6 @@ public class MakeService {
             button1.setWebApp(new WebAppInfo(LINK + chatId + "/" + RU));
             button3.setWebApp(new WebAppInfo(LINK + "orders/" + chatId + "/" + RU));
         }
-
 
         row1.add(button1);
         row2.add(button2);
@@ -747,12 +747,9 @@ public class MakeService {
             } else {
                 int deliveryPrice = (int) (constants.getMinDeliveryPrice() +
                                                                         (distance - constants.getRadiusFreeDelivery()) * constants.getPricePerKilometer());
-
-                deliveryPrice = deliveryPrice/1000;
-                if (deliveryPrice % 1000 == 0) {
-                    deliveryPrice = deliveryPrice * 1000;
-                } else {
-                    deliveryPrice = deliveryPrice * 1000 + 1000;
+                if (deliveryPrice % 1000 != 0) {
+                    int a = deliveryPrice / 1000;
+                    deliveryPrice = a * 1000 + 1000;
                 }
                 order.setDeliveryPrice(deliveryPrice);
                 order.setTotalPrice(order.getPrice() + deliveryPrice);
