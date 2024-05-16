@@ -64,4 +64,7 @@ public interface Message {
     String ENTER_BIRTHDAY = "enter.birthday";
     String CELEBRATION = "celebration";
     String INCORRECT_BIRTHDAY_FORMAT = "incorrect.birthday.format";
+    String POST_SENT = "post.sent";
+    String POST = "post";
+    String CANNOT_SAVE_FILE = "cannot.save.file";
 }

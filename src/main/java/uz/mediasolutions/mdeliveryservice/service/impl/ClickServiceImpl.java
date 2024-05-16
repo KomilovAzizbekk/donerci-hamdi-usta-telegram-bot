@@ -178,77 +178,82 @@ public class ClickServiceImpl implements ClickService {
     }
 
     @Override
-    public ClickOrderDTO completeMethod(ClickOrderDTO clickDTO) throws TelegramApiException {
-        log.info("completePayment clickDTO: {}", clickDTO);
+    @Transactional(noRollbackFor = ClickException.class)
+    public ClickOrderDTO completeMethod(ClickOrderDTO clickDTO) {
+        try {
+            log.info("completePayment clickDTO: {}", clickDTO);
 
-        checkClickSignKeyComplete(clickDTO);
+            checkClickSignKeyComplete(clickDTO);
 
-        ClickOrder clickOrder = getClickOrder(clickDTO.getMerchant_prepare_id());
-        log.info("completePayment clickOrder {}", clickOrder);
+            ClickOrder clickOrder = getClickOrder(clickDTO.getMerchant_prepare_id());
+            log.info("completePayment clickOrder {}", clickOrder);
 
-        // Click send us about cancel this transaction | Action = 1 and Error = -5017 | see click documentation
-        if (Objects.equals(clickDTO.getAction(), 1) && Objects.equals(clickDTO.getError(), -5017)) {
-            log.info("Click send us about cancel this transaction | Action = 1 and Error = -5017 | see click documentation ");
-            cancelTransaction(clickOrder, clickDTO);
+            // Click send us about cancel this transaction | Action = 1 and Error = -5017 | see click documentation
+            if (Objects.equals(clickDTO.getAction(), 1) && Objects.equals(clickDTO.getError(), -5017)) {
+                log.info("Click send us about cancel this transaction | Action = 1 and Error = -5017 | see click documentation ");
+                cancelTransaction(clickOrder, clickDTO);
+            }
+            checkTransactionCancelled(clickOrder);
+
+            clickOrder.setAmount(clickOrder.getAmount());
+            clickOrder.setAction(clickDTO.getAction());
+            clickOrder.setError(clickDTO.getError());
+            clickOrder.setErrorNote(clickDTO.getError_note());
+            clickOrderRepository.save(clickOrder);
+
+            //ORDER BO'YICHA TEKSHIRIHSNI BOSHLAYMIZ
+            ClickInvoice invoice = clickOrder.getInvoice();
+            log.info("completePayment invoice: {}", invoice);
+
+
+            checkInvoiceStatus(invoice);
+
+            checkParameterAmount(invoice, clickDTO);
+
+
+            double invoicePaymentAmount = clickDTO.getAmount();
+
+            double leftoverAmount = invoice.getLeftoverAmount() - invoicePaymentAmount;
+
+            invoice.setLeftoverAmount(leftoverAmount);
+
+            if (leftoverAmount == 0) {
+                invoice.setStatus(PAID);
+            }
+
+            if (leftoverAmount > 0) {
+                invoice.setStatus(PAYING);
+            }
+
+            double paidAmount = invoice.getPaidAmount() + (invoicePaymentAmount);
+
+            invoice.setPaidAmount(paidAmount);
+
+            clickInvoiceRepository.save(invoice);
+            log.info("completePayment invoice {}", invoice);
+
+
+            Payment payment = createAndSavePayment(invoice, invoicePaymentAmount);
+            log.info("completePayment payment {}", payment);
+
+            clickOrder.setPayment(payment);
+            clickOrderRepository.save(clickOrder);
+            log.info("completePayment clickOrder {}", clickOrder);
+
+            tgService.execute(tgService.whenSendOrderToChannelClick(invoice.getUser().getChatId()));
+            tgService.execute(tgService.whenSendOrderToUser(invoice.getUser().getChatId()));
+
+            return new ClickOrderDTO(
+                    clickDTO.getClick_trans_id(),
+                    clickDTO.getMerchant_trans_id(),
+                    0,
+                    clickDTO.getMerchant_prepare_id(),
+                    clickDTO.getMerchant_prepare_id(),
+                    clickDTO.getError_note()
+            );
+        } catch (Exception e) {
+            throw RestException.restThrow("Error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        checkTransactionCancelled(clickOrder);
-
-        clickOrder.setAmount(clickOrder.getAmount());
-        clickOrder.setAction(clickDTO.getAction());
-        clickOrder.setError(clickDTO.getError());
-        clickOrder.setErrorNote(clickDTO.getError_note());
-        clickOrderRepository.save(clickOrder);
-
-        //ORDER BO'YICHA TEKSHIRIHSNI BOSHLAYMIZ
-        ClickInvoice invoice = clickOrder.getInvoice();
-        log.info("completePayment invoice: {}", invoice);
-
-
-        checkInvoiceStatus(invoice);
-
-        checkParameterAmount(invoice, clickDTO);
-
-
-        double invoicePaymentAmount = clickDTO.getAmount();
-
-        double leftoverAmount = invoice.getLeftoverAmount() - invoicePaymentAmount;
-
-        invoice.setLeftoverAmount(leftoverAmount);
-
-        if (leftoverAmount == 0) {
-            invoice.setStatus(PAID);
-        }
-
-        if (leftoverAmount > 0) {
-            invoice.setStatus(PAYING);
-        }
-
-        double paidAmount = invoice.getPaidAmount() + (invoicePaymentAmount);
-
-        invoice.setPaidAmount(paidAmount);
-
-        clickInvoiceRepository.save(invoice);
-        log.info("completePayment invoice {}", invoice);
-
-
-        Payment payment = createAndSavePayment(invoice, invoicePaymentAmount);
-        log.info("completePayment payment {}", payment);
-
-        clickOrder.setPayment(payment);
-        clickOrderRepository.save(clickOrder);
-        log.info("completePayment clickOrder {}", clickOrder);
-
-        tgService.execute(tgService.whenSendOrderToChannelClick(invoice.getUser().getChatId()));
-        tgService.execute(tgService.whenSendOrderToUser(invoice.getUser().getChatId()));
-
-        return new ClickOrderDTO(
-                clickDTO.getClick_trans_id(),
-                clickDTO.getMerchant_trans_id(),
-                0,
-                clickDTO.getMerchant_prepare_id(),
-                clickDTO.getMerchant_prepare_id(),
-                clickDTO.getError_note()
-        );
     }
 
 

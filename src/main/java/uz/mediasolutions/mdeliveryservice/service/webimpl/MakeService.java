@@ -7,6 +7,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -34,10 +35,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1223,4 +1221,38 @@ public class MakeService {
         setUserStep(chatId, StepName.CHOOSE_FROM_MAIN_MENU);
         return sendMessage;
     }
+
+    public SendMessage whenPost(Update update) {
+        String chatId = getChatId(update);
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+
+        if (Objects.equals(chatId, "285710521") || Objects.equals(chatId, "1302908674")) {
+            setUserStep(chatId, StepName.POST);
+            sendMessage.setText(getMessage(Message.POST, getUserLanguage(chatId)));
+            sendMessage.enableHtml(true);
+            sendMessage.setReplyMarkup(forPost(update));
+        } else {
+            sendMessage.setText(getMessage(Message.CANNOT_SAVE_FILE, getUserLanguage(chatId)));
+        }
+        return sendMessage;
+    }
+
+    private ReplyKeyboardMarkup forPost(Update update) {
+        ReplyKeyboardMarkup markup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> rowList = new ArrayList<>();
+        KeyboardRow row1 = new KeyboardRow();
+
+        KeyboardButton button1 = new KeyboardButton();
+        button1.setText(getMessage(Message.BACK_TO_MENU, getUserLanguage(getChatId(update))));
+
+        row1.add(button1);
+
+        rowList.add(row1);
+        markup.setKeyboard(rowList);
+        markup.setSelective(true);
+        markup.setResizeKeyboard(true);
+        return markup;
+    }
+
 }

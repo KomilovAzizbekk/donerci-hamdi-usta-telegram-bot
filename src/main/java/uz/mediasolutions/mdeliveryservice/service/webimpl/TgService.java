@@ -5,9 +5,10 @@ import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -87,6 +88,8 @@ public class TgService extends TelegramLongPollingBot {
                 if (makeService.getUserStep(chatId).equals(StepName.MAIN_MENU) &&
                         text.equals(makeService.getMessage(Message.UZBEK, "UZ"))) {
                     execute(makeService.whenUz(update));
+                } else if (text.equals("/post")) {
+                    execute(makeService.whenPost(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.MAIN_MENU) &&
                         text.equals(makeService.getMessage(Message.RUSSIAN, "UZ"))) {
                     execute(makeService.whenRu(update));
@@ -138,6 +141,16 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenIncorrectPhoneFormat1(update));
                 } else if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_BIRTHDAY_FORMAT)) {
                     execute(makeService.whenIncorrectBirthday(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.POST) &&
+                        text.equals(makeService.getMessage(Message.BACK_TO_MENU, makeService.getUserLanguage(chatId)))) {
+                    if (tgUser.getLanguage().getName().equals(LanguageName.UZ))
+                        execute(makeService.whenUz(update));
+                    else
+                        execute(makeService.whenRu(update));
+                } else if (makeService.getUserStep(chatId).equals(StepName.POST) &&
+                        !text.equals(makeService.getMessage(Message.BACK_TO_MENU, makeService.getUserLanguage(chatId)))) {
+                    whenPostText(update);
+                    execute(makeService.whenStart(update));
                 }
             } else if (update.hasMessage() && update.getMessage().hasContact()) {
                 if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT)) {
@@ -168,7 +181,30 @@ public class TgService extends TelegramLongPollingBot {
                     execute(makeService.whenSendResToUser(data));
                 }
             } else if (update.hasMessage() && update.getMessage().hasPhoto()) {
-                System.out.println(update.getMessage().getPhoto().get(0).getFileId());
+                if (makeService.getUserStep(chatId).equals(StepName.POST)) {
+                    whenPostPhoto(update);
+                    execute(makeService.whenStart(update));
+                }
+            } else if (update.hasMessage() && update.getMessage().hasAudio()) {
+                if (makeService.getUserStep(chatId).equals(StepName.POST)) {
+                    whenPostAudio(update);
+                    execute(makeService.whenStart(update));
+                }
+            } else if (update.hasMessage() && update.getMessage().hasVideo()) {
+                if (makeService.getUserStep(chatId).equals(StepName.POST)) {
+                    whenPostVideo(update);
+                    execute(makeService.whenStart(update));
+                }
+            } else if (update.hasMessage() && update.getMessage().hasVoice()) {
+                if (makeService.getUserStep(chatId).equals(StepName.POST)) {
+                    whenPostVoice(update);
+                    execute(makeService.whenStart(update));
+                }
+            } else if (update.hasMessage() && update.getMessage().hasDocument()) {
+                if (makeService.getUserStep(chatId).equals(StepName.POST)) {
+                    whenPostDocument(update);
+                    execute(makeService.whenStart(update));
+                }
             }
         }
 //        }
@@ -339,6 +375,150 @@ public class TgService extends TelegramLongPollingBot {
         sendMessage.setReplyMarkup(makeService.forMainMenu(chatId));
         makeService.setUserStep(chatId, StepName.CHOOSE_FROM_MAIN_MENU);
         return sendMessage;
+    }
+
+
+    public void whenPostText(Update update) throws TelegramApiException {
+        String chatId = makeService.getChatId(update);
+
+        List<TgUser> users = tgUserRepository.findAll();
+        for (TgUser user : users) {
+            if (!Objects.equals(user.getChatId(), chatId))
+                try {
+                    execute(new SendMessage(user.getChatId(), update.getMessage().getText()));
+                } catch (Exception e) {
+                    System.out.println("User blocked the bot");
+                }
+        }
+        execute(new SendMessage(chatId,
+                String.format(makeService.getMessage(Message.POST_SENT,
+                        makeService.getUserLanguage(chatId)), users.size())));
+    }
+
+
+    public void whenPostDocument(Update update) throws TelegramApiException {
+        String fileId1 = update.getMessage().getDocument().getFileId();
+        String caption = update.getMessage().getCaption();
+        String chatId = makeService.getChatId(update);
+
+        SendDocument sendDocument = new SendDocument();
+        List<TgUser> users = tgUserRepository.findAll();
+        for (TgUser user : users) {
+            if (!Objects.equals(user.getChatId(), chatId)) {
+                sendDocument.setChatId(user.getChatId());
+                sendDocument.setDocument(new InputFile(fileId1));
+                if (caption != null)
+                    sendDocument.setCaption(caption);
+                try {
+                    execute(sendDocument);
+                } catch (Exception e) {
+                    System.out.println("User blocked the bot");
+                }
+            }
+        }
+        execute(new SendMessage(chatId,
+                String.format(makeService.getMessage(Message.POST_SENT,
+                        makeService.getUserLanguage(chatId)), users.size())));
+    }
+
+
+    public void whenPostPhoto(Update update) throws TelegramApiException {
+        String chatId = makeService.getChatId(update);
+        String fileId1 = update.getMessage().getPhoto().get(0).getFileId();
+        String caption = update.getMessage().getCaption();
+        SendPhoto sendPhoto = new SendPhoto();
+        List<TgUser> users = tgUserRepository.findAll();
+        for (TgUser user : users) {
+            if (!Objects.equals(user.getChatId(), chatId)) {
+                sendPhoto.setChatId(user.getChatId());
+                sendPhoto.setPhoto(new InputFile(fileId1));
+                if (caption != null)
+                    sendPhoto.setCaption(caption);
+                try {
+                    execute(sendPhoto);
+                } catch (Exception e) {
+                    System.out.println("User blocked the bot");
+                }
+            }
+        }
+        execute(new SendMessage(chatId,
+                String.format(makeService.getMessage(Message.POST_SENT,
+                        makeService.getUserLanguage(chatId)), users.size())));
+    }
+
+
+    public void whenPostAudio(Update update) throws TelegramApiException {
+        String chatId = makeService.getChatId(update);
+        String fileId1 = update.getMessage().getAudio().getFileId();
+        String caption = update.getMessage().getCaption();
+        SendAudio sendAudio = new SendAudio();
+        List<TgUser> users = tgUserRepository.findAll();
+        for (TgUser user : users) {
+            if (!Objects.equals(user.getChatId(), chatId)) {
+                sendAudio.setChatId(user.getChatId());
+                sendAudio.setAudio(new InputFile(fileId1));
+                if (caption != null)
+                    sendAudio.setCaption(caption);
+                try {
+                    execute(sendAudio);
+                } catch (Exception e) {
+                    System.out.println("User blocked the bot");
+                }
+            }
+        }
+        execute(new SendMessage(chatId,
+                String.format(makeService.getMessage(Message.POST_SENT,
+                        makeService.getUserLanguage(chatId)), users.size())));
+    }
+
+
+    public void whenPostVideo(Update update) throws TelegramApiException {
+        String chatId = makeService.getChatId(update);
+        String fileId1 = update.getMessage().getVideo().getFileId();
+        String caption = update.getMessage().getCaption();
+        SendVideo sendVideo = new SendVideo();
+        List<TgUser> users = tgUserRepository.findAll();
+        for (TgUser user : users) {
+            if (!Objects.equals(user.getChatId(), chatId)) {
+                sendVideo.setChatId(user.getChatId());
+                sendVideo.setVideo(new InputFile(fileId1));
+                if (caption != null)
+                    sendVideo.setCaption(caption);
+                try {
+                    execute(sendVideo);
+                } catch (Exception e) {
+                    System.out.println("User blocked the bot");
+                }
+            }
+        }
+        execute(new SendMessage(chatId,
+                String.format(makeService.getMessage(Message.POST_SENT,
+                        makeService.getUserLanguage(chatId)), users.size())));
+    }
+
+
+    public void whenPostVoice(Update update) throws TelegramApiException {
+        String chatId = makeService.getChatId(update);
+        String fileId1 = update.getMessage().getVoice().getFileId();
+        String caption = update.getMessage().getCaption();
+        SendVoice sendVoice = new SendVoice();
+        List<TgUser> users = tgUserRepository.findAll();
+        for (TgUser user : users) {
+            if (!Objects.equals(user.getChatId(), chatId)) {
+                sendVoice.setChatId(user.getChatId());
+                sendVoice.setVoice(new InputFile(fileId1));
+                if (caption != null)
+                    sendVoice.setCaption(caption);
+                try {
+                    execute(sendVoice);
+                } catch (Exception e) {
+                    System.out.println("User blocked the bot");
+                }
+            }
+        }
+        execute(new SendMessage(chatId,
+                String.format(makeService.getMessage(Message.POST_SENT,
+                        makeService.getUserLanguage(chatId)), users.size())));
     }
 
 }
