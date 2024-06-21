@@ -42,14 +42,14 @@ public class TgService extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "uygogo_bot";
-//        return "DonerciHamdiUsta_bot";
+//        return "uygogo_bot";
+        return "DonerciHamdiUsta_bot";
     }
 
     @Override
     public String getBotToken() {
-        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
-//        return "6269725878:AAFukIydPyHKrpfDhM47kO-z8RqYydB211c";
+//        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
+        return "6269725878:AAFukIydPyHKrpfDhM47kO-z8RqYydB211c";
     }
 
     @SneakyThrows
