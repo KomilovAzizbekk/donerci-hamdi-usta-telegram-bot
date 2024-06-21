@@ -140,15 +140,21 @@ public class MakeService {
         SendMessage sendMessage = new SendMessage(chatId, getMessage(Message.LANG_SAME_FOR_2_LANG,
                 getUserLanguage(chatId)));
         sendMessage.setReplyMarkup(forStart());
-        TgUser tgUser = TgUser.builder().chatId(chatId)
-                .admin(false)
-                .registered(false)
-                .language(languageRepository.findByName(LanguageName.UZ))
-                .banned(false)
-                .username(getUsername(update))
-                .chatId(chatId)
-                .build();
+        TgUser tgUser;
+        if (tgUserRepository.existsByChatId(chatId)) {
+            tgUser = tgUserRepository.findByChatId(chatId);
+            setUserStep(chatId, StepName.CHOOSE_FROM_MAIN_MENU);
+        } else {
+            tgUser = TgUser.builder().chatId(chatId)
+                    .admin(false)
+                    .registered(false)
+                    .language(languageRepository.findByName(LanguageName.UZ))
+                    .banned(false)
+                    .username(getUsername(update))
+                    .chatId(chatId)
+                    .build();
         tgUserRepository.save(tgUser);
+    }
         setUserStep(chatId, StepName.MAIN_MENU);
         return sendMessage;
     }

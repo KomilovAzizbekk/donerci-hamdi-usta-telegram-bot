@@ -42,14 +42,14 @@ public class TgService extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-//        return "uygogo_bot";
-        return "DonerciHamdiUsta_bot";
+        return "uygogo_bot";
+//        return "DonerciHamdiUsta_bot";
     }
 
     @Override
     public String getBotToken() {
-//        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
-        return "6269725878:AAFukIydPyHKrpfDhM47kO-z8RqYydB211c";
+        return "5049026983:AAHjxVS4KdTmMLp4x_ir9khH4w1tB4h6pPQ";
+//        return "6269725878:AAFukIydPyHKrpfDhM47kO-z8RqYydB211c";
     }
 
     @SneakyThrows
@@ -150,7 +150,14 @@ public class TgService extends TelegramLongPollingBot {
                 } else if (makeService.getUserStep(chatId).equals(StepName.POST) &&
                         !text.equals(makeService.getMessage(Message.BACK_TO_MENU, makeService.getUserLanguage(chatId)))) {
                     whenPostText(update);
-                    execute(makeService.whenStart(update));
+                    if (tgUserRepository.existsByChatId(chatId)) {
+                        if (tgUser.getLanguage().getName().equals(LanguageName.UZ))
+                            execute(makeService.whenUz(update));
+                        else
+                            execute(makeService.whenRu(update));
+                    } else {
+                        execute(makeService.whenStart(update));
+                    }
                 }
             } else if (update.hasMessage() && update.getMessage().hasContact()) {
                 if (makeService.getUserStep(chatId).equals(StepName.INCORRECT_PHONE_FORMAT)) {
@@ -183,27 +190,62 @@ public class TgService extends TelegramLongPollingBot {
             } else if (update.hasMessage() && update.getMessage().hasPhoto()) {
                 if (makeService.getUserStep(chatId).equals(StepName.POST)) {
                     whenPostPhoto(update);
-                    execute(makeService.whenStart(update));
+                    if (tgUserRepository.existsByChatId(chatId)) {
+                        if (tgUser.getLanguage().getName().equals(LanguageName.UZ))
+                            execute(makeService.whenUz(update));
+                        else
+                            execute(makeService.whenRu(update));
+                    } else {
+                        execute(makeService.whenStart(update));
+                    }
                 }
             } else if (update.hasMessage() && update.getMessage().hasAudio()) {
                 if (makeService.getUserStep(chatId).equals(StepName.POST)) {
                     whenPostAudio(update);
-                    execute(makeService.whenStart(update));
+                    if (tgUserRepository.existsByChatId(chatId)) {
+                        if (tgUser.getLanguage().getName().equals(LanguageName.UZ))
+                            execute(makeService.whenUz(update));
+                        else
+                            execute(makeService.whenRu(update));
+                    } else {
+                        execute(makeService.whenStart(update));
+                    }
                 }
             } else if (update.hasMessage() && update.getMessage().hasVideo()) {
                 if (makeService.getUserStep(chatId).equals(StepName.POST)) {
                     whenPostVideo(update);
-                    execute(makeService.whenStart(update));
+                    if (tgUserRepository.existsByChatId(chatId)) {
+                        if (tgUser.getLanguage().getName().equals(LanguageName.UZ))
+                            execute(makeService.whenUz(update));
+                        else
+                            execute(makeService.whenRu(update));
+                    } else {
+                        execute(makeService.whenStart(update));
+                    }
                 }
             } else if (update.hasMessage() && update.getMessage().hasVoice()) {
                 if (makeService.getUserStep(chatId).equals(StepName.POST)) {
                     whenPostVoice(update);
-                    execute(makeService.whenStart(update));
+                    if (tgUserRepository.existsByChatId(chatId)) {
+                        if (tgUser.getLanguage().getName().equals(LanguageName.UZ))
+                            execute(makeService.whenUz(update));
+                        else
+                            execute(makeService.whenRu(update));
+                    } else {
+                        execute(makeService.whenStart(update));
+                    }
                 }
             } else if (update.hasMessage() && update.getMessage().hasDocument()) {
                 if (makeService.getUserStep(chatId).equals(StepName.POST)) {
                     whenPostDocument(update);
-                    execute(makeService.whenStart(update));
+                    if (tgUserRepository.existsByChatId(chatId)) {
+                        if (tgUser.getLanguage().getName().equals(LanguageName.UZ))
+                            execute(makeService.whenUz(update));
+                        else
+                            execute(makeService.whenRu(update));
+                    } else {
+                        execute(makeService.whenStart(update));
+                    }
                 }
             }
         }
